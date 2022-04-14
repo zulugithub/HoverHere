@@ -12,7 +12,7 @@
 
 # InnoSetups custom folder holding the installer exe
 Build/*
-!Build/.README.txt
+!Build/README.txt
 
 #####################################################################
 # clear also "C:\Users\...\Documents\gitignore_global.txt" for .obj
