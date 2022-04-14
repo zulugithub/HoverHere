@@ -1,0 +1,23 @@
+# Blender MTL File: 'AgustaAW109_442.blend'
+# Material Count: 2
+
+newmtl Canopy
+Ns 46.487612
+Ka 0.481818 0.481818 0.481818
+Kd 0.494084 0.494084 0.494084
+Ks 0.240909 0.240909 0.240909
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_005_A.png
+
+newmtl Steel
+Ns 506.250020
+Ka 1.000000 1.000000 1.000000
+Kd 0.462047 0.462047 0.462047
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3

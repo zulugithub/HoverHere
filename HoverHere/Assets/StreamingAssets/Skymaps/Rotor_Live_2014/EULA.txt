@@ -1,0 +1,45 @@
+Endbenutzer-Lizenzvereinbarung (EULA) fuer diese Szenerie
+
+Allgemeine Nutzungsbedingungen
+==============================
+
+Nutzung
+-------
+
+Diese Szenerie darf ausschliesslich fuer private Zwecke verwendet werden.
+
+Ohne unsere ausdrueckliche und schriftliche Genehmigung ist nicht erlaubt
+- diese Szenerie (oder Teile dieser Szenerie) auf CD oder jeglich anderer
+  Form anzubieten oder zu verteilen,
+- einzelne Dateien aus diesem Paket anzubieten oder zu verteilen, sowie
+- Modifikationen dieser Dateien anzubieten oder zu verteilen.
+
+Legale Quellen dieser Dateien sind die Webseiten paulduerr.info (alle Varianten), 
+heli-x.info (fuer die Heli-X-Variante), Webseiten von Michael Goericke, 
+sowie weitere Webseiten, die von uns ausdruecklich in schriftlicher Form 
+autorisiert wurden.
+
+Zusatz fuer das verwendete Bildmaterial
+---------------------------------------
+Das in dieser Szenerie verwendete Bildmaterial wurde von Michael Goericke mit
+freundlicher Genehmigung bereitgestellt. Eine Verwendung dieses Bildmaterials
+ausserhalb des durch diese Lizenzvereinbarung vorgegebenen Rahmens erfordert
+die ausdrueckliche Zustimmung des Urhebers 
+(Kontakt: http://www.michael-goericke.de/info/kontakt).
+
+Kommerzielle Nutzung
+--------------------
+Generell ist eine kommerzielle Nutzung dieser Szenerie ohne unsere 
+ausdrueckliche Genehmigung nicht erlaubt.
+
+Haftungsausschluss:
+==================
+
+Die Nutzung dieser Szenerie geschieht auf eigene Verantwortung.
+Eine Haftung in jeglicher Form wird ausgeschlossen.
+
+Paul Duerr
+E-Mail: duerr@paulduerr.info
+Web:    http://sceneries.paulduerr.info
+
+Stand 2019-01

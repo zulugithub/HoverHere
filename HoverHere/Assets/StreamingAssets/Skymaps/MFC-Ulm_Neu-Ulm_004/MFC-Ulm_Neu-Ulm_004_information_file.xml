@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>MFC Ulm/Neu-Ulm, Version 4</name>
+  <author>zulu</author>
+  <date>06.06.2021</date>
+  <version>1.0</version>
+  <info>http://www.mfculm.de/ - High resultion scenery (8192x9182, 500MB).</info> 
+  <homepagelink>http://www.mfculm.de</homepagelink>
+  <downloadlink></downloadlink>      
+  <!-- Path in zip file SkyBox/Neu-Ulm_Wiese/4096 -->   
+  <!-- Replace & by &amp; --> 
+</stru_selection_content>
+

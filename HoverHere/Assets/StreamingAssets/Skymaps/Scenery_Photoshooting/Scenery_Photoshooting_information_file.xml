@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Scenery for photoshooting</name>
+  <author>zulu</author>
+  <date>17.06.2020</date>
+  <version>1.0</version>
+  <info>Scenery for making the helicopter preview images.</info> 
+  <homepagelink>http://www.mfculm.de</homepagelink>
+  <downloadlink>https://www.dropbox.com/s/t9h8rxw6hzlaf5i/Scenery_Photoshooting.zip?dl=1</downloadlink>      
+  <!-- Path in zip file SkyBox/Scenery_Photoshooting/4096 -->   
+</stru_selection_content>
+

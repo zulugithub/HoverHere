@@ -1,0 +1,66 @@
+# Blender MTL File: 'AH56_Cheyenne_110.blend'
+# Material Count: 6
+
+newmtl Canopy
+Ns 354.123998
+Ka 0.509091 0.509091 0.509091
+Kd 0.047637 0.024564 0.000805
+Ks 0.459091 0.459091 0.459091
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump -bm 1.200000 F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_A_Bolts_Normal.png
+map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_000_A.png
+map_Ns F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_Roughness_000_A.png
+
+newmtl Glas
+Ns 900.000000
+Ka 0.263636 0.263636 0.263636
+Kd 0.800000 0.800000 0.800000
+Ks 0.327273 0.327273 0.327273
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.204545
+illum 6
+
+newmtl Interior
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.120124 0.120124 0.120124
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Material__33
+Ns 22.627395
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.900000 0.900000 0.900000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Pilot2_t.jpg
+
+newmtl Sensor
+Ns 827.869851
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+
+newmtl Steel
+Ns 622.729356
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3

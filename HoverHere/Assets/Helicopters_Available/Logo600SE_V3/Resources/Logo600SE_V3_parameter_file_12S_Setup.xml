@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<stru_transmitter_and_helicopter xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <helicopter>
+    <mass_total>  <val>4.51</val>  </mass_total>
+    <mainrotor_sound_recorded_rpm>  <val>1280</val>  </mainrotor_sound_recorded_rpm>
+    <motor_sound_recorded_rpm>  <val>1280</val>  </motor_sound_recorded_rpm>
+    <Jxx_Jyy_Jzz> 
+      <vect3> <x>0.045</x>  <y>0.2765</y>  <z>0.3106</z>  </vect3>
+    </Jxx_Jyy_Jzz>
+    <Jxy_Jxz_Jyz>
+      <vect3>  <x>0.015</x>  <y>0.025</y>  <z>0.0001</z>  </vect3>
+    </Jxy_Jxz_Jyz>
+    <accumulator>
+      <voltage_per_cell>  <val>3.7</val>  </voltage_per_cell>
+      <cell_count>  <val>12</val>  </cell_count>
+      <Ri>  <val>0.004</val>  </Ri>
+      <capacity>  <val>5000</val>  </capacity>
+    </accumulator>
+    <governor>
+      <target_rpm><vect3>  <x>1800</x><y>2000</y><z>2400</z>  </vect3></target_rpm> <!-- bank 1 2 3 -->
+      <Kp>  <val>0.01</val>  </Kp>
+      <Ki>  <val>0.1</val>  </Ki>
+      <saturation_min>  <val>0</val>  </saturation_min>
+      <soft_start_factor>  <val>0.3</val>  </soft_start_factor>
+    </governor>
+    <gyro>
+      <K_a><vect3>    <x>550</x><y>600</y><z>650</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
+      <K_I><vect3>    <x>2.0</x><y>2.0</y><z>2.0</z>  </vect3></K_I> <!-- bank 1 2 3 -->
+      <K_p><vect3>    <x>0.19</x><y>0.22</y><z>0.25</z>  </vect3></K_p> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.0001</x><y>0.0001</y><z>0.0001</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
+    </gyro>
+    <flybarless>
+      <K_a><vect3>    <x>300</x><y>310</y><z>330</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
+      <K_I><vect3>    <x>2.3</x><y>2.3</y><z>2.3</z>  </vect3></K_I> <!-- bank 1 2 3 -->
+      <K_p><vect3>    <x>0.08</x><y>0.08</y><z>0.08</z>  </vect3></K_p> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.0001</x><y>0.0001</y><z>0.0001</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <direct_feadtrough_flybarless>  <val>false</val>  </direct_feadtrough_flybarless>
+    </flybarless>  </helicopter>
+    <flapping>
+      <hub_stiffness_mr>  <val>250</val>  </hub_stiffness_mr>
+      <e>  <val>0.05</val>  </e> 
+    </flapping>
+</stru_transmitter_and_helicopter>

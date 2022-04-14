@@ -1,0 +1,396 @@
+fileFormatVersion: 2
+guid: d423846c8cff9a44f82c9bae1973b66b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 9115247175938640634
+    second: UI_Informations_Overlay_Icons_0
+  - first:
+      213: 5602080163950251842
+    second: UI_Informations_Overlay_Icons_1
+  - first:
+      213: 6715634147834341695
+    second: UI_Informations_Overlay_Icons_2
+  - first:
+      213: -2408387064088096809
+    second: UI_Informations_Overlay_Icons_3
+  - first:
+      213: -1110406367295244776
+    second: UI_Informations_Overlay_Icons_4
+  - first:
+      213: -8787321716141627399
+    second: UI_Informations_Overlay_Icons_5
+  - first:
+      213: -8122312076026169112
+    second: UI_Informations_Overlay_Icons_6
+  - first:
+      213: -1537708399374092430
+    second: UI_Informations_Overlay_Icons_7
+  - first:
+      213: 9145876765916165414
+    second: UI_Informations_Overlay_Icons_8
+  - first:
+      213: 1353778250990617375
+    second: UI_Informations_Overlay_Icons_9
+  - first:
+      213: 4913485022969332429
+    second: UI_Informations_Overlay_Icons_10
+  - first:
+      213: -7865713705136075778
+    second: UI_Informations_Overlay_Icons_11
+  externalObjects: {}
+  serializedVersion: 11
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: -1
+    aniso: -1
+    mipBias: -100
+    wrapU: 1
+    wrapV: 1
+    wrapW: -1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 763.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afa84b9030ddf7e70800000000000000
+      internalID: 9115247175938640634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_1
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 763.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24f448f5a369ebd40800000000000000
+      internalID: 5602080163950251842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_2
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 763.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f39262f2da9b23d50800000000000000
+      internalID: 6715634147834341695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 509.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7df0263b9b0b39ed0800000000000000
+      internalID: -2408387064088096809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_4
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 509.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 816f809ca4b0790f0800000000000000
+      internalID: -1110406367295244776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_5
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 509.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f76d46d4792d0680800000000000000
+      internalID: -8787321716141627399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 255.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e838916330c74f80800000000000000
+      internalID: -8122312076026169112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_7
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 255.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2773c2f9b56f8aae0800000000000000
+      internalID: -1537708399374092430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_8
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 255.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6257eef267eacee70800000000000000
+      internalID: 9145876765916165414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1302fa852699c210800000000000000
+      internalID: 1353778250990617375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_10
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 1.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc20a4b7894303440800000000000000
+      internalID: 4913485022969332429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: UI_Informations_Overlay_Icons_11
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 1.5
+        width: 254.33333
+        height: 254.5
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efb417c3f0f57d290800000000000000
+      internalID: -7865713705136075778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: a9bb6a42439983a4fa7f2801400015f4
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+  spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

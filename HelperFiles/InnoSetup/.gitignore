@@ -1,0 +1,8 @@
+# This .gitignore file should be placed at the root of your Unity project directory
+#
+# Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
+#
+
+# InnoSetups custom folder holding the installer exe
+Output/
+

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<stru_transmitter_and_helicopter xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <helicopter>
+    <sound_volume>  <val>100</val>  </sound_volume> <!-- LOGO600SE is the default model and its parameter are set in "Helicopter_Parameter.cs"-->
+    <collision>
+      <positions_left>
+        <vect3>
+          <Vector3>  <x>0.2</x>  <y>-0.170</y>  <z>-0.1</z>  </Vector3>
+          <Vector3>  <x>-0.1</x>  <y>-0.190</y>  <z>-0.1</z>  </Vector3>
+        </vect3>
+      </positions_left>
+      <positions_right>
+        <vect3>
+          <Vector3>  <x>0.2</x>  <y>-0.170</y>  <z>0.1</z>  </Vector3>
+          <Vector3>  <x>-0.1</x>  <y>-0.190</y>  <z>0.1</z>  </Vector3>
+        </vect3>
+      </positions_right>
+      <positions_steering_center>
+        <vect3>
+          <Vector3>  <x>-0.93</x>  <y>-0.16</y>  <z>0</z>  </Vector3>
+        </vect3>
+      </positions_steering_center>
+    </collision>
+  </helicopter>
+</stru_transmitter_and_helicopter>

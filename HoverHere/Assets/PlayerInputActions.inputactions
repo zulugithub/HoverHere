@@ -1,0 +1,282 @@
+{
+    "name": "PlayerInputActions",
+    "maps": [
+        {
+            "name": "PlayerControls",
+            "id": "08ac7467-96e9-4cbb-88b9-2855954e530e",
+            "actions": [
+                {
+                    "name": "Channel 0",
+                    "type": "PassThrough",
+                    "id": "e12e4f41-4c88-4c08-af42-53f123b2e061",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 1",
+                    "type": "PassThrough",
+                    "id": "38344104-e71c-40b3-9ac0-ec66938d996a",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 2",
+                    "type": "PassThrough",
+                    "id": "7b2f7013-6dc6-49b6-a75c-818f4ed6766e",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 3",
+                    "type": "PassThrough",
+                    "id": "96ff245c-2b8e-474e-9e86-d8819dc66ac3",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 4",
+                    "type": "PassThrough",
+                    "id": "7ba0ed46-dd39-4d84-ab3f-2688ac618c6a",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 5",
+                    "type": "PassThrough",
+                    "id": "2cea8ba4-a138-46ce-b93a-50acd5838782",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 6",
+                    "type": "Button",
+                    "id": "b841121d-b07c-44f2-a9ad-88678cd3a1fa",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Channel 7",
+                    "type": "Button",
+                    "id": "406818b5-51f0-47ea-8d81-edd94e6fbd83",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e232243b-0b30-475c-8ceb-63e2f0d10bf5",
+                    "path": "<Joystick>/axis0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 0",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e86dc62a-b31e-4196-885d-d57f66471a6c",
+                    "path": "<Joystick>/stick/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 0",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "339505a5-4186-48f3-a7a4-7d11a8a98411",
+                    "path": "<Gamepad>/leftStick/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 0",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7ae140cb-c098-4b85-9dd0-e0f298f9c729",
+                    "path": "<Joystick>/axis1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "070e69b5-e35a-40b6-b2a9-fc7ee58de599",
+                    "path": "<Joystick>/stick/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a5f94f8-ecd5-4658-883a-f514ae034975",
+                    "path": "<Gamepad>/leftStick/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3ec7956a-9dfd-41de-b5f5-0dbd5601721b",
+                    "path": "<Joystick>/axis2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b58237ea-2ee6-4e08-b3c3-768f6bd88cbe",
+                    "path": "<Gamepad>/rightStick/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7efa585e-e5f8-45dc-b010-9c8640235cf2",
+                    "path": "<HID::Logitech Logitech RumblePad 2 USB>/rz",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8a644b15-6858-4406-8a8b-13d6928ee74d",
+                    "path": "<Joystick>/axis3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "97ad2721-960e-447a-be8c-fd9fdb833482",
+                    "path": "<Gamepad>/rightStick/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e286992e-bd27-4a08-abd3-079b19869d5f",
+                    "path": "<HID::Logitech Logitech RumblePad 2 USB>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "81bb9515-ab1d-4f45-ba79-37ad9dd40ccf",
+                    "path": "<Joystick>/axis4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1ef9a530-2619-4a3d-8326-e54b20e81ead",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d6168c9c-8a28-4454-862b-4f0050b86f36",
+                    "path": "<Joystick>/axis5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "28c5512a-25b5-4356-aa29-ce180d2a0e1d",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b2856978-ce0c-4dd0-96e5-e7a16892c59e",
+                    "path": "<Joystick>/axis6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d536ef67-d448-4ac8-8632-32f6a83bdba0",
+                    "path": "<Joystick>/axis7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Channel 7",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "PlayerControls",
+            "bindingGroup": "PlayerControls",
+            "devices": []
+        }
+    ]
+}

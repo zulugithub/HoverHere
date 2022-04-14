@@ -1,0 +1,45 @@
+# Blender MTL File: 'SikorskyS61_1020.blend'
+# Material Count: 4
+
+newmtl Canopy_A
+Ns 781.456621
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.005579 0.840053
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_000_A.png
+map_Ns f:\\Helikopter\\UNITY\\GitHub\\Free-RC-Helicopter-Simulator\\Assets\\Helicopters_Available\\SikorskyS61\\Resources\\SikorskyS61_Setup_002\\Textures\\SikorskyS61_Canopy_Roughness_002_A.png
+
+newmtl Rotorblades
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.132863 0.132863 0.132863
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_003_A.png
+
+newmtl Steel
+Ns 506.250020
+Ka 1.000000 1.000000 1.000000
+Kd 0.462047 0.462047 0.462047
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
+newmtl Tubing
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.049033 0.049033 0.049033
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

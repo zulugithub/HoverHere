@@ -1,0 +1,2 @@
+Generate speech from text
+https://spik.ai/

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>MFC Ulm/Neu-Ulm, Version 2</name>
+  <author>zulu</author>
+  <date>19.03.2020</date>
+  <version>1.0</version>
+  <info>http://www.mfculm.de/</info> 
+  <homepagelink>http://www.mfculm.de</homepagelink>
+  <downloadlink>https://www.dropbox.com/s/xdx0o4n0fhxlc5h/MFC-Ulm_Neu-Ulm_002.zip?dl=1</downloadlink>      
+  <!-- Path in zip file SkyBox/MFC-Ulm_Neu-Ulm_002/4096 -->   
+</stru_selection_content>
+

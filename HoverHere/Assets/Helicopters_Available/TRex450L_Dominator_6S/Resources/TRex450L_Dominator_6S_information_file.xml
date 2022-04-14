@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>TRex450L Dominator 6S</name>
+  <author>zulu</author>
+  <date>26.02.2021</date>
+  <version>2.0</version>
+  <info>Model is setup for reduced rotor spead. Canopy is moved forward to give more place for LiPo and connector.</info> 
+</stru_selection_content>

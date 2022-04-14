@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Rotor Live 2014</name>
+  <author>Paul Duerr, (c) 2014</author>
+  <date>25.12.2020</date>
+  <version>1.0</version>
+  <info>Portierung der Szenerie Rotor Live 2014 von Michael Goericke. Bildmaterial und Grundgeruest des 3D-Modells: (c) Michael Goericke. Erweiterte 3D-Modellierung und Portierung: Paul Duerr</info> 
+  <homepagelink>https://sceneries.paulduerr.info/szenerien/portierungen/m-goericke/rotor-live-2014.html</homepagelink>
+  <downloadlink>http://sceneries.paulduerr.info/data/heli-x7/Rotor_Live_2014_current.zip</downloadlink>
+</stru_selection_content>

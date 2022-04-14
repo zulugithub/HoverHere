@@ -1,0 +1,167 @@
+fileFormatVersion: 2
+guid: 53e99ef4f000e8a419b0fa43a5deb3e9
+ModelImporter:
+  serializedVersion: 20200
+  internalIDToNameTable:
+  - first:
+      74: -7424968712639136876
+    second: Animation_Weapons_Right|Weapons_Closed
+  - first:
+      74: 6223928876969293377
+    second: Animation_Weapons_Right|Weapons_Closed.001
+  - first:
+      74: 5538883038022688230
+    second: Animation_Weapons_Right|Weapons_Opened
+  - first:
+      74: -8590781718220198580
+    second: Animation_Weapons_Right|Weapons_Transition
+  - first:
+      74: 296949995270887154
+    second: Animation_Weapons_Left|Weapons_Closed
+  - first:
+      74: 3825907315415937231
+    second: Animation_Weapons_Left|Weapons_Closed.001
+  - first:
+      74: -3247335675842769685
+    second: Animation_Weapons_Left|Weapons_Opened
+  - first:
+      74: -5751463399480338074
+    second: Animation_Weapons_Left|Weapons_Transition
+  - first:
+      74: -3492029338774206944
+    second: Animation_Weapons_Rockets|Weapons_Rockets_Closed
+  - first:
+      74: -96006720624106447
+    second: Animation_Weapons_Rockets|Weapons_Rockets_Opened
+  - first:
+      74: 5115061601254080383
+    second: Animation_Weapons_Rockets|Weapons_Rockets_Opened.001
+  - first:
+      74: -6573721047769237995
+    second: Animation_Weapons_Rockets|Weapons_Rockets_Transition
+  - first:
+      74: 526293607905375292
+    second: Animation_Weapons_Rockets|Weapons_Rockets_Transition.001
+  - first:
+      74: -8313317607116185442
+    second: Gun.003|Weapons_Transition
+  - first:
+      74: -1354235752562380226
+    second: Gun.001|Weapons_Transition
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alu
+    second: {fileID: 2100000, guid: a8453c6a20b7f6c478c6315dacf92df6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Canopy
+    second: {fileID: 2100000, guid: 4425f0bcc5396b14ea79e93a2404626a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Dark
+    second: {fileID: 2100000, guid: cc511c250b4eff242a048662df0c23e5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gun
+    second: {fileID: 2100000, guid: 8b65c0051b9002041a82615d3f2866df, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.2
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.2
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

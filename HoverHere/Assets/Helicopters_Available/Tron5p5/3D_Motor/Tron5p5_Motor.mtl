@@ -1,0 +1,13 @@
+# Blender MTL File: 'Tron5p5_129.blend'
+# Material Count: 1
+
+newmtl Canopy_A
+Ns 867.570249
+Ka 0.567273 0.567273 0.567273
+Kd 0.800000 0.800000 0.800000
+Ks 0.038182 0.038182 0.038182
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Tron5p5\\Tron5p5_Canopy_000_A.png

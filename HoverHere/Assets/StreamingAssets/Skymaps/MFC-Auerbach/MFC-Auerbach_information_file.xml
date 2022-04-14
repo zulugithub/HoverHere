@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>MFC Auerbach</name>
+  <author>Andreas F</author>
+  <date>20.03.2020</date>
+  <version>1.0</version>
+  <info>Modellflugclub (MFC) Auerbach e. V.</info> 
+  <downloadlink>https://www.dropbox.com/s/e9ahx92bpn6te1z/MFC-Auerbach.zip?dl=1</downloadlink>      
+  <!-- Path in zip file SkyBox/MFC-Auerbach/4096 -->    
+</stru_selection_content>

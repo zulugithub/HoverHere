@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<stru_mainrotor_mechanics xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <blades_count>2</blades_count>
+  <r_KO_O>
+   <x>-2.161743140050021e-08</x>
+   <y>-0.08499600738286972</y>
+   <z>2.0836175451677263e-08</z>
+  </r_KO_O>
+<limb_stationary>
+<!-- ############## STATIONARY LIMB 0 ############## -->
+ <stru_limb_stationary>
+ <parameter>
+  <A_OLAi>  <!-- row-major order -->
+   <float>-4.860977469434147e-07</float>
+   <float>1.5766358046676032e-05</float>
+   <float>0.9999998807907104</float>
+   <float>0.9999952912330627</float>
+   <float>-0.003031760221347213</float>
+   <float>6.497474487332511e-07</float>
+   <float>0.0030318759381771088</float>
+   <float>0.9999952912330627</float>
+   <float>-1.56486094056163e-05</float>
+  </A_OLAi>
+  <r_AiO_O>
+   <x>-0.032700274139642715</x>
+   <y>-0.1416368931531906</y>
+   <z>-0.016999976709485054</z>
+  </r_AiO_O>
+  <r_BiAi_LAi>
+   <x>-4.694479249778283e-10</x>
+   <y>0.017000000923871994</y>
+   <z>1.601250937399712e-10</z>
+  </r_BiAi_LAi>
+  <r_CiK_LK>
+   <x>-0.03587917983531952</x>
+   <y>-3.40192022808397e-17</y>
+   <z>-2.531966025731691e-10</z>
+  </r_CiK_LK>
+  <l_BiAi>0.017000000768162816</l_BiAi>
+  <l_CiBi>0.05678149389206801</l_CiBi>
+ </parameter>
+ </stru_limb_stationary>
+<!-- ############## STATIONARY LIMB 1 ############## -->
+ <stru_limb_stationary>
+ <parameter>
+  <A_OLAi>  <!-- row-major order -->
+   <float>8.014085324248299e-05</float>
+   <float>0.5000317692756653</float>
+   <float>-0.8660070300102234</float>
+   <float>1.0</float>
+   <float>-0.00015769724268466234</float>
+   <float>1.4938771073502721e-06</float>
+   <float>-0.00013581618259195238</float>
+   <float>-0.8660070300102234</float>
+   <float>-0.5000318288803101</float>
+  </A_OLAi>
+  <r_AiO_O>
+   <x>0.008855405263602734</x>
+   <y>-0.1416368931531906</y>
+   <z>0.049660734832286835</z>
+  </r_AiO_O>
+  <r_BiAi_LAi>
+   <x>-8.683400665177032e-10</x>
+   <y>0.01699976436793804</y>
+   <z>-3.747897391742638e-12</z>
+  </r_BiAi_LAi>
+  <r_CiK_LK>
+   <x>0.017939550802111626</x>
+   <y>1.2338412602730386e-07</y>
+   <z>0.03107221983373165</z>
+  </r_CiK_LK>
+  <l_BiAi>0.016999763836902736</l_BiAi>
+  <l_CiBi>0.05677849454490477</l_CiBi>
+ </parameter>
+ </stru_limb_stationary>
+<!-- ############## STATIONARY LIMB 2 ############## -->
+ <stru_limb_stationary>
+ <parameter>
+  <A_OLAi>  <!-- row-major order -->
+   <float>1.033468925015768e-05</float>
+   <float>0.4873776435852051</float>
+   <float>0.8731913566589355</float>
+   <float>1.0</float>
+   <float>-2.0923167539876886e-05</float>
+   <float>-2.3403755733397702e-07</float>
+   <float>1.8116439605364576e-05</float>
+   <float>0.8731913566589355</float>
+   <float>-0.48737770318984985</float>
+  </A_OLAi>
+  <r_AiO_O>
+   <x>0.008940473198890686</x>
+   <y>-0.1416368931531906</y>
+   <z>-0.049659211188554764</z>
+  </r_AiO_O>
+  <r_BiAi_LAi>
+   <x>-4.088796856649424e-09</x>
+   <y>0.016957679763436317</y>
+   <z>0.00017383228987455368</z>
+  </r_BiAi_LAi>
+  <r_CiK_LK>
+   <x>0.017939550802111626</x>
+   <y>7.778156430049421e-08</y>
+   <z>-0.031072216108441353</z>
+  </r_CiK_LK>
+  <l_BiAi>0.016958567600880665</l_BiAi>
+  <l_CiBi>0.056775981502806314</l_CiBi>
+ </parameter>
+ </stru_limb_stationary>
+</limb_stationary>
+<!-- ############## -->
+<limb_rotating>
+<!-- ############## ROTATING LIMB 0 ############## -->
+ <stru_limb_rotating>
+ <parameter>
+  <r_DiJ_LJ>
+   <x>6.126753578428179e-05</x>
+   <y>8.519162264519764e-08</y>
+   <z>0.02407902665436268</z>
+  </r_DiJ_LJ>
+  <r_EiO_O>
+   <x>0.000349974085111171</x>
+   <y>-2.499474049955097e-08</y>
+   <z>0.03100001998245716</z>
+  </r_EiO_O>
+  <l_DiJ>0.024079100990996177</l_DiJ>
+  <l_EiDi>0.08527768910645069</l_EiDi>
+  <l_EiO>0.031001992080610736</l_EiO>
+ </parameter>
+ </stru_limb_rotating>
+<!-- ############## ROTATING LIMB 1 ############## -->
+ <stru_limb_rotating>
+ <parameter>
+  <r_DiJ_LJ>
+   <x>-6.126813968876377e-05</x>
+   <y>6.382000350413364e-08</y>
+   <z>-0.024079030379652977</z>
+  </r_DiJ_LJ>
+  <r_EiO_O>
+   <x>-0.0003500204475130886</x>
+   <y>-4.4641922158916714e-08</y>
+   <z>-0.030999990180134773</z>
+  </r_EiO_O>
+  <l_DiJ>0.024079104618508432</l_DiJ>
+  <l_EiDi>0.08527769609000496</l_EiDi>
+  <l_EiO>0.031001962563122855</l_EiO>
+ </parameter>
+ </stru_limb_rotating>
+</limb_rotating>
+<!-- ############## -->
+<driver_rotating>
+<!-- ############## ROTATING SWAHPLATE DRIVE 0 ############## -->
+ <stru_driver_rotating>
+ <parameter>
+  <r_FiO_O>
+   <x>-0.007950745522975922</x>
+   <y>-0.06274589151144028</y>
+   <z>8.43046521481483e-09</z>
+  </r_FiO_O>
+  <l_GiFi>0.02550490652675202</l_GiFi>
+  <l_HiGi>0.021498690230209064</l_HiGi>
+  <l_HiJ>0.019679099369320666</l_HiJ>
+ </parameter>
+ </stru_driver_rotating>
+<!-- ############## ROTATING SWAHPLATE DRIVE 1 ############## -->
+ <stru_driver_rotating>
+ <parameter>
+  <r_FiO_O>
+   <x>0.007950704544782639</x>
+   <y>-0.06274590641260147</y>
+   <z>8.43046699117167e-09</z>
+  </r_FiO_O>
+  <l_GiFi>0.02550490995007315</l_GiFi>
+  <l_HiGi>0.02149865341548508</l_HiGi>
+  <l_HiJ>0.01967910306605124</l_HiJ>
+ </parameter>
+ </stru_driver_rotating>
+</driver_rotating>
+</stru_mainrotor_mechanics>

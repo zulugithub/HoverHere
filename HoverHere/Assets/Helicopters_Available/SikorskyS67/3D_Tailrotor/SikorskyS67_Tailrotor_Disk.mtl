@@ -1,0 +1,24 @@
+# Blender MTL File: 'Tailrotor_Disk.blend'
+# Material Count: 2
+
+newmtl Tailrotor_Disk_Bottom
+Ns 60.000013
+Ka 0.600000 0.600000 0.600000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 0.500000
+illum 6
+map_Kd Tailrotor_Disk_Bottom.png
+
+newmtl Tailrotor_Disk_Top
+Ns 60.000013
+Ka 0.600000 0.600000 0.600000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 0.500000
+illum 6
+map_Kd Tailrotor_Disk_Top.png

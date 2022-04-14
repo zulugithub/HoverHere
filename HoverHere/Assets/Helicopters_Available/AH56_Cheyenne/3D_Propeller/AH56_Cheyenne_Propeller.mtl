@@ -1,0 +1,15 @@
+# Blender MTL File: 'AH56_Cheyenne_110.blend'
+# Material Count: 1
+
+newmtl Canopy
+Ns 354.123998
+Ka 0.509091 0.509091 0.509091
+Kd 0.047637 0.024564 0.000805
+Ks 0.459091 0.459091 0.459091
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Bump -bm 1.200000 F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_A_Bolts_Normal.png
+map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_000_A.png
+map_Ns F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH56_Cheyenne\\AH56_Cheyenne_Canopy_Roughness_000_A.png

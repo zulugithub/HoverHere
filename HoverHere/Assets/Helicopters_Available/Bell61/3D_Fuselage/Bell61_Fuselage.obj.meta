@@ -1,0 +1,342 @@
+fileFormatVersion: 2
+guid: e3ad006c9decbe34d80fbd845256ac54
+ModelImporter:
+  serializedVersion: 20200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BezierCurve_BezierCurve.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Canopy_A
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Canopy_Interior
+    second: {fileID: 2100000, guid: 023c3f07914561849b01ce8dbfd9c053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cube.001_Cube.033_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cube.002_Cube.027_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cube.007_Cube.005_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cube.008_Cube.006_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cylinder.001_Cylinder_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cylinder.002_Cylinder.001_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cylinder.003_Cylinder.044_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cylinder.004_Cylinder.046_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cylinder_Cylinder.040_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Details_Cube.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Exhaust.001_BezierCurve.001_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Exhaust.002_BezierCurve.002_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Exhaust_BezierCurve_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glas
+    second: {fileID: 2100000, guid: 2043419de0db6244985792ca705cf453, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Interior_1_Plane.005_interiorMat
+    second: {fileID: 2100000, guid: 023c3f07914561849b01ce8dbfd9c053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Landing_Gear_Details_On_Hull_Cube.034_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plane.001_Plane.036_interiorMat
+    second: {fileID: 2100000, guid: 023c3f07914561849b01ce8dbfd9c053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plane.002_Plane_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plane.007_Plane.010_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plane.008_Plane.006_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plane_Plane_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plate_Nose_Cube.005_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Plate_Nose_Details_Cube.006_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rivet_001_Cylinder.017_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: details_front_1_015-0-15_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fuselage_004-0-4.001_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fuselage_004-0-4.001_Canopy_InteriorMat
+    second: {fileID: 2100000, guid: 023c3f07914561849b01ce8dbfd9c053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fuselage_004-0-4.001_Canopy_RimMat
+    second: {fileID: 2100000, guid: e84099ae29a51124cbc641aa3dc9f32e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fuselage_004-0-4.001_GlasMat
+    second: {fileID: 2100000, guid: 2043419de0db6244985792ca705cf453, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: fuselage_windiow_gummi_fuselage.004_blackMat
+    second: {fileID: 2100000, guid: e84099ae29a51124cbc641aa3dc9f32e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: handle_Cylinder.007_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: interior
+    second: {fileID: 2100000, guid: 023c3f07914561849b01ce8dbfd9c053, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: lamp_front_Plane.020_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: landing_Gear_Details_On_Hull_Cube.034_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mainrotor_shaft.002_054-0-54.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mainrotor_shaft.003_054-0-54.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sensor_Front_BezierCurve.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sensor_Front_Plate_Cube.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: window_side__Plane.003_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: window_side_glas_Plane.001_GlasMat
+    second: {fileID: 2100000, guid: 2043419de0db6244985792ca705cf453, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: window_side_gummi_window_side_gummi_blackMat
+    second: {fileID: 2100000, guid: e84099ae29a51124cbc641aa3dc9f32e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: windows_front_Plane.004_GlasMat
+    second: {fileID: 2100000, guid: 2043419de0db6244985792ca705cf453, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wing_horizontal_Cube.033_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wing_tubes_Plane.010_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wing_vertical_Cube.027_Canopy_AMat
+    second: {fileID: 2100000, guid: 9dd1f0ef809fa36439d212ee239f1486, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.2
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 0.2
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

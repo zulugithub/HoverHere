@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>Neu-Ulm Wiese</name>
+  <author>zulu</author>
+  <date>13.06.2021</date>
+  <version>1.0</version> 
+  <info>High resultion scenery (8192x9182, 100MB)</info> 
+  <!-- <homepagelink>http://www.mfculm.de</homepagelink> --> 
+  <downloadlink>https://www.dropbox.com/s/98xipfyzmqa0ugv/Neu-Ulm_Wiese.zip?dl=1</downloadlink>      
+  <!-- Path in zip file SkyBox/Neu-Ulm_Wiese/4096 -->   
+</stru_selection_content>
+

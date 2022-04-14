@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<stru_selection_content xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <name>MSG-Virngrund e.V. Neuler</name>
+  <author>P. Duerr, (c) 2013</author>
+  <date>25.12.2020</date>
+  <version>1.0</version>
+  <info>Diese Szenerie zeigt den Modellflugplatz des MSG-Virngrund e.V. Neuler (im Ostalbkreis) im September 2012.
+ http://sceneries.paulduerr.info</info> 
+  <homepagelink>https://sceneries.paulduerr.info/szenerien/specials/msg-virngrund.html</homepagelink>
+  <downloadlink>http://sceneries.paulduerr.info/data/heli-x8/MSG-Virngrund_eV_Neuler_current.zip</downloadlink>
+</stru_selection_content>

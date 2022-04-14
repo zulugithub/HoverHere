@@ -1,0 +1,43 @@
+End User License Agreement (EULA) for this Scenery
+
+General Terms
+==============
+
+Use of this scenery
+--------------------
+
+This scenery may be used for private purposes only.
+
+Without my express and written permission is not allowed to
+- distribute this scenery or any parts of this scenery on CD or any other media,
+- distribute or offer single files from this package, or
+- distribute of offer any modifications of files contained in this package.
+
+Legal sources of these files are the web sites paulduerr.info (all file versions), 
+heli-x.info (for the Heli-X version of this scenery), as well as other 
+websites that have been authorized by me expressly in writing. 
+
+Commercial use
+--------------
+
+Generally, a commercial use of this scenery without my explicit permission 
+is prohibited. 
+
+Disclaimer:
+===========
+
+This simulator scenery is provided 'As Is' without any express or implied warranty 
+of any kind. Use this flight simulator scenery at your own risk.
+In no event shall the author of this scenery be liable for any damages
+rising out of the use this simulator scenery or scenery installer software.
+
+If in doubt, do not use the automatic installer method (EXE file) to reduce the
+risk of loss of data or data corruption that may result from any improper 
+software behaviour.
+
+
+Martin Koall
+E-Mail: mkoall@t-online.de
+Web:    http://sceneries.paulduerr.info
+
+2019-03
