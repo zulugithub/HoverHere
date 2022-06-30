@@ -32,7 +32,7 @@ namespace Helicopter_Tailrotor_Mechanics
     //               V:::V           I::::::::IS:::::::::::::::SS     UU:::::::::UU A:::::A                 A:::::A L::::::::::::::::::::::L      cc:::::::::::::::cl::::::l a::::::::::aa:::as:::::::::::ss   s:::::::::::ss  
     //                VVV            IIIIIIIIII SSSSSSSSSSSSSSS         UUUUUUUUU  AAAAAAA                   AAAAAAALLLLLLLLLLLLLLLLLLLLLLLL        ccccccccccccccccllllllll  aaaaaaaaaa  aaaa sssssssssss      sssssssssss    
     // ##################################################################################
-    public class Helicopter_Tailrotor_Mechanics : MonoBehaviour
+    public class Helicopter_Tailrotor_Mechanics 
     {
 
         // ##################################################################################
@@ -101,10 +101,10 @@ namespace Helicopter_Tailrotor_Mechanics
         //    MMMMMMMM               MMMMMMMM    eeeeeeeeeeeeee            ttttttttttt  hhhhhhh     hhhhhhh   ooooooooooo      ddddddddd   ddddd  sssssssssss   
         // ##################################################################################
         #region methods
-        public Helicopter_Tailrotor_Mechanics()
+        /*public Helicopter_Tailrotor_Mechanics()
         {
 
-        }
+        }*/
 
 
         public void Initialize(string helicopter_name, string rotor_name, Transform transform)

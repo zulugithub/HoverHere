@@ -3,7 +3,27 @@ guid: 54d2393576ac36c469c2d056b1e1cac7
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Black_Plastic
+    second: {fileID: 2100000, guid: 2b7dfce95359c444184ea757e52b78fb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Canopy_A
+    second: {fileID: 2100000, guid: 20f7a2ba838b4f74d8888455417f3170, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Canopy_NEW
+    second: {fileID: 2100000, guid: f756733e7b84b484eb95e15bb0f89000, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Heckverkleidung
+    second: {fileID: 2100000, guid: 70274023310631948840bb1ac794ba3e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -1,0 +1,13 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Canopy
+Ns 806.270625
+Ka 0.481818 0.481818 0.481818
+Kd 0.002667 0.002667 0.002667
+Ks 0.240909 0.240909 0.240909
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd Bell222_Canopy_000_A.png

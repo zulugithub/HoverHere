@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Landing_Lights : MonoBehaviour
 {
-    float time = 0; // [sec]
+    //float time = 0; // [sec]
     const float time_on = 0.5f; // [sec]
     const float time_off = 1.0f; // [sec]
-    bool light_status_flag = false;
+    //bool light_status_flag = false;
 
     private Helicopter_Main Helicopter_Main;
 

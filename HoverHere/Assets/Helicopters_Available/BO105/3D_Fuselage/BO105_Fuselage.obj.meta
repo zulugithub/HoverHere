@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: ba9899d83eadc274b84eb02e3ddfe309
 ModelImporter:
-  serializedVersion: 20101
+  serializedVersion: 20200
   internalIDToNameTable: []
   externalObjects:
   - first:
@@ -19,6 +19,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: interior
     second: {fileID: 2100000, guid: 096a6d0c35198e54f92243b658a958b4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rim
+    second: {fileID: 2100000, guid: d40ad89958f02cc40940087a92b4585c, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -110,6 +115,7 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 

@@ -1,8 +1,8 @@
-# Blender MTL File: 'Tron5p5_129.blend'
+# Blender MTL File: 'Tron5p5_140.blend'
 # Material Count: 3
 
 newmtl Black
-Ns 748.199027
+Ns 831.332252
 Ka 0.920743 0.920743 0.920743
 Kd 0.004776 0.004776 0.004776
 Ks 0.041818 0.041818 0.041818
@@ -12,7 +12,7 @@ d 1.000000
 illum 3
 
 newmtl Canopy_A
-Ns 867.570249
+Ns 963.966943
 Ka 0.567273 0.567273 0.567273
 Kd 0.800000 0.800000 0.800000
 Ks 0.038182 0.038182 0.038182
@@ -20,10 +20,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Tron5p5\\Tron5p5_Canopy_000_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Tron5p5\\Tron5p5_Canopy_000_A.png
 
 newmtl Steel
-Ns 707.076381
+Ns 785.640424
 Ka 0.936364 0.936364 0.936364
 Kd 0.775680 0.775680 0.775680
 Ks 0.190909 0.190909 0.190909

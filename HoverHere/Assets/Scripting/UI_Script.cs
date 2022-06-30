@@ -268,33 +268,33 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         UI_Initialize_Selection_UI(Ui_Selection_Type.scenery);
 
 
-        // search ALL UI canvas children (recursively) and change image component
-        foreach (Image im in GameObject.Find("Canvas").GetComponentsInChildren<Image>(true))
-        {
-            
-            if (im.sprite != null)
-            {
-                if (string.Equals(im.sprite.name, "Carbon-Fiber"))
-                {
-                    if (im.pixelsPerUnitMultiplier == 6)
-                    {
-                        //im.sprite = Resources.Load<Sprite>("Sprites/CarbonFiberUkraineBlue");
-                        //im.color = new Color(0.6415094f, 0.6415094f , 0.6415094f);
-                       // im.pixelsPerUnitMultiplier = 1;
-                    }
-                    else
-                    {
-                        im.sprite = Resources.Load<Sprite>("Sprites/CarbonFiberUkraine");
-                        im.color = Color.white;
-                    }
-
-                    if (im.pixelsPerUnitMultiplier == 5)
-                    {
-                        im.pixelsPerUnitMultiplier = 2;
-                    }
-                }
-            }
-        }
+        //// search ALL UI canvas children (recursively) and change image component
+        //foreach (Image im in GameObject.Find("Canvas").GetComponentsInChildren<Image>(true))
+        //{
+        //
+        //    if (im.sprite != null)
+        //    {
+        //        if (string.Equals(im.sprite.name, "Carbon-Fiber"))
+        //        {
+        //            if (im.pixelsPerUnitMultiplier == 6)
+        //            {
+        //                //im.sprite = Resources.Load<Sprite>("Sprites/CarbonFiberUkraineBlue");
+        //                //im.color = new Color(0.6415094f, 0.6415094f , 0.6415094f);
+        //               // im.pixelsPerUnitMultiplier = 1;
+        //            }
+        //            else
+        //            {
+        //                im.sprite = Resources.Load<Sprite>("Sprites/CarbonFiberUkraine");
+        //                im.color = Color.white;
+        //            }
+        //
+        //            if (im.pixelsPerUnitMultiplier == 5)
+        //            {
+        //                im.pixelsPerUnitMultiplier = 2;
+        //            }
+        //        }
+        //    }
+        //}
 
     }
     // ##################################################################################
@@ -1019,7 +1019,10 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void Listener_UI_Pie_Menu_Keyboard_Shorcuts_Button() { ui_menu_logic_info(); }
     void Listener_UI_Pie_Menu_Exit_Game_Button( )
     {
-        if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
+        Pause_ODE(true);
+        Simulation_Thread_Abort();
+
+        // if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
         Application.Quit();
     }
     // ##################################################################################
@@ -1034,7 +1037,10 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //// debug time ticks to file
         Debug_Save_Time_Ticks();
 #endif
-        if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
+        Pause_ODE(true);
+        Simulation_Thread_Abort();
+
+        // if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
         Application.Quit();
     }
     // ##################################################################################
@@ -1115,7 +1121,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void Listener_UI_Button_Open_Folder()
     {
         //Process.Start(@ui_text_fullpath_echo.text);
-        System.Diagnostics.Process.Start(@Path.GetDirectoryName(ui_text_fullpath_echo.text));   
+        //System.Diagnostics.Process.Start(@Path.GetDirectoryName(ui_text_fullpath_echo.text));
+        // il2cpp does not support Process, see https://forum.unity.com/threads/solved-il2cpp-and-process-start.533988/
+        Application.OpenURL(@Path.GetDirectoryName(ui_text_fullpath_echo.text));
     }
     // ##################################################################################
 
@@ -1138,6 +1146,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             //UnityEngine.Debug.Log(regedit_path_for_playerprefs);
             System.Diagnostics.Process.Start("cmd.exe", "/c REG ADD HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Regedit /v LastKey /t REG_SZ /d \"" + regedit_path_for_playerprefs + "\" /f");
             System.Diagnostics.Process.Start("regedit");
+
+            // il2cpp does not support Process, see https://forum.unity.com/threads/solved-il2cpp-and-process-start.533988/
+            // Application.OpenURL();
         }
         else
         {
@@ -1158,13 +1169,18 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         if ((Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor))
         {
             //Process.Start(@ui_text_fullpath_echo.text);
-            System.Diagnostics.Process.Start(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
+            //System.Diagnostics.Process.Start(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
+            // il2cpp does not support Process, see https://forum.unity.com/threads/solved-il2cpp-and-process-start.533988/
+            Application.OpenURL(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
+
         }
         else
         {
             // MacOS 
             // TODO test???  https://answers.unity.com/questions/43422/how-to-implement-show-in-explorer.html
-            System.Diagnostics.Process.Start(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
+            //System.Diagnostics.Process.Start(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
+            // il2cpp does not support Process, see https://forum.unity.com/threads/solved-il2cpp-and-process-start.533988/
+            Application.OpenURL(@Path.GetDirectoryName(Application.persistentDataPath + "/Free RC Helicopter Simulator"));
         }
     }
     // ##################################################################################

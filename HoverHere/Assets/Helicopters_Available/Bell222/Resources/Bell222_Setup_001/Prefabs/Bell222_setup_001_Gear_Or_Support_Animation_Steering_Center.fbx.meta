@@ -50,6 +50,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Gear
+    second: {fileID: 2100000, guid: 72189c0b883846742b5cf0fb0ce05b5d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Gun
     second: {fileID: 2100000, guid: 8b65c0051b9002041a82615d3f2866df, type: 2}
   - first:

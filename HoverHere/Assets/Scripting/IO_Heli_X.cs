@@ -204,9 +204,9 @@ namespace IO_Heli_X
                     {
                         System.IO.Compression.ZipFile.ExtractToDirectory(fullpath_scenery_file_zipped, fullpath_scenery_file_unzipped);
                     }
-                    catch (System.ArgumentException ex)
+                    catch (System.ArgumentException ex) 
                     {
-                        //UnityEngine.Debug.Log("\n" + "ZipFile Error\n" + ex.ToString());
+                        UnityEngine.Debug.Log("\n" + "ZipFile Error\n" + ex.ToString());
                         //return;
                         // TODO handle error
                     }

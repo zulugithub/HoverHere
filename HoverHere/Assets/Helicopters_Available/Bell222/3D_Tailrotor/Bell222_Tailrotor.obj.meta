@@ -12,13 +12,28 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Gear
+    second: {fileID: 2100000, guid: 72189c0b883846742b5cf0fb0ce05b5d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Gummi
     second: {fileID: 2100000, guid: cc511c250b4eff242a048662df0c23e5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Steal
+    second: {fileID: 2100000, guid: 8c95559662033ac44aa18dd8e40828aa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Steel
     second: {fileID: 2100000, guid: 8c95559662033ac44aa18dd8e40828aa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: TailrotorMechanics
+    second: {fileID: 2100000, guid: 2ec19fa065b56434599055f858b22529, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -85,7 +85,7 @@ def export_objects():
 	######################################################################################
 	#target_folder_relative = '//..//..//Free-RC-Helicopter-Simulator_//Assets//Helicopters_Available//'
 	#target_folder_relative = '\\Free-RC-Helicopter-Simulator\\Free-RC-Helicopter-Simulator\\Assets\\StreamingAssets\\Skymaps'
-	target_folder_relative = '\\HoverHere\\HoverHere\\Assets\\StreamingAssets\\Skymaps'
+	target_folder_relative = '\\HoverHere\\Git\\HoverHere\\Assets\\StreamingAssets\\Skymaps'
 	scale = 1.0
 	######################################################################################
 	

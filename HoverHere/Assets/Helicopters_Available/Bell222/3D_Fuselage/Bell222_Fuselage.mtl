@@ -1,8 +1,8 @@
-# Blender MTL File: 'Bell222_302.blend'
-# Material Count: 17
+# Blender MTL File: 'Bell222_333.blend'
+# Material Count: 20
 
 newmtl Black_Total
-Ns 900.000000
+Ns 1000.000000
 Ka 0.331606 0.331606 0.331606
 Kd 0.000000 0.000000 0.000000
 Ks 0.028497 0.028497 0.028497
@@ -12,7 +12,7 @@ d 1.000000
 illum 3
 
 newmtl Canopy
-Ns 806.270623
+Ns 895.856248
 Ka 0.481818 0.481818 0.481818
 Kd 0.002667 0.002667 0.002667
 Ks 0.240909 0.240909 0.240909
@@ -20,11 +20,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Canopy_000_A.png
-map_Ns f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Canopy_Roughness_000_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_000_A.png
+map_Ns E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Roughness_000_A.png
 
 newmtl Closure
-Ns 826.913164
+Ns 918.792404
 Ka 1.000000 1.000000 1.000000
 Kd 0.007189 0.007189 0.007189
 Ks 0.329268 0.329268 0.329268
@@ -34,7 +34,7 @@ d 1.000000
 illum 2
 
 newmtl Dark
-Ns 4.703152
+Ns 5.225724
 Ka 1.000000 1.000000 1.000000
 Kd 0.003095 0.003095 0.003095
 Ks 0.096386 0.096386 0.096386
@@ -44,7 +44,7 @@ d 1.000000
 illum 2
 
 newmtl Glas
-Ns 900.000000
+Ns 1000.000000
 Ka 0.868182 0.868182 0.868182
 Kd 0.086174 0.086174 0.086174
 Ks 0.227273 0.227273 0.227273
@@ -54,7 +54,7 @@ d 0.236364
 illum 6
 
 newmtl Glas_Dark
-Ns 900.000000
+Ns 1000.000000
 Ka 0.801515 0.801515 0.801515
 Kd 0.005601 0.005601 0.005601
 Ks 0.116593 0.116593 0.116593
@@ -64,7 +64,7 @@ d 0.915743
 illum 6
 
 newmtl Grid
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -72,11 +72,21 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
-map_d f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
+map_d E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
+
+newmtl Gummi
+Ns 6.694222
+Ka 1.000000 1.000000 1.000000
+Kd 0.006369 0.006369 0.006369
+Ks 0.231818 0.231818 0.231818
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
 
 newmtl Gun
-Ns 843.638431
+Ns 937.376034
 Ka 0.827273 0.827273 0.827273
 Kd 0.748399 0.748399 0.748399
 Ks 0.136364 0.136364 0.136364
@@ -84,10 +94,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Gun.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Gun.png
 
 newmtl Helmet_Black
-Ns 826.913164
+Ns 918.792404
 Ka 1.000000 1.000000 1.000000
 Kd 0.005603 0.005603 0.005603
 Ks 0.329268 0.329268 0.329268
@@ -97,7 +107,7 @@ d 1.000000
 illum 2
 
 newmtl Helmet_Glases_Black
-Ns 793.590141
+Ns 881.766824
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.500000 0.500000 0.500000
@@ -107,7 +117,7 @@ d 1.000000
 illum 2
 
 newmtl Interior_Luxury
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.500347 0.500347 0.500347
 Ks 0.500000 0.500000 0.500000
@@ -115,10 +125,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell222\\Bell222_Interior.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Interior.png
 
 newmtl Interior_Rim
-Ns 746.222480
+Ns 829.136089
 Ka 0.817073 0.817073 0.817073
 Kd 0.011082 0.010639 0.010639
 Ks 0.500000 0.500000 0.500000
@@ -128,7 +138,7 @@ d 1.000000
 illum 3
 
 newmtl Interior_Wall
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.087139 0.082218 0.082218
 Ks 0.500000 0.500000 0.500000
@@ -137,8 +147,19 @@ Ni 1.450000
 d 1.000000
 illum 2
 
+newmtl MainrotorMechanics
+Ns 562.500022
+Ka 1.000000 1.000000 1.000000
+Kd 0.462047 0.462047 0.462047
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_MainrotorMechanics_AO.png
+
 newmtl Mirror
-Ns 898.200900
+Ns 998.001000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -148,7 +169,7 @@ d 1.000000
 illum 2
 
 newmtl Red
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.207911 0.007374 0.038278
 Ks 0.500000 0.500000 0.500000
@@ -158,7 +179,7 @@ d 1.000000
 illum 2
 
 newmtl Red_Bright
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.723031 0.024093 0.012114
 Ks 0.500000 0.500000 0.500000
@@ -168,7 +189,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
@@ -176,3 +197,14 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
+
+newmtl TailrotorMechanics
+Ns 562.500022
+Ka 1.000000 1.000000 1.000000
+Kd 0.462047 0.462047 0.462047
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_TailrotorMechanics_AO.png

@@ -1,8 +1,8 @@
-# Blender MTL File: 'SikorskyS48_037.blend'
+# Blender MTL File: 'SikorskyS48_038.blend'
 # Material Count: 7
 
 newmtl ALU
-Ns 96.078443
+Ns 106.753826
 Ka 1.000000 1.000000 1.000000
 Kd 0.540000 0.540000 0.540000
 Ks 0.500000 0.500000 0.500000
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd Ref01.jpg
+map_Kd E:\\Heli-x_model\\Logo600_Sikorsky_S48\\Ref01.jpg
 
 newmtl BlackPlastic
-Ns 5.000001
+Ns 5.555557
 Ka 1.000000 1.000000 1.000000
 Kd 0.057580 0.057580 0.057580
 Ks 0.067580 0.067580 0.067580
@@ -23,7 +23,7 @@ d 1.000000
 illum 2
 
 newmtl Fuselage
-Ns 191.174959
+Ns 212.416621
 Ka 1.000000 1.000000 1.000000
 Kd 0.784318 0.357086 0.016559
 Ks 0.546240 0.546240 0.546240
@@ -31,10 +31,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd SikorskyS48_Canopy_001_A.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS48\\SikorskyS48_Canopy_001_A.jpg
 
 newmtl Glas
-Ns 810.696199
+Ns 900.773554
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.331818 0.331818 0.331818
@@ -44,7 +44,7 @@ d 0.152727
 illum 9
 
 newmtl Interior
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -55,7 +55,7 @@ illum 2
 map_Kd .
 
 newmtl Pilot
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -63,10 +63,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd pilot.png
+map_Kd D:\\Zoltan\\Heli-x_model\\Logo600_Sikorsky_S48\\pilot.png
 
 newmtl _15535_N2S_234_Stearman_Pilot_v1default
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -74,4 +74,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd Textures\\SikorskyS48_pilot.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS48\\SikorskyS48_pilot.png

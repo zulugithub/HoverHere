@@ -3,7 +3,17 @@ guid: abac2c615b1e5c94088c3d92be18889c
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Kunstoff_Schwarz
+    second: {fileID: 2100000, guid: 2b7dfce95359c444184ea757e52b78fb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Zahnrad
+    second: {fileID: 2100000, guid: c78c23faeb24cae4d8a35fa1c3e40472, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

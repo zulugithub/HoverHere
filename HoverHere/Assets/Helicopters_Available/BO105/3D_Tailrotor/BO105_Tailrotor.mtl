@@ -1,4 +1,4 @@
-# Blender MTL File: 'BO105_098.blend'
+# Blender MTL File: 'BO105_100.blend'
 # Material Count: 2
 
 newmtl None
@@ -10,7 +10,7 @@ d 1
 illum 2
 
 newmtl fuselage
-Ns 829.440002
+Ns 921.600002
 Ka 0.661818 0.661818 0.661818
 Kd 1.000000 1.000000 1.000000
 Ks 0.279176 0.279176 0.279176
@@ -18,4 +18,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\BO105\\BO105_Canopy_003_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\BO105\\BO105_Canopy_003_A.png

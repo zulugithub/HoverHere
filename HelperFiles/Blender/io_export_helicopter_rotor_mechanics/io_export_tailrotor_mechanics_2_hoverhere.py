@@ -99,7 +99,7 @@ def export_objects():
     ######################################################################################
     #target_folder_relative = '//..//..//HoverHere_//Assets//Helicopters_Available//'
     #target_folder_relative = '\\HoverHere\\HoverHere\\Assets\\Helicopters_Available'
-    target_folder_relative = '\\HoverHere\\HoverHere\\Assets\\Helicopters_Available'
+    target_folder_relative = '\\HoverHere\\Git\\HoverHere\\Assets\\Helicopters_Available'
     scale = 1.0
     ######################################################################################
 

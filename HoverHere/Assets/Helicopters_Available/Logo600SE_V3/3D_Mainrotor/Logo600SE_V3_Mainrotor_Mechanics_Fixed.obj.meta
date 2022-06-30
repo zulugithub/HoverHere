@@ -17,6 +17,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Savox_Orange
+    second: {fileID: 2100000, guid: 29e1f28f5a4331147bea7825f3bb1beb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Stainless_Steel
     second: {fileID: 2100000, guid: e77f98fcc73d6d3418a6878a48670e9c, type: 2}
   materials:

@@ -1,8 +1,8 @@
-# Blender MTL File: 'OH-6_165.blend'
+# Blender MTL File: 'OH-6_183.blend'
 # Material Count: 2
 
 newmtl Canopy
-Ns 835.350977
+Ns 928.167753
 Ka 1.000000 1.000000 1.000000
 Kd 0.152925 0.000000 0.012570
 Ks 0.500000 0.500000 0.500000
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\OH-6\\OH-6_Canopy_A_Bolts_Only_Normal.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\OH-6\\OH-6_Canopy_002_A.png
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000

@@ -1,8 +1,8 @@
-# Blender MTL File: 'TREx450L_Dominator_6S___048.blend'
+# Blender MTL File: 'TREx450L_Dominator_6S___050.blend'
 # Material Count: 2
 
 newmtl Red
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.012690 0.004721
 Ks 0.500000 0.500000 0.500000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 707.076381
+Ns 785.640424
 Ka 0.936364 0.936364 0.936364
 Kd 0.775680 0.775680 0.775680
 Ks 0.190909 0.190909 0.190909

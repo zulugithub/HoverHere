@@ -1,8 +1,8 @@
-# Blender MTL File: 'Bell61_052.blend'
+# Blender MTL File: 'Bell61_055.blend'
 # Material Count: 3
 
 newmtl Canopy_A
-Ns 781.456621
+Ns 868.285134
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.005579 0.840053
 Ks 0.500000 0.500000 0.500000
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell61\\Bell61_Canopy_001_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell61\\Bell61_Canopy_001_A.png
 
 newmtl Rotorblades
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.132863 0.132863 0.132863
 Ks 0.500000 0.500000 0.500000
@@ -21,10 +21,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell61\\Bell61_Canopy_001_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell61\\Bell61_Canopy_001_A.png
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000

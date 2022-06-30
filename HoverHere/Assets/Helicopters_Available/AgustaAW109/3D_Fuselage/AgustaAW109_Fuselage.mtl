@@ -1,8 +1,8 @@
-# Blender MTL File: 'AgustaAW109_442.blend'
+# Blender MTL File: 'AgustaAW109_452.blend'
 # Material Count: 12
 
 newmtl Canopy
-Ns 46.487612
+Ns 51.652902
 Ka 0.481818 0.481818 0.481818
 Kd 0.494084 0.494084 0.494084
 Ks 0.240909 0.240909 0.240909
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_005_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_000_A.png
 
 newmtl Glas
-Ns 851.578499
+Ns 946.198332
 Ka 0.863636 0.863636 0.863636
 Kd 0.086174 0.086174 0.086174
 Ks 0.322727 0.322727 0.322727
@@ -23,7 +23,7 @@ d 0.159091
 illum 6
 
 newmtl Gray
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.114942 0.114942 0.114942
 Ks 0.500000 0.500000 0.500000
@@ -33,7 +33,7 @@ d 1.000000
 illum 2
 
 newmtl Grid
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -41,11 +41,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
-map_d f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
+map_d E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
 
 newmtl Gummi
-Ns 6.024799
+Ns 6.694222
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.231818 0.231818 0.231818
@@ -55,7 +55,7 @@ d 1.000000
 illum 2
 
 newmtl Interior_Luxury
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.500347 0.500347 0.500347
 Ks 0.500000 0.500000 0.500000
@@ -63,10 +63,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AgustaAW109\\AgustaAW109_Interior_Luxury_Brown.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Interior_Luxury.png
 
 newmtl Interior_Rim
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.069977 0.066259 0.066259
 Ks 0.500000 0.500000 0.500000
@@ -76,7 +76,7 @@ d 1.000000
 illum 2
 
 newmtl Interior_Wall
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.087139 0.082218 0.082218
 Ks 0.500000 0.500000 0.500000
@@ -86,7 +86,7 @@ d 1.000000
 illum 2
 
 newmtl Luxury_Beige
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.351533 0.274677 0.191202
 Ks 0.500000 0.500000 0.500000
@@ -96,7 +96,7 @@ d 1.000000
 illum 2
 
 newmtl Mirror
-Ns 898.200900
+Ns 998.001000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -106,7 +106,7 @@ d 1.000000
 illum 2
 
 newmtl Red
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.207911 0.007374 0.038278
 Ks 0.500000 0.500000 0.500000
@@ -116,7 +116,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000

@@ -386,7 +386,7 @@ namespace Helisimulator
         private double thrust_pr = 0; // [N] propeller thrust
         private double torque_pr = 0; // [Nm] propeller torque 
         private double thrust_bo = 0; // [N] booster thrust
-        private double torque_bo = 0; // [Nm] booster torque 
+        //private double torque_bo = 0; // [Nm] booster torque 
         private double omega_pr; // [rad/sec] propeller rotation velocity 
         private Quaternion q = new Quaternion(0, 0, 0, 1);  // unity: x, y, z, w --> [0], [1], [2], [3]
         private Vector3 vectO = Vector3.zero; // [m]
@@ -659,6 +659,7 @@ namespace Helisimulator
         public Vector3[,] F_LB_O_torque = new Vector3[4, 10]; // [Nm]
         public Vector3 F_thrustsumLD_O = new Vector3(); // [N]
         public Vector3 F_torquesumLD_LD = new Vector3(); // [Nm]
+        public Vector3 F_thrustsumLD_LD = new Vector3(); // [N]
         public float[,] Vi_LD = new float[4, 10]; // [m/sec]
         public float[,] Vi_LD_smoothdamp = new float[4, 10]; // [m/sec]
         public float[,] Vi_LD_smoothdamp_diff = new float[4, 10]; // [m/sec]
@@ -1674,7 +1675,7 @@ namespace Helisimulator
             int n_booster = 1;
 
             thrust_bo = par.transmitter_and_helicopter.helicopter.booster.thrust.val * input_x_booster; // [N]
-            torque_bo = 0; // [Nm]
+            //torque_bo = 0; // [Nm]
 
             if(par.transmitter_and_helicopter.helicopter.booster.booster_symmetric.val == true)
                 n_booster = 2;
@@ -2009,7 +2010,7 @@ const double eta = 0.80f;
             thrust_pr = 0; // [N] propeller thrust
             torque_pr = 0; // [Nm] propeller torque 
             thrust_bo = 0; // [N] booster thrust
-            torque_bo = 0; // [Nm] booster torque 
+            //torque_bo = 0; // [Nm] booster torque 
             omega_pr = 0; // [rad/sec] propeller rotation velocity 
             q = new Quaternion(0, 0, 0, 1);  // unity: x, y, z, w --> [0], [1], [2], [3]
             vectO = Vector3.zero; // [m]
@@ -2511,7 +2512,16 @@ const double eta = 0.80f;
                     //float Omega_mr_ = (float)Omega_mr;
 
                     Helicopter_Main.Helicopter_Mainrotor_Mechanics.Calculate(roll, pitch, collective, (float)Omega_mr, ref beta, (float)dtime, integrator_function_call_number);
+
+                    float beta_sum = 0; // [rad]
+                    for (int i = 0; i < beta.Length; i++) beta_sum += beta[i];
+                    ODEDebug.Theta_col_mr = beta_sum / beta.Length; // [rad]
                 }
+                else
+                {
+                   ODEDebug.Theta_col_mr = (float)Theta_col_mr; // [rad]
+                }
+
 
                 //switch (par.transmitter_and_helicopter.helicopter.rotor_systems_configuration.val)
                 if (Helicopter_Main.Helicopter_Tailrotor_Mechanics.rotor_3d_mechanics_geometry_available == true)
@@ -2524,10 +2534,6 @@ float beta_tr = 0; // calculated blade angle not used yet
                 }
             }
 
-            //ODEDebug.Theta_col_mr = (float)Theta_col_mr; // [rad]
-            float beta_sum = 0; // [rad]
-            for (int i = 0; i < beta.Length; i++) beta_sum += beta[i];
-            ODEDebug.Theta_col_mr = beta_sum / beta.Length; // [rad]
             // ##################################################################################
 
 
@@ -3097,7 +3103,7 @@ float beta_tr = 0; // calculated blade angle not used yet
             force_y_gear_or_support_steering_leftLH = force_y_gear_or_support_steering_leftLH_temp; // [N] summ of forces in local coordinate system
             force_y_gear_or_support_steering_rightLH = force_y_gear_or_support_steering_rightLH_temp; // [N] summ of forces in local coordinate system
 
-            const bool steering_left_gameobject_is_mirror_of_steering_right = true; // TODO put into parameter list, also does not work well for the left and right steering wheel: wheel steers in wrong direction
+            //const bool steering_left_gameobject_is_mirror_of_steering_right = true; // TODO put into parameter list, also does not work well for the left and right steering wheel: wheel steers in wrong direction
 
             wheel_rolling_distance_left = wheel_rolling_distance_left_temp; // [m]
             wheel_rolling_distance_right = wheel_rolling_distance_right_temp; // [m]
@@ -3106,10 +3112,11 @@ float beta_tr = 0; // calculated blade angle not used yet
             wheel_rolling_distance_steering_right = wheel_rolling_distance_steering_right_temp; // [m]
 
             wheel_steering_center = wheel_steering_center_temp; // [0...1] for one rotation
-            if (!steering_left_gameobject_is_mirror_of_steering_right)
-                wheel_steering_left = (wheel_steering_left_temp); // [0...1] for one rotation
-            else
-                wheel_steering_left = (0.5f - wheel_steering_left_temp) % 1.0f; // [0...1] for one rotation
+            //if (!steering_left_gameobject_is_mirror_of_steering_right)
+            //    wheel_steering_left = (wheel_steering_left_temp); // [0...1] for one rotation
+            //else
+            //    wheel_steering_left = (0.5f - wheel_steering_left_temp) % 1.0f; // [0...1] for one rotation
+            wheel_steering_left = (0.5f - wheel_steering_left_temp) % 1.0f; // [0...1] for one rotation
             wheel_steering_right = wheel_steering_right_temp; // [0...1] for one rotation
 
 
@@ -3371,7 +3378,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                     ref A_OLDnorot,
                     ref r_LBO_O, ref dr_LBO_O_dt, ref dr_LBO_LB_dt,
                     ref F_LB_O_thrust, ref F_LB_O_torque,
-                    ref F_thrustsumLD_O, ref F_torquesumLD_LD, ref Vi_LD, ref Vi_LD_smoothdamp, ref Vi_LD_smoothdamp_diff, ref Vi_LD_smoothdamp_velocity, ref Vi_mean, (float)dtime,
+                    ref F_thrustsumLD_O, ref F_torquesumLD_LD, ref F_thrustsumLD_LD, ref Vi_LD, ref Vi_LD_smoothdamp, ref Vi_LD_smoothdamp_diff, ref Vi_LD_smoothdamp_velocity, ref Vi_mean, (float)dtime,
                     ground_effect_mainrotor_hub_distance_to_ground,
                     ground_effect_mainrotor_triangle_normalR,
                     out sound_volume_mainrotor,
@@ -3399,8 +3406,8 @@ float beta_tr = 0; // calculated blade angle not used yet
                 v_i_mr = Vi_mean;
 
                 
-                thrust_mr_for_rotordisc_conical_deformation = (float)thrust_mr; // 
-                
+                thrust_mr_for_rotordisc_conical_deformation = (float)F_thrustsumLD_LD.y; // [N] 
+
 
                 int r_n = 4;  // radial steps - (polar coordiantes)
                 int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
@@ -3674,7 +3681,7 @@ float beta_tr = 0; // calculated blade angle not used yet
         }
 
 
-        
+        /*
         // ##################################################################################
         // disc has to be integrated with higher frequency 
         // ##################################################################################
@@ -3686,7 +3693,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                   double time,                                // [IN] time 
                   double dtime)                               // [IN] timestep    
         {
-/*
+
              q0_DO = x_states[31]; // [-] w quaternion orientation real - rotor disc
              q1_DO = x_states[32]; // [-] x quaternion orientation imag i - rotor disc
              q2_DO = x_states[33]; // [-] y quaternion orientation imag j - rotor disc
@@ -3738,9 +3745,10 @@ float beta_tr = 0; // calculated blade angle not used yet
 
              dxdt[35] = (MLx + wLy* wLz * (Jy - Jz)) / Jx;
              //dxdt[36] = (MLy - wLx * wLz * (Jx - Jz)) / Jy; 
-             dxdt[36] = (MLz + wLx* wLy * (Jx - Jy)) / Jz;*/
-        }
+             dxdt[36] = (MLz + wLx* wLy * (Jx - Jy)) / Jz;
 
+        }
+        */
         #endregion
     }
 

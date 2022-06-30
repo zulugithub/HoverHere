@@ -30,6 +30,24 @@ ModelImporter:
   - first:
       74: -3483440974145316428
     second: Landing_Gear_Armature.L|Weapons_Transition
+  - first:
+      74: 3835976615747303217
+    second: Landing_Gear_Armature.L|Closed_L.001
+  - first:
+      74: 8492060693200562785
+    second: Landing_Gear_Armature.L|Deflection_L.001
+  - first:
+      74: -8205185005972562535
+    second: Landing_Gear_Armature.L|Opened_L.001
+  - first:
+      74: 1018121702189566580
+    second: Landing_Gear_Armature.L|Rotation_L.001
+  - first:
+      74: -3928735701068126274
+    second: Landing_Gear_Armature.L|Transition_L.001
+  - first:
+      74: 3369045488115862319
+    second: Landing_Gear_Rear_Left.005|Deflection_L
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -41,6 +59,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Dark
     second: {fileID: 2100000, guid: cc511c250b4eff242a048662df0c23e5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gear
+    second: {fileID: 2100000, guid: 72189c0b883846742b5cf0fb0ce05b5d, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

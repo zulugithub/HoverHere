@@ -23,6 +23,7 @@
 ## 2020.12.25 V1.01 
 ## 2021.04.18 V1.02
 ## 2021.09.12 V1.03
+## 2022.06.25 V1.04
 
 #################################################################################
 ##    ____      ____    
@@ -38,8 +39,8 @@
 bl_info = {
     "name": "Export blender helicopter model to 'Hover Here, a Free-RC_Helicopter-Simulator.",
     "author": "zulu",
-    "version": (1, 0, 3),
-    "blender": (2, 92, 00),
+    "version": (1, 0, 5),
+    "blender": (3, 2, 00),
     "location": "File > Export > HoverHere",
     "description": "Export to HoverHere",
     "warning": "",
@@ -88,7 +89,7 @@ def export_objects():
 	######################################################################################
 	#target_folder_relative = '//..//..//HoverHere_//Assets//Helicopters_Available//'
 	#target_folder_relative = '\\HoverHere\\HoverHere\\Assets\\Helicopters_Available'
-	target_folder_relative = '\\HoverHere\\HoverHere\\Assets\\Helicopters_Available'
+	target_folder_relative = '\\HoverHere\\Git\\HoverHere\\Assets\\Helicopters_Available'
 	scale = 1.0
 	######################################################################################
 	
@@ -303,11 +304,14 @@ def export_objects():
 	f = open( os.path.dirname(bpy.data.filepath) + '\\' + textfile1 , 'w')
 	f.writelines(['Info: Blenders rotation squence is a "space fixed 123" (S123) rotation and not a "body fixed 123" rotation.\n\n'])
 	export_rotor_as_obj('MAINROTOR_EXPORT'          , 'Mainrotor'   , 'Mainrotor'           , 'Empty_Mainrotor'             , scale, f)
+	export_rotor_as_obj('MAINROTOR_BLUR_EXPORT'     , 'Mainrotor'   , 'Mainrotor_Blur'      , 'Empty_Mainrotor_Blur'        , scale, f)
 	export_rotor_as_obj('MAINGEAR_EXPORT'           , 'Maingear'    , 'Maingear'            , 'Empty_Maingear'              , scale, f)
 	export_rotor_as_obj('TAILROTOR_EXPORT'          , 'Tailrotor'   , 'Tailrotor'           , 'Empty_Tailrotor'             , scale, f)
+	export_rotor_as_obj('TAILROTOR_BLUR_EXPORT'     , 'Tailrotor'   , 'Tailrotor_Blur'      , 'Empty_Tailrotor_Blur'        , scale, f)
 	export_rotor_as_obj('PROPELLER_EXPORT'          , 'Propeller'   , 'Propeller'           , 'Empty_Propeller'             , scale, f)
+	export_rotor_as_obj('PROPELLER_BLUR_EXPORT'     , 'Propeller'   , 'Propeller_Blur'      , 'Empty_Propeller_Blur'        , scale, f)
 	export_rotor_as_obj('MOTOR_EXPORT'              , 'Motor'       , 'Motor'               , 'Empty_Motor'                 , scale, f)
-	f.close()
+	f.close() 
 	
 	## SETUP EXPORT
 	for i in range(9):
@@ -387,9 +391,9 @@ class EXPORT_HOVER_HERE_OT_objects(Operator):
 		#target_folder = os.path.abspath(target_folder_relative + name_in_unity)
 		#print("Target Folder: '" + target_folder + "'")
 		#print("Name: '" + name_in_unity + "'")
-
+		bpy.data.scenes[0].frame_set(0)
 		export_objects()
-
+		
 		return {'FINISHED'}            # lets Blender know the operator finished successfully.
 
 

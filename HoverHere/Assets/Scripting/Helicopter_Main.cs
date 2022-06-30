@@ -70,7 +70,7 @@ using Parameter;
 
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
-using UnityEngine.InputSystem;
+//using UnityEngine.InputSystem;
 
 // ##################################################################################
 //    MMMMMMMM               MMMMMMMM                    iiii                   
@@ -327,14 +327,17 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     GameObject camera_offset;
     float xr_camera_vertical_position_offset = 0f; // [m] offset value for xr-camera: at loading of the scenery this offset ensures, that the xr-camera is at the same height, as the panoramic photo was taken
     //Camera sub_camera; // needed for projecting skymap to mesh
-    Bloom bloom_layer = null;
-    float bloom_layer_intensity_old;
 
     // graphic settings
+    Bloom bloom_layer = null;
+    float bloom_layer_intensity_old;
+    bool bloom_old;
+
     MotionBlur motion_blur_layer = null;
     bool motion_blur_old;
 
-    bool bloom_old;
+    DepthOfField depthoffield_layer = null;
+    bool depthoffield_old;
 
     int quality_setting_old = 0;
     int resolution_setting_old = 0;
@@ -528,7 +531,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     /// <summary>
     /// TODO: lock necceessry, better way ??????
     /// </summary>
-    static readonly object _locker = new object();
+   // static readonly object _locker = new object();
 
     // ##################################################################################
     // This function is running in a thread with constant low stepsize (high frquency)
@@ -537,8 +540,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // ##################################################################################
     public override void TakeStep(float dt)
     {
-        lock (_locker)
-        {
+      //  lock (_locker)
+       // {
             IO_AntiStutter__Get_ODE_Transform_Before_Calculation(dt);
 
             //dt = helicopter_ODE.par.simulation.delta_t.val;//  thread_ODE_deltat    override with const-value
@@ -546,9 +549,19 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             //UnityEngine.Debug.Log("TakeStep Called");
             stopwatch.Start();
 
-            if (helicopter_ODE.RK4Step(ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37))
+            // main solver embedded ode calculations
+            int RK4Step_error = helicopter_ODE.RK4Step(ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37);
+
+            // if results are outside of bounds (see check_results()-function) than catch error
+            if (RK4Step_error > 0)
             //if (helicopter_ODE.RK4Step(helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 31 ))
-            { 
+            {
+                //UnityEngine.Debug.Log("ERROR in RK4Step, Nr:" + RK4Step_error.ToString());
+                //for (int i = 0; i < helicopter_ODE.x_states.Count(); i++)
+                //{
+                //    UnityEngine.Debug.Log("x_states[" + i.ToString() + "]:" + helicopter_ODE.x_states[i] + "  old:" + helicopter_ODE.x_states_old[i]);
+                //}
+
                 // catch NaN
                 error_counter++;
                 //helicopter_ODE.Set_Initial_Conditions(); 
@@ -573,7 +586,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             counter++;
 
             IO_AntiStutter__Get_ODE_Transform_After_Calculation();
-        }
+       // }
     }
     // ##################################################################################
 
@@ -1126,38 +1139,44 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             wheels_status_old = wheel_status;
 
             // non-stearable wheels
-            if (System.Array.Exists(animator_wheels_left.parameters, p => p.name == "Wheel_Status") && wheel_status==Wheels_Status_Variants.lowered)
-            {
-                animator_wheels_left.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
-                animator_wheels_left.Play("Transition.wheels_lowered", -1, 0.0f);
-                collision_positions_landing_gear_left_rising_offset_target = 0; // [0...1]
-                helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 0; // [0...1]
-            }
-            else
-            {
-                animator_wheels_left.ResetTrigger("Wheel_Status"); // 0 triggers transition down -> raised
-                animator_wheels_left.Play("Transition.wheels_rised", -1, 0.0f);
-                collision_positions_landing_gear_left_rising_offset_target = 1; // [0...1]
-                helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 1; // [0...1]
+            if (System.Array.Exists(animator_wheels_left.parameters, p => p.name == "Wheel_Status"))
+            { 
+                if(wheel_status==Wheels_Status_Variants.lowered)
+                {
+                    animator_wheels_left.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
+                    animator_wheels_left.Play("Transition.wheels_lowered", -1, 0.0f);
+                    collision_positions_landing_gear_left_rising_offset_target = 0; // [0...1]
+                    helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 0; // [0...1]
+                }
+                else
+                {
+                    animator_wheels_left.ResetTrigger("Wheel_Status"); // 0 triggers transition up -> raised
+                    animator_wheels_left.Play("Transition.wheels_rised", -1, 0.0f);
+                    collision_positions_landing_gear_left_rising_offset_target = 1; // [0...1]
+                    helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 1; // [0...1]
+                }
             }
 
-            if (System.Array.Exists(animator_wheels_right.parameters, p => p.name == "Wheel_Status") && wheel_status == Wheels_Status_Variants.lowered)
+            if (System.Array.Exists(animator_wheels_right.parameters, p => p.name == "Wheel_Status"))
             {
-                animator_wheels_right.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
-                animator_wheels_right.Play("Transition.wheels_lowered", -1, 0.0f);
-                collision_positions_landing_gear_right_rising_offset_target = 0; // [0...1]
-                helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 0; // [0...1]
-            }
-            else
-            {
-                animator_wheels_right.ResetTrigger("Wheel_Status"); // 0 triggers transition down -> raised
-                animator_wheels_right.Play("Transition.wheels_rised", -1, 0.0f);
-                collision_positions_landing_gear_right_rising_offset_target = 1; // [0...1]
-                helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 1; // [0...1]
+                if (wheel_status == Wheels_Status_Variants.lowered)
+                {
+                    animator_wheels_right.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
+                    animator_wheels_right.Play("Transition.wheels_lowered", -1, 0.0f);
+                    collision_positions_landing_gear_right_rising_offset_target = 0; // [0...1]
+                    helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 0; // [0...1]
+                }
+                else
+                {
+                    animator_wheels_right.ResetTrigger("Wheel_Status"); // 0 triggers transition up -> raised
+                    animator_wheels_right.Play("Transition.wheels_rised", -1, 0.0f);
+                    collision_positions_landing_gear_right_rising_offset_target = 1; // [0...1]
+                    helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 1; // [0...1]
+                }
             }
 
             // steerable wheels
-            if (animator_wheels_steering_center != null)
+            if (animator_wheels_steering_center != null) 
             {
                 if (System.Array.Exists(animator_wheels_steering_center.parameters, p => p.name == "Wheel_Status"))
                 {
@@ -1171,7 +1190,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     }
                     else
                     {
-                        animator_wheels_steering_center.ResetTrigger("Wheel_Status"); // 0 triggers transition down -> raised
+                        animator_wheels_steering_center.ResetTrigger("Wheel_Status"); // 0 triggers transition up -> raised
                         animator_wheels_steering_center.Play("Transition.wheels_rised", -1, 0.0f);
                         collision_positions_landing_gear_steering_center_rising_offset_target = 1; // [0...1]
                         helicopter_ODE.collision_positions_landing_gear_steering_center_rising_offset = 1; // [0...1]
@@ -1180,8 +1199,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 }
                 else
                 {
-                    animator_wheels_steering_center.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
-                    animator_wheels_steering_center.Play("Transition.wheels_lowered", -1, 0.0f);
+                    //animator_wheels_steering_center.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
+                    //animator_wheels_steering_center.Play("Transition.wheels_lowered", -1, 0.0f);
                     collision_positions_landing_gear_steering_center_rising_offset_target = 0; // [0...1]
                     helicopter_ODE.collision_positions_landing_gear_steering_center_rising_offset = 0; // [0...1]
                     helicopter_ODE.wheel_steering_center_lock_to_initial_direction = false;
@@ -1202,7 +1221,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     }
                     else
                     {
-                        animator_wheels_steering_left.ResetTrigger("Wheel_Status"); // 0 triggers transition down -> raised
+                        animator_wheels_steering_left.ResetTrigger("Wheel_Status"); // 0 triggers transition up -> raised
                         animator_wheels_steering_left.Play("Transition.wheels_rised", -1, 0.0f);
                         collision_positions_landing_gear_steering_left_rising_offset_target = 1; // [0...1]
                         helicopter_ODE.collision_positions_landing_gear_steering_left_rising_offset = 1; // [0...1]
@@ -1211,8 +1230,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 }
                 else
                 {
-                    animator_wheels_steering_left.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
-                    animator_wheels_steering_left.Play("Transition.wheels_lowered", -1, 0.0f);
+                    //animator_wheels_steering_left.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
+                    //animator_wheels_steering_left.Play("Transition.wheels_lowered", -1, 0.0f);
                     collision_positions_landing_gear_steering_left_rising_offset_target = 0; // [0...1]
                     helicopter_ODE.collision_positions_landing_gear_steering_left_rising_offset = 0; // [0...1]
                     helicopter_ODE.wheel_steering_left_lock_to_initial_direction = false;
@@ -1233,7 +1252,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     }
                     else
                     {
-                        animator_wheels_steering_right.ResetTrigger("Wheel_Status"); // 0 triggers transition down -> raised
+                        animator_wheels_steering_right.ResetTrigger("Wheel_Status"); // 0 triggers transition up -> raised
                         animator_wheels_steering_right.Play("Transition.wheels_rised", -1, 0.0f);
                         collision_positions_landing_gear_steering_right_rising_offset_target = 1; // [0...1]
                         helicopter_ODE.collision_positions_landing_gear_steering_right_rising_offset = 1; // [0...1]
@@ -1242,8 +1261,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 }
                 else 
                 {
-                    animator_wheels_steering_right.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
-                    animator_wheels_steering_right.Play("Transition.wheels_lowered", -1, 0.0f);
+                    //animator_wheels_steering_right.SetTrigger("Wheel_Status"); // 1 triggers transition down -> lowered
+                    //animator_wheels_steering_right.Play("Transition.wheels_lowered", -1, 0.0f);
                     collision_positions_landing_gear_steering_right_rising_offset_target = 0; // [0...1]
                     helicopter_ODE.collision_positions_landing_gear_steering_right_rising_offset = 0; // [0...1]
                     helicopter_ODE.wheel_steering_right_lock_to_initial_direction = false;
@@ -1809,7 +1828,14 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // motion blur
         if (post_processing_volume != null)
             post_processing_volume.profile.TryGetSettings(out motion_blur_layer);
+        // depth of field
+        if (post_processing_volume != null)
+            post_processing_volume.profile.TryGetSettings(out depthoffield_layer);
         // ##################################################################################
+
+
+
+
 
 
 
@@ -2563,6 +2589,14 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             if (bloom_layer != null)
                 bloom_layer.enabled.value = bloom;
             bloom_old = bloom;
+        }
+
+        bool depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality.depthoffield.val;
+        if (depthoffield != depthoffield_old)
+        {
+            if (depthoffield_layer != null)
+                depthoffield_layer.enabled.value = depthoffield;
+            depthoffield_old = depthoffield;
         }
 
         int quality_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality.quality_setting);
@@ -4064,6 +4098,19 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
 
+        // ##################################################################################
+        // depth of field 
+        // ##################################################################################
+        if (depthoffield_layer != null)
+        {
+            depthoffield_layer.focusDistance.value = (helicopters_available.transform.position - main_camera.transform.position).magnitude;
+            depthoffield_layer.aperture.value = 3f;
+            depthoffield_layer.focalLength.value = 35f;
+        }
+        // ##################################################################################
+
+
+
 
         // ##################################################################################
         // update rotor mechanics model
@@ -4206,14 +4253,18 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
 
+        //par.transmitter_and_helicopter.helicopter.rotor_systems_configuration.val
 
 
         // ##################################################################################
         // mainrotorblades deformation 
         // ##################################################################################
-        mainrotor_object.Update_Rotor_Deformation(ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, flapping_a_s_mr_L, flapping_b_s_mr_L, omega_mr, Omega_mr);
-        tailrotor_object.Update_Rotor_Deformation(ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, flapping_a_s_tr_L, flapping_b_s_tr_L, omega_tr, Omega_tr);
-        propeller_object.Update_Rotor_Deformation(ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller, flapping_a_s_pr_L, flapping_b_s_pr_L, omega_pr, Omega_pr);
+        mainrotor_object.Update_Rotor_Deformation(0,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, 
+            flapping_a_s_mr_L, flapping_b_s_mr_L, omega_mr, Omega_mr, (float)helicopter_ODE.Theta_col_mr, main_camera);
+        tailrotor_object.Update_Rotor_Deformation(1,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, 
+            flapping_a_s_tr_L, flapping_b_s_tr_L, omega_tr, Omega_tr, (float)helicopter_ODE.Theta_col_tr, main_camera);
+        propeller_object.Update_Rotor_Deformation(2,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller,
+            flapping_a_s_pr_L, flapping_b_s_pr_L, omega_pr, Omega_pr, (float)helicopter_ODE.Theta_col_pr, main_camera);
         // ##################################################################################         
 
 
@@ -4729,6 +4780,13 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             {
                 animator_pilot_with_transmitter.SetTrigger("lifting_arm");
                 animator_pilot_with_transmitter.ResetTrigger("lowering_arm");
+
+                if (depthoffield_layer != null)
+                {
+                    depthoffield_layer.focusDistance.value = 0.3f;
+                    depthoffield_layer.aperture.value = 20f;
+                    depthoffield_layer.focalLength.value = 35;
+                }
             }
             if (vertical_camera_angle > -10)
             {
@@ -4855,11 +4913,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 // https://docs.unity3d.com/2020.2/Documentation/Manual/xr_input.html
                 var inputDevices = new List<UnityEngine.XR.InputDevice>();
                 UnityEngine.XR.InputDevices.GetDevices(inputDevices);
-                bool XR_devide_is_active = false;
+                //bool XR_devide_is_active = false;
                 foreach (var device in inputDevices)
                 {
-                    UnityEngine.Debug.Log(string.Format("  xxxxxxxxxxxx  Device found with name '{0}' and role '{1}'", device.name, device.role.ToString()));
-                    XR_devide_is_active = true;
+                    UnityEngine.Debug.Log(string.Format("  xxxxxxxxxxxx  Device found with name '{0}' and role '{1}'", device.name, device.characteristics.ToString()));
+                   // XR_devide_is_active = true;
                 }
                 // --------------------------- TRY TO FIND OUT IF DEVICIE IS ACTIVE: DOES NOT WORK YET ---------------------
 

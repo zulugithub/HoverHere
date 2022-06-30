@@ -1,8 +1,8 @@
-# Blender MTL File: 'SikorskyS67_120.blend'
+# Blender MTL File: 'SikorskyS67_122.blend'
 # Material Count: 4
 
 newmtl Canopy
-Ns 487.291867
+Ns 541.435408
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.231818 0.231818 0.231818
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS67\\SikorskyS67_Canopy_001_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS67\\SikorskyS67_Canopy_001_A.png
 
 newmtl Canopy_Internal
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.005333 0.005116 0.005082
 Ks 0.500000 0.500000 0.500000
@@ -23,7 +23,7 @@ d 1.000000
 illum 2
 
 newmtl Canopy_Rim
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.002361 0.002471 0.002483
 Ks 0.500000 0.500000 0.500000
@@ -33,7 +33,7 @@ d 1.000000
 illum 2
 
 newmtl Glas
-Ns 857.957343
+Ns 953.285936
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000

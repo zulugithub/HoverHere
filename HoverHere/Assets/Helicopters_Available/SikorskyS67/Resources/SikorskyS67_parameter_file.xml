@@ -124,9 +124,11 @@
       <positions_left_type>  <val>1</val>  </positions_left_type>  <!--0:skids,1:gear-->
       <positions_right_type>  <val>1</val>  </positions_right_type>  <!--0:skids,1:gear-->
       <positions_steering_center_type>  <val>1</val>  </positions_steering_center_type>  <!--0:skids,1:gear-->
-      <positions_left_rised_offset>  <val>0.1</val>  </positions_left_rised_offset>
-      <positions_right_rised_offset>  <val>0.1</val>  </positions_right_rised_offset>
-      <positions_steering_center_rised_offset>  <val>0.0</val>  </positions_steering_center_rised_offset>
+      <positions_left_rised_offset>  <val>0.100</val>  </positions_left_rised_offset>
+      <positions_right_rised_offset>  <val>0.100</val>  </positions_right_rised_offset>
+      <positions_steering_center_rised_offset>  <val>0.000</val>  </positions_steering_center_rised_offset>
+      <positions_steering_left_rised_offset>  <val>0.000</val>  </positions_steering_left_rised_offset>  
+      <positions_steering_right_rised_offset>  <val>0.000</val>  </positions_steering_right_rised_offset> 
       <positions_left>
        <vect3>
           <Vector3>  <x>0.14</x>  <y>-0.247</y>  <z>-0.11</z>  </Vector3>
@@ -234,7 +236,7 @@
       <Kp>  <val>0.05</val>  </Kp>
       <Ki>  <val>0.05</val>  </Ki>
       <saturation_min>  <val>0</val>  </saturation_min>
-      <soft_start_factor>  <val>0.05</val>  </soft_start_factor>
+      <soft_start_factor>  <val>0.12</val>  </soft_start_factor>
       <engine_restart_time>  <val>5</val>  </engine_restart_time>
       <engine_restart_factor>  <val>10</val>  </engine_restart_factor>
     </governor>
@@ -267,6 +269,12 @@
     <visual_effects>
       <mainrotor_idle_deformation>  <val>3</val>  </mainrotor_idle_deformation>
       <mainrotor_running_deformation>  <val>0.02</val>  </mainrotor_running_deformation>
+      <mainrotor_blur_rpm_factor>  <val>1.300</val>  </mainrotor_blur_rpm_factor>
+      <mainrotor_blur_transparency>  <val>1.000</val>  </mainrotor_blur_transparency>
+      <tailrotor_blur_rpm_factor>  <val>1.000</val>  </tailrotor_blur_rpm_factor>
+      <tailrotor_blur_transparency>  <val>0.600</val>  </tailrotor_blur_transparency>
+      <propeller_blur_rpm_factor>  <val>1.000</val>  </propeller_blur_rpm_factor>
+      <propeller_blur_transparency>  <val>1.000</val>  </propeller_blur_transparency>
       <landing_gear_or_skids_deflection_stiffness>  <val>100</val>  </landing_gear_or_skids_deflection_stiffness>
       <landing_gear_main_radius>  <val>0.018</val>  </landing_gear_main_radius>
       <landing_gear_main_transition_time_gear>  <val>0.8</val>  </landing_gear_main_transition_time_gear>

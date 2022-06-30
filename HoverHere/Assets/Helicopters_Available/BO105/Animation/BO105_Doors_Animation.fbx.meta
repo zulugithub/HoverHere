@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 279e17da89ae60b47814d0f0509cbb11
 ModelImporter:
-  serializedVersion: 20101
+  serializedVersion: 20200
   internalIDToNameTable:
   - first:
       74: -2258538201880625822
@@ -75,6 +75,9 @@ ModelImporter:
   - first:
       74: -313170209400123892
     second: Animation_Doors|Animation_Opened
+  - first:
+      74: -1667245708437426355
+    second: Animation_Doors|Animation_Opened.001
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -177,6 +180,7 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 

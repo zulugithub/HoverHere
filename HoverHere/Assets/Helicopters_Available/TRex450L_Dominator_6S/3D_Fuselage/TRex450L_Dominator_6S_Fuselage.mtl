@@ -1,8 +1,8 @@
-# Blender MTL File: 'TREx450L_Dominator_6S___048.blend'
+# Blender MTL File: 'TREx450L_Dominator_6S___050.blend'
 # Material Count: 21
 
 newmtl Alu
-Ns 778.845368
+Ns 865.383742
 Ka 0.794326 0.794326 0.794326
 Kd 0.800000 0.800000 0.800000
 Ks 0.386525 0.386525 0.386525
@@ -12,7 +12,7 @@ d 1.000000
 illum 3
 
 newmtl Black
-Ns 440.999985
+Ns 489.999983
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.000000 0.000000
 Ks 0.108333 0.108333 0.108333
@@ -22,7 +22,7 @@ d 1.000000
 illum 2
 
 newmtl Black.001
-Ns 440.999985
+Ns 489.999983
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.000000 0.000000
 Ks 0.108333 0.108333 0.108333
@@ -32,7 +32,7 @@ d 1.000000
 illum 2
 
 newmtl Black.002
-Ns 748.199027
+Ns 831.332252
 Ka 0.920743 0.920743 0.920743
 Kd 0.004776 0.004776 0.004776
 Ks 0.041818 0.041818 0.041818
@@ -42,7 +42,7 @@ d 1.000000
 illum 3
 
 newmtl Cable
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -50,10 +50,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Cable.001
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -61,10 +61,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Cable.002
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -72,10 +72,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Cable.003
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -83,10 +83,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Cable.004
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -94,10 +94,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Cable.005
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.681870 0.660967
 Ks 0.500000 0.500000 0.500000
@@ -105,10 +105,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Cable.jpg
 
 newmtl Canopy_A
-Ns 867.570249
+Ns 963.966943
 Ka 0.567273 0.567273 0.567273
 Kd 0.800000 0.800000 0.800000
 Ks 0.038182 0.038182 0.038182
@@ -116,10 +116,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\TRex450L_Dominator_6S_Canopy_000_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\TRex450L_Dominator_6S_Canopy_000_A.png
 
 newmtl Carbon
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.017388 0.017388 0.017388
 Ks 0.500000 0.500000 0.500000
@@ -127,7 +127,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Woven-Carbon-Fiber-Texture.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Woven-Carbon-Fiber-Texture.jpg
 
 newmtl Grau
 Ns 0.000000
@@ -140,7 +140,7 @@ d 1.000000
 illum 2
 
 newmtl Material.002
-Ns 550.115744
+Ns 611.239715
 Ka 1.000000 1.000000 1.000000
 Kd 0.642616 0.642616 0.642616
 Ks 0.131819 0.131819 0.131819
@@ -150,7 +150,7 @@ d 1.000000
 illum 2
 
 newmtl Microbeast
-Ns 488.008282
+Ns 542.231424
 Ka 1.000000 1.000000 1.000000
 Kd 0.003178 0.003178 0.003178
 Ks 0.100000 0.100000 0.100000
@@ -158,7 +158,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\TRex450L_Dominator_6S\\Microbeast.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\TRex450L_Dominator_6S\\Microbeast.png
 
 newmtl None
 Ns 500
@@ -169,7 +169,7 @@ d 1
 illum 2
 
 newmtl Red
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.012690 0.004721
 Ks 0.500000 0.500000 0.500000
@@ -179,7 +179,7 @@ d 1.000000
 illum 2
 
 newmtl Red.001
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.012690 0.004721
 Ks 0.500000 0.500000 0.500000
@@ -189,7 +189,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 707.076381
+Ns 785.640424
 Ka 0.936364 0.936364 0.936364
 Kd 0.775680 0.775680 0.775680
 Ks 0.190909 0.190909 0.190909
@@ -199,7 +199,7 @@ d 1.000000
 illum 3
 
 newmtl White
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -209,7 +209,7 @@ d 1.000000
 illum 2
 
 newmtl connector
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.221204 0.000000
 Ks 0.500000 0.500000 0.500000

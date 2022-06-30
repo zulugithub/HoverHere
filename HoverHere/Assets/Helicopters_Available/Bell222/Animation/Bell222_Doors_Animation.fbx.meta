@@ -30,6 +30,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Gear
+    second: {fileID: 2100000, guid: 72189c0b883846742b5cf0fb0ce05b5d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Glas
     second: {fileID: 2100000, guid: 05c9752326de7284684e5c054db6dbc4, type: 2}
   - first:

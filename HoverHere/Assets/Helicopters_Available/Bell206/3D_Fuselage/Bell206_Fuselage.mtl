@@ -1,8 +1,8 @@
-# Blender MTL File: 'Bell206_014.blend'
+# Blender MTL File: 'Bell206_015.blend'
 # Material Count: 14
 
 newmtl Bell206_Canopy
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_Canopy_000.png
 
 newmtl Bell206_Fin
-Ns 15.999998
+Ns 17.777776
 Ka 1.000000 1.000000 1.000000
 Kd 0.019608 0.113725 0.184314
 Ks 0.900000 0.900000 0.900000
@@ -23,7 +23,7 @@ d 0.380000
 illum 9
 
 newmtl Bell206_Glas
-Ns 638.710746
+Ns 709.678606
 Ka 1.000000 1.000000 1.000000
 Kd 0.019608 0.113725 0.184314
 Ks 0.636364 0.636364 0.636364
@@ -33,7 +33,7 @@ d 0.098182
 illum 9
 
 newmtl Material_Door_001
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -41,10 +41,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_Canopy_000.png
 
 newmtl Material_Door_001_Knobs
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -52,10 +52,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_B_C_512.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_B_C_512.tga
 
 newmtl Material_Door_002
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -63,10 +63,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_Canopy_000.png
 
 newmtl Material_Door_003
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -74,10 +74,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_Canopy_000.png
 
 newmtl Material_Door_003_Knobs
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -85,10 +85,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_B_C_512.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_B_C_512.tga
 
 newmtl Material_Door_004
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -96,10 +96,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_Canopy_000.png
 
 newmtl Material_Door_004_Knobs
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -107,10 +107,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_B_C_512.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_B_C_512.tga
 
 newmtl Material_Instruments
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -118,10 +118,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_panel.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_panel.tga
 
 newmtl Material_Interior
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -129,10 +129,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_B_C_512.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_B_C_512.tga
 
 newmtl Material_Radio
-Ns 4.000000
+Ns 4.444444
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -140,10 +140,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\Bell206\\Bell206_radio.tga
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell206\\Bell206_radio.tga
 
 newmtl Material_Shaft
-Ns 15.999998
+Ns 17.777776
 Ka 1.000000 1.000000 1.000000
 Kd 0.019608 0.113725 0.184314
 Ks 0.900000 0.900000 0.900000

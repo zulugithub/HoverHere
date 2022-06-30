@@ -2,7 +2,7 @@
 # Material Count: 2
 
 newmtl Canopy
-Ns 359.274786
+Ns 399.194207
 Ka 1.000000 1.000000 1.000000
 Kd 0.362894 0.339264 0.339264
 Ks 0.472727 0.472727 0.472727
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\EC135\\EC135_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\EC135\\EC135_Canopy_000.png
 
 newmtl Rotorblades
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -21,4 +21,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\EC135\\EC135_Canopy_000.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\EC135\\EC135_Canopy_000.png

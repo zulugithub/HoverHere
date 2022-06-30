@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Gear
+    second: {fileID: 2100000, guid: 72189c0b883846742b5cf0fb0ce05b5d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Interior_Airwolf
     second: {fileID: 2100000, guid: 9bed22cc1ae82ec4589ecdc09aebe373, type: 2}
   - first:

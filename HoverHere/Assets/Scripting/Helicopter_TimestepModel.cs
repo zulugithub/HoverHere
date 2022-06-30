@@ -21,7 +21,8 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
 
     public readonly bool threadRunning = true;
     //bool stepFree = true;
-    bool stepRunning = false;
+    //bool stepRunning = false;
+    int stepRunning = 0;
     //public float model_t = 0.0f;
 
     //public bool threaded = true;
@@ -62,8 +63,14 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
             sw.Start();
             //UnityEngine.Debug.Log("GetHashCode " + thread_ODE.GetHashCode() + "   ManagedThreadId " + thread_ODE.ManagedThreadId);
        // }
-
     }
+
+
+    public void Simulation_Thread_Abort()
+    {
+        thread_ODE.Abort();
+    }
+
 
     public void ThreadedActions()
     {
@@ -95,7 +102,8 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
                 oldTime = currentTime; //Store current Time
                 //UnityEngine.Debug.Log("deltaTime: " + deltaTime + "  waitTime: " + waitTime + "  model_dt: " + model_dt);
 
-                stepRunning = true;
+                //stepRunning = true;
+                stepRunning = 1000000;
                 // TakeStep(model_dt);
                 // model_t += model_dt; //am I doing this twice?
                 if (!paused)
@@ -103,7 +111,8 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
                     TakeStep(deltaTime * 0.001f); // [s]
                 }
                 //model_t += deltaTime; 
-                stepRunning = false;
+                //stepRunning = false;
+                stepRunning = 0;
             }
            
 
@@ -159,8 +168,13 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
             {
                 //stepFree = false;
                 // would a lock be more efficient here?
-                while (stepRunning) { } // wait for step to finish to avoid race condition
-                                        // grow array if needed
+
+                //while (stepRunning) { }
+                while ( (stepRunning--) > 0) {  } // wait for step to finish to avoid race condition   <<<<< commented out, because IL2CPP hangs here
+                                                  // grow array if needed
+
+                //UnityEngine.Debug.Log("Pause");
+
                 paused = paused_flag;
             }
             paused_flag_old = paused_flag;

@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SupportedDevices: []
   m_UpdateMode: 1
+  m_MaxEventBytesPerUpdate: 5242880
+  m_MaxQueuedEventsPerUpdate: 1000
   m_CompensateForScreenOrientation: 0
-  m_FilterNoiseOnCurrent: 0
+  m_FilterNoiseOnCurrent: 1
+  m_BackgroundBehavior: 0
+  m_EditorInputBehaviorInPlayMode: 0
   m_DefaultDeadzoneMin: 0
-  m_DefaultDeadzoneMax: 0.925
+  m_DefaultDeadzoneMax: 1
   m_DefaultButtonPressPoint: 0.5
   m_ButtonReleaseThreshold: 0.75
   m_DefaultTapTime: 0.2
@@ -25,6 +29,7 @@ MonoBehaviour:
   m_DefaultHoldTime: 0.4
   m_TapRadius: 5
   m_MultiTapDelayTime: 0.75
+  m_DisableRedundantEventsMerging: 0
   m_iOSSettings:
     m_MotionUsage:
       m_Enabled: 0

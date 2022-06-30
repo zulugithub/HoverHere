@@ -1,8 +1,8 @@
-# Blender MTL File: 'SikorskyS61_1020.blend'
+# Blender MTL File: 'SikorskyS61_1023.blend'
 # Material Count: 15
 
 newmtl Canopy_A
-Ns 781.456621
+Ns 868.285134
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.005579 0.840053
 Ks 0.500000 0.500000 0.500000
@@ -10,11 +10,11 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_000_A.png
-map_Ns f:\\Helikopter\\UNITY\\GitHub\\Free-RC-Helicopter-Simulator\\Assets\\Helicopters_Available\\SikorskyS61\\Resources\\SikorskyS61_Setup_002\\Textures\\SikorskyS61_Canopy_Roughness_002_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_000_A.png
+map_Ns E:\\Helikopter\\Free-RC-Helicopter-Simulator\\Assets\\Helicopters_Available\\SikorskyS61\\Resources\\SikorskyS61_Setup_002\\Textures\\SikorskyS61_Canopy_Roughness_002_A.png
 
 newmtl Canopy_Interior
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.007605 0.007605 0.007605
 Ks 0.500000 0.500000 0.500000
@@ -24,7 +24,7 @@ d 1.000000
 illum 2
 
 newmtl Canopy_Rim
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.003135 0.003044 0.003044
 Ks 0.500000 0.500000 0.500000
@@ -34,7 +34,7 @@ d 1.000000
 illum 2
 
 newmtl Glas
-Ns 900.000000
+Ns 1000.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.744304 0.688998 0.676507
 Ks 0.318504 0.318504 0.318504
@@ -44,7 +44,7 @@ d 0.471277
 illum 6
 
 newmtl Glas_Green
-Ns 758.752072
+Ns 843.057858
 Ka 1.000000 1.000000 1.000000
 Kd 0.038295 0.352035 0.259226
 Ks 0.318504 0.318504 0.318504
@@ -54,7 +54,7 @@ d 0.662186
 illum 6
 
 newmtl Grid
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -62,8 +62,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_Grid.png
-map_d f:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_Grid.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_Grid.png
+map_d E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS61\\SikorskyS61_Canopy_Grid.png
 
 newmtl None
 Ns 500
@@ -74,7 +74,7 @@ d 1
 illum 2
 
 newmtl Rivets_dummy1
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -84,7 +84,7 @@ d 1.000000
 illum 2
 
 newmtl Rivets_dummy1.002
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -94,7 +94,7 @@ d 1.000000
 illum 2
 
 newmtl Rivets_dummy1.003
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -104,7 +104,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
@@ -114,7 +114,7 @@ d 1.000000
 illum 3
 
 newmtl aluminum
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.706000 0.705719 0.705719
 Ks 0.780472 0.780472 0.780472
@@ -124,7 +124,7 @@ d 1.000000
 illum 2
 
 newmtl black
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.000000 0.000000 0.000000
 Ks 0.500000 0.500000 0.500000
@@ -134,7 +134,7 @@ d 1.000000
 illum 2
 
 newmtl interior
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.035936 0.035936 0.035936
 Ks 0.500000 0.500000 0.500000
@@ -144,7 +144,7 @@ d 1.000000
 illum 2
 
 newmtl red_knobs
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.600000 0.000000 0.000000
 Ks 0.200000 0.200000 0.200000

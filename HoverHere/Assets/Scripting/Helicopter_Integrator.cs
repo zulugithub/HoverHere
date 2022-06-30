@@ -68,7 +68,7 @@ abstract public class Helicopter_Integrator  {
 	/// <param name="x">The values being integrated.</param>
 	/// <param name="xdot">The derivatives being calculated.</param>
 	abstract public void ODE(int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
-	abstract public void ODE_DISC(int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
+	//abstract public void ODE_DISC(int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
 
 	/// <summary>
 	/// Step forward using Euler's method
@@ -89,31 +89,31 @@ abstract public class Helicopter_Integrator  {
 	/// </summary>
 	/// <param name="x">The values being integrated.</param>
 	/// <param name="h">The time step.</param>
-	public bool RK4Step(ref double [] x, double[] u, ref double t, double h, int state_begin, int state_end) {
+	public int RK4Step(ref double [] x, double[] u, ref double t, double h, int state_begin, int state_end) {
         int integrator_function_call_number = 0;
         ODE (integrator_function_call_number++, ref x, u, k1, t , h / 2.00000000000f);
-		if (check_results(x)) return true;
+		if (check_results(x)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			store [i] = x [i] + k1 [i] * h / 2.0;
 		}
         ODE(integrator_function_call_number++, ref store, u, k2, t + 0.5f * h, h / 2);
-		if (check_results(store)) return true;
+		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++){
 			store [i] = x [i] + k2 [i] * h / 2.0;
 		}
         ODE(integrator_function_call_number++, ref store, u, k3, t + 0.5f * h, h / 2);
-		if (check_results(store)) return true;
+		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			store [i] = x [i] + k3 [i] * h;
 		}
         ODE(integrator_function_call_number++, ref store, u, k4, t + h, h);
-		if (check_results(store)) return true;
+		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			x [i] = x [i] + (k1[i] +2.0*k2[i]+ 2.0*k3 [i]+k4[i]) * h/6.0;
 		}
-		if (check_results(x)) return true;
+		if (check_results(x)) return integrator_function_call_number;
 		t = t + h;
-		return false;
+		return 0;
 	}
 
 	public bool check_results(double[] x)
@@ -171,18 +171,18 @@ abstract public class Helicopter_Integrator  {
 			if(Double.IsNaN(x[i]) || Double.IsInfinity(x[i]))
 			{
 #if UNITY_EDITOR
-				UnityEngine.Debug.Log("ERROR NAN i:" + i.ToString() + "  x:" + x[i].ToString());
+                UnityEngine.Debug.Log("ERROR NAN i:" + i.ToString() + "  x:" + x[i].ToString());
 #endif
-				return true;
+                return true;
 			}
 
 
 			if (Math.Abs(x[i]) > mylimits[i])
 			{
 #if UNITY_EDITOR
-				UnityEngine.Debug.Log("ERROR RANGE i:" + i.ToString() + "  x:" + x[i].ToString());
+                UnityEngine.Debug.Log("ERROR RANGE i:" + i.ToString() + "  x:" + x[i].ToString());
 #endif
-				return true;
+                return true;
 			}
 
 		}
@@ -190,7 +190,7 @@ abstract public class Helicopter_Integrator  {
 	}
 
 
-
+	/*
 	/// <summary>
 	/// Step forward using 4th order Runge Kutta method
 	/// </summary>
@@ -222,7 +222,7 @@ abstract public class Helicopter_Integrator  {
 		t = t + h;
 		return false;
 	}
-
+	*/
 
 
 	/**

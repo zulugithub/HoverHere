@@ -41,7 +41,7 @@
       </orientation>
     </reference_to_masscentrum>
     <mass_total>  <val>18.0</val>  </mass_total>
-    <mainrotor_sound_recorded_rpm>  <val>1000</val>  </mainrotor_sound_recorded_rpm>   <!--real1300rpm-->  
+    <mainrotor_sound_recorded_rpm>  <val>900</val>  </mainrotor_sound_recorded_rpm>   <!--real1300rpm-->  
     <motor_sound_recorded_rpm>  <val>1000</val>  </motor_sound_recorded_rpm>
     <stall_sound_recorded_rpm>  <val>1000</val>  </stall_sound_recorded_rpm>
     <sound_volume>  <val>14</val>  </sound_volume>
@@ -74,11 +74,11 @@
         <servo_lon_mr_time_constant><val>0.100</val></servo_lon_mr_time_constant>      
     </servo_damping>
     <governor>
-      <target_rpm><vect3>  <x>1050</x><y>1100</y><z>1150</z>  </vect3></target_rpm> <!-- bank 1 2 3 -->
+      <target_rpm><vect3>  <x>800</x><y>900</y><z>1000</z>  </vect3></target_rpm> <!-- bank 1 2 3 -->
       <Kp>  <val>0.03</val>  </Kp>
       <Ki>  <val>0.05</val>  </Ki>
       <saturation_min>  <val>0</val>  </saturation_min>
-      <soft_start_factor>  <val>0.03</val>  </soft_start_factor>
+      <soft_start_factor>  <val>0.09</val>  </soft_start_factor>
       <engine_restart_time>  <val>5</val>  </engine_restart_time>
       <engine_restart_factor>  <val>0.5</val>  </engine_restart_factor>
     </governor>
@@ -117,7 +117,7 @@
       <J>  <val>0.60000</val>  </J>
       <C_D0>  <val>0.016</val>  </C_D0>
       <K_col>  <val>6.5</val>  </K_col>
-      <Theta_col_0>  <val>5.5</val>  </Theta_col_0>
+      <Theta_col_0>  <val>6.5</val>  </Theta_col_0>
       <posLH>
         <vect3> <x>0</x> <y>0.2539999961853027</y> <z>0</z> </vect3>
       </posLH>
@@ -212,9 +212,11 @@
       <positions_left_type>  <val>1</val>  </positions_left_type> <!--0:skids,1:gear-->
       <positions_right_type>  <val>1</val>  </positions_right_type> <!--0:skids,1:gear-->
       <positions_steering_center_type>  <val>1</val>  </positions_steering_center_type> <!--0:skids,1:gear-->
-      <positions_left_rised_offset>  <val>0.16</val>  </positions_left_rised_offset>
-      <positions_right_rised_offset>  <val>0.16</val>  </positions_right_rised_offset>
-      <positions_steering_center_rised_offset>  <val>0.16</val>  </positions_steering_center_rised_offset>
+      <positions_left_rised_offset>  <val>0.160</val>  </positions_left_rised_offset>
+      <positions_right_rised_offset>  <val>0.160</val>  </positions_right_rised_offset>
+      <positions_steering_center_rised_offset>  <val>0.160</val>  </positions_steering_center_rised_offset> 
+      <positions_steering_left_rised_offset>  <val>0.000</val>  </positions_steering_left_rised_offset>  
+      <positions_steering_right_rised_offset>  <val>0.000</val>  </positions_steering_right_rised_offset> 
       <positions_left>
         <vect3>
           <Vector3>  <x>-0.163</x>  <y>-0.380</y>  <z>-0.21</z>  </Vector3>
@@ -241,6 +243,13 @@
     <visual_effects>
       <mainrotor_idle_deformation>  <val>6</val>  </mainrotor_idle_deformation>
       <mainrotor_running_deformation>  <val>0.020</val>  </mainrotor_running_deformation>
+      <mainrotor_running_deformation>  <val>0.02</val>  </mainrotor_running_deformation>
+      <mainrotor_blur_transparency>  <val>1.300</val>  </mainrotor_blur_transparency>
+      <mainrotor_blur_rpm_factor>  <val>1.000</val>  </mainrotor_blur_rpm_factor>
+      <tailrotor_blur_transparency>  <val>1.000</val>  </tailrotor_blur_transparency>
+      <tailrotor_blur_rpm_factor>  <val>1.000</val>  </tailrotor_blur_rpm_factor>
+      <propeller_blur_transparency>  <val>1.000</val>  </propeller_blur_transparency>
+      <propeller_blur_rpm_factor>  <val>1.000</val>  </propeller_blur_rpm_factor>
       <landing_gear_or_skids_deflection_stiffness>  <val>120</val>  </landing_gear_or_skids_deflection_stiffness>
       <landing_gear_main_radius>  <val>0.035</val>  </landing_gear_main_radius>
       <landing_gear_main_transition_time_gear>  <val>2.5</val>  </landing_gear_main_transition_time_gear>

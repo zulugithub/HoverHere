@@ -249,6 +249,7 @@ namespace Parameter
         public stru_bool show_pilot { get; set; } // 
         public stru_bool show_fps { get; set; } // 
         public stru_float delay_after_reset { get; set; } // [sec] deactivate user input duration after reset  
+        public stru_bool rotor_disk_complexity { get; set; } // [0,1]
         public stru_float rotor_disk_transparency { get; set; } // [0...1]
         public stru_float rotor_blade_transparency { get; set; } // [0...1]
         public stru_bool wheel_brake_on_after_heli_change { get; set; } // 
@@ -259,6 +260,7 @@ namespace Parameter
             show_pilot = new stru_bool();
             show_fps = new stru_bool();
             delay_after_reset = new stru_float();
+            rotor_disk_complexity = new stru_bool();
             rotor_disk_transparency = new stru_float();
             rotor_blade_transparency = new stru_float();
             wheel_brake_on_after_heli_change = new stru_bool();
@@ -284,6 +286,12 @@ namespace Parameter
             delay_after_reset.comment = "";
             delay_after_reset.unit = "sec";
             delay_after_reset.save_under_player_prefs = true;
+
+            rotor_disk_complexity.val = true;
+            rotor_disk_complexity.hint = "Rotor disk simple (false) oder complex (true) model";
+            rotor_disk_complexity.comment = "";
+            rotor_disk_complexity.unit = "-";
+            rotor_disk_complexity.save_under_player_prefs = true;
 
             rotor_disk_transparency.val = 0.92f;
             rotor_disk_transparency.min = 0f;
@@ -322,6 +330,7 @@ namespace Parameter
 
         public stru_bool motion_blur { get; set; } // 
         public stru_bool bloom { get; set; } // 
+        public stru_bool depthoffield { get; set; } // 
         public stru_list quality_setting { get; set; } // 
         public stru_list resolution_setting { get; set; } // 
         
@@ -329,6 +338,7 @@ namespace Parameter
         {
             motion_blur = new stru_bool();
             bloom = new stru_bool();
+            depthoffield = new stru_bool();
             quality_setting = new stru_list();
             resolution_setting = new stru_list();
 
@@ -345,8 +355,14 @@ namespace Parameter
             bloom.unit = "-";
             bloom.save_under_player_prefs = true;
 
-            quality_setting.val = 3;
-            quality_setting.str = new List<string> { "Low", "High", "Very High", "Ultra" };
+            depthoffield.val = true;
+            depthoffield.hint = "Enables or disables depth of field effect.";
+            depthoffield.comment = "";
+            depthoffield.unit = "-";
+            depthoffield.save_under_player_prefs = true;
+
+            quality_setting.val = 2;
+            quality_setting.str = new List<string> { "Low", "High", "Very High", "Ultra" }; // 0 1 2 3
             quality_setting.hint = "Sets graphics quality level.";
             quality_setting.comment = "";
             quality_setting.unit = ""; 
@@ -431,13 +447,15 @@ namespace Parameter
             this.gameplay.show_pilot.val = (PlayerPrefs.GetInt("__simulation_" + "show_pilot", this.gameplay.show_pilot.val == false ? 0 : 1)) == 0 ? false : true;
             this.gameplay.show_fps.val = (PlayerPrefs.GetInt("__simulation_" + "show_fps", this.gameplay.show_fps.val == false ? 0 : 1)) == 0 ? false : true;
             this.gameplay.delay_after_reset.val = PlayerPrefs.GetFloat("__simulation_" + "delay_after_reset", this.gameplay.delay_after_reset.val);
+            this.gameplay.rotor_disk_complexity.val = (PlayerPrefs.GetInt("__simulation_" + "rotor_disk_complexity", this.gameplay.rotor_disk_complexity.val == false ? 0 : 1)) == 0 ? false : true;
             this.gameplay.rotor_disk_transparency.val = PlayerPrefs.GetFloat("__simulation_" + "rotor_disk_transparency", this.gameplay.rotor_disk_transparency.val);
             this.gameplay.rotor_blade_transparency.val = PlayerPrefs.GetFloat("__simulation_" + "rotor_blade_transparency", this.gameplay.rotor_blade_transparency.val);
             this.gameplay.wheel_brake_on_after_heli_change.val = (PlayerPrefs.GetInt("__simulation_" + "wheel_brake_on_after_heli_change", this.gameplay.wheel_brake_on_after_heli_change.val == false ? 0 : 1)) == 0 ? false : true;
             this.gameplay.limit_mouse_to_game.val = (PlayerPrefs.GetInt("__simulation_" + "limit_mouse_to_game", this.gameplay.limit_mouse_to_game.val == false ? 0 : 1)) == 0 ? false : true;
 
             this.graphic_quality.motion_blur.val = (PlayerPrefs.GetInt("__simulation_" + "motion_blur", this.graphic_quality.motion_blur.val == false ? 0 : 1)) == 0 ? false : true;
-            this.graphic_quality.bloom.val = (PlayerPrefs.GetInt("__simulation_" + "bloom", this.graphic_quality.bloom.val == false ? 0 : 1)) == 0 ? false : true;  
+            this.graphic_quality.bloom.val = (PlayerPrefs.GetInt("__simulation_" + "bloom", this.graphic_quality.bloom.val == false ? 0 : 1)) == 0 ? false : true;
+            this.graphic_quality.depthoffield.val = (PlayerPrefs.GetInt("__simulation_" + "depthoffield", this.graphic_quality.depthoffield.val == false ? 0 : 1)) == 0 ? false : true;
             this.graphic_quality.quality_setting.val = (PlayerPrefs.GetInt("__simulation_" + "quality_setting", this.graphic_quality.quality_setting.val));
             this.graphic_quality.resolution_setting.val = (PlayerPrefs.GetInt("__simulation_" + "resolution_setting", this.graphic_quality.resolution_setting.val));
             
@@ -2313,7 +2331,7 @@ namespace Parameter
             saturation_min.comment = "";
             saturation_min.unit = "Volt";
 
-            soft_start_factor.val = 0.10f;
+            soft_start_factor.val = 0.25f;
             soft_start_factor.min = 0.001f;
             soft_start_factor.max = 10.000f;
             soft_start_factor.hint = "Governor soft start factor";
@@ -2679,11 +2697,11 @@ namespace Parameter
             positions_steering_center_type = new stru_list();
             positions_steering_left_type = new stru_list();
             positions_steering_right_type = new stru_list();
-            positions_left_rised_offset = new stru_float();
-            positions_right_rised_offset = new stru_float();
-            positions_steering_center_rised_offset = new stru_float();
-            positions_steering_left_rised_offset = new stru_float();
-            positions_steering_right_rised_offset = new stru_float();
+            positions_left_rised_offset = new stru_float(); //
+            positions_right_rised_offset = new stru_float(); //
+            positions_steering_center_rised_offset = new stru_float(); //
+            positions_steering_left_rised_offset = new stru_float(); //
+            positions_steering_right_rised_offset = new stru_float(); //
             positions_left = new stru_Vector3_list();
             positions_right = new stru_Vector3_list();
             positions_steering_center = new stru_Vector3_list();
@@ -2768,14 +2786,14 @@ namespace Parameter
 
 
 
-            positions_left_rised_offset.val = 0;
+            positions_left_rised_offset.val = 0.035f;
             positions_left_rised_offset.max = 1;
             positions_left_rised_offset.min = 0;
             positions_left_rised_offset.hint = "If left landing gear or skid is rised their collision point is moved in y-direction by this value.";
             positions_left_rised_offset.comment = "";
             positions_left_rised_offset.unit = "[m]";
 
-            positions_right_rised_offset.val = 0;
+            positions_right_rised_offset.val = 0.035f;
             positions_right_rised_offset.max = 1;
             positions_right_rised_offset.min = 0;
             positions_right_rised_offset.hint = "If right landing gear or skid is rised their collision point is moved in y-direction by this value.";
@@ -2922,6 +2940,12 @@ namespace Parameter
     {
         public stru_float mainrotor_idle_deformation { get; set; } // [rad] 
         public stru_float mainrotor_running_deformation { get; set; } // [rad] 
+        public stru_float mainrotor_blur_transparency { get; set; } // [0...1] 
+        public stru_float mainrotor_blur_rpm_factor { get; set; } // [0...1] 
+        public stru_float tailrotor_blur_transparency { get; set; } // [0...1] 
+        public stru_float tailrotor_blur_rpm_factor { get; set; } // [0...1] 
+        public stru_float propeller_blur_transparency { get; set; } // [0...1] 
+        public stru_float propeller_blur_rpm_factor { get; set; } // [0...1] 
         public stru_float landing_gear_or_skids_deflection_stiffness { get; set; } // [-] 
         public stru_float landing_gear_main_radius { get; set; } // [-] 
         public stru_float landing_gear_main_transition_time_gear { get; set; } // [sec] 
@@ -2935,6 +2959,12 @@ namespace Parameter
         {
             mainrotor_idle_deformation = new stru_float();
             mainrotor_running_deformation = new stru_float();
+            mainrotor_blur_transparency = new stru_float();
+            mainrotor_blur_rpm_factor = new stru_float();
+            tailrotor_blur_transparency = new stru_float();
+            tailrotor_blur_rpm_factor = new stru_float();
+            propeller_blur_transparency = new stru_float();
+            propeller_blur_rpm_factor = new stru_float();
             landing_gear_or_skids_deflection_stiffness = new stru_float();
             landing_gear_main_radius = new stru_float();
             landing_gear_main_transition_time_gear = new stru_float();
@@ -2958,6 +2988,48 @@ namespace Parameter
             mainrotor_running_deformation.comment = "";
             mainrotor_running_deformation.unit = "deg/N";
 
+            mainrotor_blur_transparency.val = 1.0f;
+            mainrotor_blur_transparency.max = 0.0f;
+            mainrotor_blur_transparency.min = 1.0f;
+            mainrotor_blur_transparency.hint = "Mainrotor motion blured transparency";
+            mainrotor_blur_transparency.comment = "";
+            mainrotor_blur_transparency.unit = "-";
+
+            mainrotor_blur_rpm_factor.val = 1.0f;
+            mainrotor_blur_rpm_factor.max = 0.0f;
+            mainrotor_blur_rpm_factor.min = 1.0f;
+            mainrotor_blur_rpm_factor.hint = "Mainrotor motion blured rotation speed factor";
+            mainrotor_blur_rpm_factor.comment = "";
+            mainrotor_blur_rpm_factor.unit = "-";
+
+            tailrotor_blur_transparency.val = 1.0f;
+            tailrotor_blur_transparency.max = 0.0f;
+            tailrotor_blur_transparency.min = 1.0f;
+            tailrotor_blur_transparency.hint = "Tailrotor motion blured transparency";
+            tailrotor_blur_transparency.comment = "";
+            tailrotor_blur_transparency.unit = "-";
+
+            tailrotor_blur_rpm_factor.val = 1.0f;
+            tailrotor_blur_rpm_factor.max = 0.0f;
+            tailrotor_blur_rpm_factor.min = 1.0f;
+            tailrotor_blur_rpm_factor.hint = "Tailrotor motion blured rotation speed factor";
+            tailrotor_blur_rpm_factor.comment = "";
+            tailrotor_blur_rpm_factor.unit = "-";
+
+            propeller_blur_transparency.val = 1.0f;
+            propeller_blur_transparency.max = 0.0f;
+            propeller_blur_transparency.min = 1.0f;
+            propeller_blur_transparency.hint = "Propeller motion blured transparency";
+            propeller_blur_transparency.comment = "";
+            propeller_blur_transparency.unit = "-";
+
+            propeller_blur_rpm_factor.val = 1.0f;
+            propeller_blur_rpm_factor.max = 0.0f;
+            propeller_blur_rpm_factor.min = 1.0f;
+            propeller_blur_rpm_factor.hint = "Propeller motion blured rotation speed factor";
+            propeller_blur_rpm_factor.comment = "";
+            propeller_blur_rpm_factor.unit = "-";
+
             landing_gear_or_skids_deflection_stiffness.val = 100f;
             landing_gear_or_skids_deflection_stiffness.max = 0.00f;
             landing_gear_or_skids_deflection_stiffness.min = 100000.0f;
@@ -2972,21 +3044,21 @@ namespace Parameter
             landing_gear_main_radius.comment = "";
             landing_gear_main_radius.unit = "m";
 
-            landing_gear_main_transition_time_gear.val = 2.00f;
+            landing_gear_main_transition_time_gear.val = 0.70f;
             landing_gear_main_transition_time_gear.max = 10.00f;
             landing_gear_main_transition_time_gear.min = 0.000f;
             landing_gear_main_transition_time_gear.hint = "Transition time for rising/lowering gear (only collision detection, animation duration is not effected).";
             landing_gear_main_transition_time_gear.comment = "";
             landing_gear_main_transition_time_gear.unit = "sec";
 
-            landing_gear_main_transition_time_bay.val = 0.3f;
+            landing_gear_main_transition_time_bay.val = 0.20f;
             landing_gear_main_transition_time_bay.max = 10.00f;
             landing_gear_main_transition_time_bay.min = 0.000f;
             landing_gear_main_transition_time_bay.hint = "Transition time for closing/opening gear bay doors (only collision detection, animation duration is not effected).";
             landing_gear_main_transition_time_bay.comment = "";
             landing_gear_main_transition_time_bay.unit = "sec";
 
-            landing_gear_main_mechanism_tilted_forward.val = 10f;
+            landing_gear_main_mechanism_tilted_forward.val = 25f;
             landing_gear_main_mechanism_tilted_forward.max = 90.00f;
             landing_gear_main_mechanism_tilted_forward.min = -90.00f;
             landing_gear_main_mechanism_tilted_forward.hint = "How much is the gear mechnism tilted forward (relative to vertical) if lowered.";

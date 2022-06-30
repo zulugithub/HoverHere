@@ -62,6 +62,7 @@ namespace Rotor
         private MeshRenderer rotor_blades_to_deform_at_low_rpm;
         public GameObject rotordisk;
         public GameObject rotordisk_BEMT;
+        public GameObject rotordisk_complex; // new
         private List<Material> rotor_blades_material = new List<Material>();
 
         // audio 
@@ -84,10 +85,16 @@ namespace Rotor
         private Material rotordisk_top_material;
         private Material rotordisk_bottom_material;
         private int flip_rotordisk_angle = 1;
+        private Material rotordisk_complex_material; //new
 
+        // rotordisk complex material array
+        Mesh SSB_Mesh;
+        Material SSB_Material;
+        Material[] SSB_Materials;
+        const int SSB_Samples = 360;
 
         private GameObject blade_object;
-        private GameObject rod_C2B2_object;
+        //private GameObject rod_C2B2_object;
 
 
 
@@ -144,11 +151,11 @@ namespace Rotor
 
 
 
-                    rod_C2B2_object = Helicopter_Selected.transform.Find(rotor_name + "_Model").gameObject.transform.GetChild(2).gameObject;
-                    rod_C2B2_object.transform.localPosition = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0.01703f, -0.165f, -0.034934f));
-                    forward = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 1, 0));
-                    upward = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(-0.01703f, 0, 0.034934f));
-                    rod_C2B2_object.transform.localRotation = Quaternion.LookRotation(forward, upward);
+                    //rod_C2B2_object = Helicopter_Selected.transform.Find(rotor_name + "_Model").gameObject.transform.GetChild(2).gameObject;
+                    //rod_C2B2_object.transform.localPosition = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0.01703f, -0.165f, -0.034934f));
+                    //forward = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 1, 0));
+                    //upward = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(-0.01703f, 0, 0.034934f));
+                    //rod_C2B2_object.transform.localRotation = Quaternion.LookRotation(forward, upward);
                 }
                 // ##################################################################################
 
@@ -239,11 +246,40 @@ namespace Rotor
                 // ##################################################################################
                 // Init rotor-disk visibility 
                 // ##################################################################################
-                rotordisk = Helicopter_Selected.transform.Find(rotor_name + "_Disk").gameObject;
-                rotordisk_top_material = rotordisk.GetComponent<MeshRenderer>().materials[0];
-                rotordisk_top_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
-                rotordisk_bottom_material = rotordisk.GetComponent<MeshRenderer>().materials[1];
-                rotordisk_bottom_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                var temp_rotordisk = Helicopter_Selected.transform.Find(rotor_name + "_Disk");
+                var temp_rotordisk_complex = Helicopter_Selected.transform.Find(helicopter_name + "_" + rotor_name + "_Blur");
+
+                if (temp_rotordisk != null)
+                {
+                    rotordisk = temp_rotordisk.gameObject;
+                    rotordisk.SetActive(!helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+
+                }
+                if (temp_rotordisk_complex != null)
+                {
+                    rotordisk_complex = temp_rotordisk_complex.gameObject.transform.GetChild(0).gameObject;
+                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                }
+
+
+                //if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                //{
+                    if (temp_rotordisk != null)
+                    {                        
+                        rotordisk_top_material = rotordisk.GetComponent<MeshRenderer>().materials[0];
+                        rotordisk_top_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                        rotordisk_bottom_material = rotordisk.GetComponent<MeshRenderer>().materials[1];
+                        rotordisk_bottom_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                    }
+                //}
+                //else
+                //{
+                    if(temp_rotordisk_complex != null)
+                    {
+                        rotordisk_complex_material = rotordisk_complex.GetComponent<MeshRenderer>().materials[0];
+                        //rotordisk_complex_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                    }
+                //}
                 // ##################################################################################
 
 
@@ -251,25 +287,47 @@ namespace Rotor
                 // ##################################################################################
                 // Init deformation of rotor-disk
                 // ##################################################################################
-                rotordisk.transform.localPosition = Helper.ConvertRightHandedToLeftHandedVector(par_rotor.posLH.vect3);
+                //if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                //{
+                    if (rotordisk != null)
+                    {
+                        rotordisk.transform.localPosition = Helper.ConvertRightHandedToLeftHandedVector(par_rotor.posLH.vect3);
 
-                rotordisk_deforming_mesh = rotordisk.GetComponent<MeshFilter>().mesh;
+                        rotordisk_deforming_mesh = rotordisk.GetComponent<MeshFilter>().mesh;
 
-                // store the rotordisk verticles-array in a list, but only once at the first call, so they can be reused to reset the rotordisk to the initial deformation
-                while (helicopter_id >= list__rotordisk_original_vertices.Count)
-                    list__rotordisk_original_vertices.Add(default); // add empty array of Vector3 as list element    
+                        // store the rotordisk verticles-array in a list, but only once at the first call, so they can be reused to reset the rotordisk to the initial deformation
+                        while (helicopter_id >= list__rotordisk_original_vertices.Count)
+                            list__rotordisk_original_vertices.Add(default); // add empty array of Vector3 as list element    
 
-                if (list__rotordisk_original_vertices[helicopter_id] == null)
-                    list__rotordisk_original_vertices[helicopter_id] = rotordisk_deforming_mesh.vertices.Deep_Clone();
+                        if (list__rotordisk_original_vertices[helicopter_id] == null)
+                            list__rotordisk_original_vertices[helicopter_id] = rotordisk_deforming_mesh.vertices.Deep_Clone();
 
-                rotordisk_original_vertices = list__rotordisk_original_vertices[helicopter_id].Deep_Clone();
-                rotordisk_radial_distance_to_center = new float[rotordisk_original_vertices.Length];
-                rotordisk_displaced_vertices = new Vector3[rotordisk_original_vertices.Length];
-                for (int i = 0; i < rotordisk_original_vertices.Length; i++)
-                {
-                    rotordisk_displaced_vertices[i] = rotordisk_original_vertices[i];
-                    rotordisk_radial_distance_to_center[i] = rotordisk_original_vertices[i].magnitude; // distance to center
-                }
+                        rotordisk_original_vertices = list__rotordisk_original_vertices[helicopter_id].Deep_Clone();
+                        rotordisk_radial_distance_to_center = new float[rotordisk_original_vertices.Length];
+                        rotordisk_displaced_vertices = new Vector3[rotordisk_original_vertices.Length];
+                        for (int i = 0; i < rotordisk_original_vertices.Length; i++)
+                        {
+                            rotordisk_displaced_vertices[i] = rotordisk_original_vertices[i];
+                            rotordisk_radial_distance_to_center[i] = rotordisk_original_vertices[i].magnitude; // distance to center
+                        }
+                    }
+                //}
+                //else
+                //{
+                    if(rotordisk_complex != null)
+                    {                        
+                        SSB_Mesh = rotordisk_complex.GetComponent<MeshFilter>().mesh;
+                        SSB_Material = rotordisk_complex_material;
+                        SSB_Material.enableInstancing = true;
+
+                        // create array of materials for SSB (SimpleSpinBlur)
+                        SSB_Materials = new Material[SSB_Samples + 1];
+                        for (int i = 0; i <= SSB_Samples; i++)
+                        {
+                            SSB_Materials[i] = new Material(SSB_Material);
+                        }
+                    }
+                //}
                 // ##################################################################################
 
 
@@ -353,7 +411,7 @@ namespace Rotor
 
 
         // ##################################################################################
-        // change rotor visiblitiy as a function of rotation velocity
+        // change rotor visibility as a function of rotation velocity
         // ##################################################################################
         public void Update_Rotor_Visiblitiy(ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float Theta_col, ref float omega)
         {
@@ -369,10 +427,10 @@ namespace Rotor
                 normalized_speed_for_rotorvisibility = Mathf.Clamp(Mathf.Abs(omega) / (rotational_speed_where_visiblity_is_full_transparent * Common.Helper.Rpm_to_RadPerSec), 0.00f, 1f);
 
                 fade_disk_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.3f, 0, 1.0f, 1);
-                fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 1 - helicopter_ODE.par.simulation.gameplay.rotor_blade_transparency.val);
+                //fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 1 - helicopter_ODE.par.simulation.gameplay.rotor_blade_transparency.val);
+                fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 0.000000000000000000f);
 
-                rotordisk_top_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
-                rotordisk_bottom_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
+                // rotor blades
                 foreach (var rotor_blade_material in rotor_blades_material)
                 {
                     rotor_blade_material.ChangeTransparency(fade_blade_transparency); // alpha setting
@@ -383,11 +441,27 @@ namespace Rotor
                     else
                         rotor_blade_material.ToFadeMode();
                 }
-                // specular highlight effect of rotor disk
-                flip_rotordisk_angle *= -1;
-                float _CollectiveSpecular = 0.5f * (flip_rotordisk_angle * Mathf.Abs(Theta_col)) / (par_rotor.K_col.val * Mathf.Deg2Rad); // -0.5...+0.5
-                rotordisk_top_material.SetFloat("_CollectiveSpecular", _CollectiveSpecular);
-                rotordisk_bottom_material.SetFloat("_CollectiveSpecular", _CollectiveSpecular);
+
+                // rotor disk
+                if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                {
+                    rotordisk_top_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
+                    rotordisk_bottom_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
+
+                    // specular highlight effect of rotor disk (collectiv signal)
+                    flip_rotordisk_angle *= -1;
+                    float _CollectiveSpecular = 0.5f * (flip_rotordisk_angle * Mathf.Abs(Theta_col)) / (par_rotor.K_col.val * Mathf.Deg2Rad); // -0.5...+0.5
+                    rotordisk_top_material.SetFloat("_CollectiveSpecular", _CollectiveSpecular);
+                    rotordisk_bottom_material.SetFloat("_CollectiveSpecular", _CollectiveSpecular);
+                }
+                else
+                { 
+                    // new complex rotordisk
+                    if (rotordisk_complex_material != null)
+                    {
+                        rotordisk_complex_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting  }
+                    }
+                }
             }
         }
         // ##################################################################################
@@ -468,11 +542,11 @@ namespace Rotor
         // ##################################################################################
         // rotor deformation
         // ##################################################################################
-        public void Update_Rotor_Deformation(ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float flapping_a_s_LH, float flapping_b_s_LH, float omega, float Omega)
+        public void Update_Rotor_Deformation(int rotor_type, ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float flapping_a_s_LH, float flapping_b_s_LH, float omega, float Omega, float Theta_col, Camera camera)
         {
             if (rotor_object != null)
             {
-
+                
                 // ##################################################################################
                 // cone angle
                 // ##################################################################################
@@ -494,6 +568,12 @@ namespace Rotor
                     // y = ( ( 0  -  angle ) / ( rpm -  0 ) ) * ( x -  0 ) + angle 
                     cone_angle = -((-deformation_rad / deformation_velocity) * (Mathf.Abs(omega) * Helper.RadPerSec_to_Rpm) + deformation_rad); // [rad] 
                 }
+
+                // tailrotor should not have cone angle (only in tandem rotor config)
+                if ((rotor_type>0) && (helicopter_ODE.par.transmitter_and_helicopter.helicopter.rotor_systems_configuration.val==0))
+                {
+                    cone_angle = 0; 
+                }
                 // ##################################################################################
 
 
@@ -501,17 +581,129 @@ namespace Rotor
                 // ##################################################################################
                 // rotor disk: conical elastic deformation and tilting of rotor-disk due to rotor load/thrust
                 // ##################################################################################
-                for (int i = 0; i < rotordisk_displaced_vertices.Length; i++)
-                    rotordisk_displaced_vertices[i].y = rotordisk_original_vertices[i].y + rotordisk_radial_distance_to_center[i] * (cone_angle); // small angle approximation: removes Tan(cone_angle) --> cone_angle
+                if (rotordisk != null)
+                {
+                    rotordisk.SetActive(!helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                }
+                if ( rotordisk_complex!= null)
+                {
+                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                }
 
-                rotordisk_deforming_mesh.vertices = rotordisk_displaced_vertices;
-                //rotordisk_deforming_mesh.RecalculateNormals();
+                if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                {
+                    if (rotordisk != null)
+                    {
+                        for (int i = 0; i < rotordisk_displaced_vertices.Length; i++)
+                            rotordisk_displaced_vertices[i].y = rotordisk_original_vertices[i].y + rotordisk_radial_distance_to_center[i] * (cone_angle); // small angle approximation: removes Tan(cone_angle) --> cone_angle
 
-                // tilting due to flapping of rotor disk
-                Quaternion rotor_axis_orientation = Helper.ConvertRightHandedToLeftHandedQuaternion(Helper.S123toQuat(par_rotor.oriLH.vect3));
-                rotordisk.transform.localRotation =
-                    Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) *
-                    rotor_axis_orientation; // Unity uses left handed Euler rotation, space fixed = extrinsic S312 (= intrinsic = body fixed B213)  
+                        rotordisk_deforming_mesh.vertices = rotordisk_displaced_vertices;
+                        //rotordisk_deforming_mesh.RecalculateNormals();
+
+                        // tilting due to flapping of rotor disk
+                        Quaternion rotor_axis_orientation = Helper.ConvertRightHandedToLeftHandedQuaternion(Helper.S123toQuat(par_rotor.oriLH.vect3));
+                        rotordisk.transform.localRotation =
+                            Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) *
+                            rotor_axis_orientation; // Unity uses left handed Euler rotation, space fixed = extrinsic S312 (= intrinsic = body fixed B213)  
+                    }
+                }
+                else
+                {
+                    if (rotordisk_complex != null)
+                    {
+                        // set first object transparency to 0
+                        Color tempColor_0;
+                        tempColor_0 = new Color(SSB_Material.color.r, SSB_Material.color.g, SSB_Material.color.b, 0);
+                        SSB_Material.color = tempColor_0;
+
+                        //////////////////////////////////////////////////////////////////////////
+                        // at flat camera_angles decrease transparency
+                        //////////////////////////////////////////////////////////////////////////
+                        // https://mathinsight.org/distance_point_plane
+                        Vector3 v = (camera.transform.position - rotordisk.transform.position);
+                        float d = Vector3.Dot(v, Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) * rotordisk.transform.up); // [distance camera poition to rotor's plane] 
+                        float a = (camera.transform.position - rotordisk.transform.position).magnitude; // [m] camera to rotor
+                        float alpha_by_camera_angle = Mathf.Abs(Mathf.Asin(d / a) / (Mathf.PI / 2)); // [0...1] camera_angle 
+
+                        alpha_by_camera_angle = Helper.Step(alpha_by_camera_angle, 0.0f, 0.9f, 0.02f, 1.0f);
+                        //print("d: " + d + " camera_angle: " + camera_angle);
+                        //////////////////////////////////////////////////////////////////////////
+                     
+                        // if rpm is very low, hide rotor
+                        const float rotational_speed_where_visiblity_is_full_transparent_const = 500.0f; // [rpm]
+                        float rotational_speed_where_visiblity_is_full_transparent = rotational_speed_where_visiblity_is_full_transparent_const / par_rotor.b.val; // [rpm]
+                        float normalized_speed_for_rotorvisibility = Mathf.Clamp(Mathf.Abs(omega) / (rotational_speed_where_visiblity_is_full_transparent * Common.Helper.Rpm_to_RadPerSec), 0.00f, 1f);
+                        float fade_disk_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.3f, 0, 1.0f, 1);
+
+                        // 
+                        float alpha_offset = (helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val - 0.92f ) + 0.00500000000000f;
+                        float rpm_offset = -Omega / 10.0000000000000f; //
+
+                        // tailrotor should have rotation offset (important for tandem rotors)
+                        if ((rotor_type > 0) && (helicopter_ODE.par.transmitter_and_helicopter.helicopter.rotor_systems_configuration.val == 1))
+                            rpm_offset += Mathf.PI * 0.5f;
+
+                        rotordisk_complex.transform.parent.localRotation = Helper.ConvertRightHandedToLeftHandedQuaternion(Helper.S123toQuat(par_rotor.oriLH.vect3));
+                        rotordisk_complex.transform.parent.localPosition = Helper.ConvertRightHandedToLeftHandedVector(par_rotor.posLH.vect3);
+
+                        // tune values with parameter
+                        float blur_rpm_factor=1, blur_transparency=1;
+                        if (rotor_type == 0)
+                        {
+                            blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.mainrotor_blur_rpm_factor.val;
+                            blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.mainrotor_blur_transparency.val;
+                        }
+                        if (rotor_type == 1)
+                        {
+                            blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.tailrotor_blur_rpm_factor.val;
+                            blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.tailrotor_blur_transparency.val;
+                        }
+                        if (rotor_type == 2)
+                        {
+                            blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.propeller_blur_rpm_factor.val;
+                            blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.propeller_blur_transparency.val;
+                        }
+
+                        // blade transparency changes over one rotation to mimic single blured blades
+                        float alpha_amplitude = Helper.Step(Mathf.Abs(omega * Helper.RadPerSec_to_Rpm), 800 * blur_rpm_factor, 1, 1200 * blur_rpm_factor, 0); // depends on rpm  --> transparency between blades
+                        float alpha_pow = Helper.Step(Mathf.Abs(omega * Helper.RadPerSec_to_Rpm), 400 * blur_rpm_factor, 20, 1200 * blur_rpm_factor, 4)/ par_rotor.b.val; // depends on rpm  --> how sharp the blade blur seams
+
+                        // calculate and create 360 blades 
+                        for (int i = 0; i < SSB_Samples; i++)
+                        {
+                            SSB_Materials[i].SetFloat("_Metallic", SSB_Material.GetFloat("_Metallic"));
+                            SSB_Materials[i].SetFloat("_Glossiness", SSB_Material.GetFloat("_Glossiness"));
+
+                            // calculate transparency's alpha value for each blade
+                            float alpha = (1 - alpha_by_camera_angle) * (10.00000000000f / (float)SSB_Samples) + 
+                                Mathf.Abs((2.00000000f / (float)SSB_Samples) + alpha_offset) *   
+                                (Mathf.Pow(Mathf.Abs(Mathf.Sin(((float)i / (float)SSB_Samples) * par_rotor.b.val * Mathf.PI + rpm_offset)), alpha_pow) * alpha_amplitude + (1f - alpha_amplitude));
+
+                            Color tempColor = new Color(SSB_Material.color.r, SSB_Material.color.g, SSB_Material.color.b, alpha * fade_disk_transparency * blur_transparency);
+                            SSB_Materials[i].color = tempColor;
+
+                            float phi = ((float)i / (float)SSB_Samples) * (Mathf.PI * 2.0f); // [rad] rotation around hub
+                            float cyclic_angle = Theta_col * 1.50000000f; // [rad] collectiv signal
+                            cyclic_angle += Mathf.Sin(phi) * flapping_a_s_LH * 1.50000000f; // flapping     angle change occures 90° before flapping, therefore use sin instead of cos
+                            cyclic_angle += Mathf.Cos(phi) * flapping_b_s_LH * 1.50000000f; // flapping
+                            
+                            // rotation order
+                            // 5.) flapping_a_s_LH around z
+                            // 4.) -flapping_b_s_LH around x
+                            // 3.) -cyclic_angle around x
+                            // 2.) phi around y
+                            // 1.) cone_angle around z
+                            Quaternion q = rotordisk_complex.transform.parent.rotation * 
+                                           Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) * 
+                                           Quaternion.Euler(-cyclic_angle * Mathf.Rad2Deg, phi * Mathf.Rad2Deg, 0f) * 
+                                           Quaternion.Euler(0f, 0f, cone_angle * Mathf.Rad2Deg);
+
+                            // generate mesh
+                            Graphics.DrawMesh(SSB_Mesh, rotordisk_complex.transform.position, q, SSB_Materials[i], 0, null, 0);
+                        }
+                    }
+
+                }
                 // ##################################################################################
 
 
@@ -1260,7 +1452,7 @@ namespace Rotor
             ref Vector3 T_stiffLR_LH, ref Vector3 T_stiffLR_LD, ref Vector3 T_dampLR_LH, ref Vector3 T_dampLR_LD,
             ref Matrix4x4 A_OLDnorot, ref Vector3[,] r_LBO_O, ref Vector3[,] dr_LBO_O_dt, ref Vector3[,] dr_LBO_LB_dt,
             ref Vector3[,] F_LB_O_thrust, ref Vector3[,] F_LB_O_torque,
-            ref Vector3 F_thrustsumLD_O, ref Vector3 F_torquesumLD_LD, ref float[,] Vi_LD, ref float[,] Vi_LD_smoothdamp, ref float[,] Vi_LD_smoothdamp_diff, ref float[,] Vi_LD_smoothdamp_velocity, ref float Vi_mean, float dtime,
+            ref Vector3 F_thrustsumLD_O, ref Vector3 F_torquesumLD_LD, ref Vector3 F_thrustsumLD_LD, ref float[,] Vi_LD, ref float[,] Vi_LD_smoothdamp, ref float[,] Vi_LD_smoothdamp_diff, ref float[,] Vi_LD_smoothdamp_velocity, ref float Vi_mean, float dtime,
             float ground_effect_mainrotor_hub_distance_to_ground, // [m]
             Vector3 ground_effect_mainrotor_triangle_normalR, // [1]
             out float sound_volume_mainrotor,
@@ -1538,13 +1730,15 @@ float rho_air = 1.27f; // TODO  rho_air;
                     // resulting thrust and torque (sum) 
                     Vector3 F_segmentLB_LB = new Vector3( 0 , DtDr * (segment_radial_length * 2),  DqDr * (segment_radial_length * 2)); // 2D
 //Vector3 F_segmentLB_LB = new Vector3( 0 , DtDr * (segment_radial_length * 2),  DqDr * (segment_radial_length * 2)); // 2D
-                    F_thrustsumLD_O +=   (Vector3)(A_OLDnorot * A_LDnorotLB * F_segmentLB_LB);                                     // ODE definition requirement: must be in world frame
+                    F_thrustsumLD_O += (Vector3)(A_OLDnorot * A_LDnorotLB * F_segmentLB_LB);                                     // ODE definition requirement: must be in world frame
                     F_torquesumLD_LD += (Vector3)(A_LDO * A_OLDnorot * A_LDnorotLB * Helper.Cross(r_LBP_LB, F_segmentLB_LB));    // ODE definition requirement: must be in disc's local frame
 
                     //F_thrustsumLD_O = Vector3.zero;
                     //F_torquesumLD_LD = Vector3.zero;
 
 
+                    // resulting thrust in disc frame - needed for visual effect of conical rotor disc-deformation only
+                    F_thrustsumLD_LD = A_LDO.transpose * F_thrustsumLD_O;
 
 
                     ///////////////////////////////////////////////////////////////////

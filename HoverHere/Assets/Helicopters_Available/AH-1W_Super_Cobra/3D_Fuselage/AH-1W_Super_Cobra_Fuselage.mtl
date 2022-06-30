@@ -1,8 +1,8 @@
-# Blender MTL File: 'AH-1W_Super_Cobra_014.blend'
+# Blender MTL File: 'AH-1W_Super_Cobra_015.blend'
 # Material Count: 21
 
 newmtl Canopy_000_A
-Ns 27.857595
+Ns 30.952883
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -10,10 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Canopy_000_A.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Canopy_000_A.jpg
 
 newmtl Canopy_000_B
-Ns 17.148399
+Ns 19.053776
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -21,10 +21,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_intake_tail_N.jpg
+map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_intake_tail_N.jpg
 
 newmtl Canopy_000_C
-Ns 19.698296
+Ns 21.886996
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -32,10 +32,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_landing_accesories_N.jpg
+map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_landing_accesories_N.jpg
 
 newmtl Canopy_000_D
-Ns 13.928803
+Ns 15.476447
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -43,10 +43,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_guns_N.jpg
+map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_guns_N.jpg
 
 newmtl Canopy_000_E
-Ns 27.857595
+Ns 30.952883
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -56,7 +56,7 @@ d 1.000000
 illum 2
 
 newmtl Canopy_000_F
-Ns 27.857595
+Ns 30.952883
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -66,7 +66,7 @@ d 1.000000
 illum 2
 
 newmtl Material__29
-Ns 13.928803
+Ns 15.476447
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -74,10 +74,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_props_hardware.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_props_hardware.jpg
 
 newmtl Material__30
-Ns 19.698296
+Ns 21.886996
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -85,10 +85,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic2.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic2.jpg
 
 newmtl Material__31
-Ns 17.148399
+Ns 19.053776
 Ka 1.000000 1.000000 1.000000
 Kd 0.007843 0.050980 0.078431
 Ks 0.900000 0.900000 0.900000
@@ -98,7 +98,7 @@ d 0.400000
 illum 9
 
 newmtl Material__32
-Ns 8.574186
+Ns 9.526874
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -106,10 +106,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic.jpg
 
 newmtl Material__33
-Ns 22.627395
+Ns 25.141550
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -117,10 +117,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Pilot2_t.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Pilot2_t.jpg
 
 newmtl Material__36
-Ns 15.999998
+Ns 17.777776
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -128,10 +128,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_blk_C.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_blk_C.jpg
 
 newmtl Material__37
-Ns 27.857595
+Ns 30.952883
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -139,10 +139,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Pilot1_t.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Pilot1_t.jpg
 
 newmtl Material__38
-Ns 14.928500
+Ns 16.587223
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -150,10 +150,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic3.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_basic3.jpg
 
 newmtl Material__39
-Ns 10.556100
+Ns 11.729000
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -161,10 +161,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_panels2.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_panels2.jpg
 
 newmtl Material__40
-Ns 14.928500
+Ns 16.587223
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -172,10 +172,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_green_C.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_green_C.jpg
 
 newmtl Material__41
-Ns 27.857595
+Ns 30.952883
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -183,10 +183,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_gunner dialls.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_gunner dialls.jpg
 
 newmtl Material__42
-Ns 19.698296
+Ns 21.886996
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -194,10 +194,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_pilot dials.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_pilot dials.jpg
 
 newmtl Material__43
-Ns 14.928500
+Ns 16.587223
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -205,10 +205,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_red_C.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_red_C.jpg
 
 newmtl Material__45
-Ns 21.112098
+Ns 23.457887
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.900000 0.900000 0.900000
@@ -216,10 +216,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Lens_T.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Lens_T.jpg
 
 newmtl Mirroring
-Ns 900.000000
+Ns 1000.000000
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
 Ks 0.300000 0.300000 0.300000

@@ -1,8 +1,8 @@
-# Blender MTL File: 'OH-6_165.blend'
-# Material Count: 9
+# Blender MTL File: 'OH-6_183.blend'
+# Material Count: 8
 
 newmtl Black
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.005604 0.005604 0.005604
 Ks 0.500000 0.500000 0.500000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 
 newmtl Canopy
-Ns 835.350977
+Ns 928.167753
 Ka 1.000000 1.000000 1.000000
 Kd 0.152925 0.000000 0.012570
 Ks 0.500000 0.500000 0.500000
@@ -20,10 +20,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\OH-6\\OH-6_Canopy_A_Bolts_Only_Normal.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\OH-6\\OH-6_Canopy_002_A.png
 
 newmtl Canopy_Interior_Rim
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.002064 0.000000 0.000000
 Ks 0.500000 0.500000 0.500000
@@ -33,7 +33,7 @@ d 1.000000
 illum 2
 
 newmtl Canopy_Interior_Wall
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.010168 0.010168 0.010168
 Ks 0.500000 0.500000 0.500000
@@ -43,7 +43,7 @@ d 1.000000
 illum 2
 
 newmtl Glas
-Ns 810.165954
+Ns 900.184394
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.725790 0.748143
 Ks 0.500000 0.500000 0.500000
@@ -52,18 +52,8 @@ Ni 1.450000
 d 0.273171
 illum 9
 
-newmtl Glas_Green
-Ns 859.096327
-Ka 1.000000 1.000000 1.000000
-Kd 0.147643 0.288294 0.161028
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 0.350575
-illum 9
-
 newmtl Interior
-Ns 225.000000
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.094625 0.087419 0.092792
 Ks 0.500000 0.500000 0.500000
@@ -71,10 +61,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\OH-6\\OH-6_Interior.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\OH-6\\OH-6_Interior.png
 
 newmtl Interior_Shiny
-Ns 751.258253
+Ns 834.731392
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -82,10 +72,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd F:\\Helikopter\\UNITY\\GitHub\\Work\\Helicopter\\OH-6\\OH-6_Interior.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\OH-6\\OH-6_Interior.png
 
 newmtl Steel
-Ns 506.250020
+Ns 562.500022
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000

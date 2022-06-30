@@ -50,6 +50,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     float[] input_channel_used_in_game = new float[8];
     float[] input_channel_from_event_proccessing = new float[8];
 
+    int init_controller_reset = 10; // if controller is at exact zero position for some reason until the first movement of one of the stick an offset is added to the stick signals. To avoid this, the controller values are reset to zero for the first xx-event calls.
+
     // custom devices
     public RX2SIM_Game_Controller RX2SIM_game_controller;
     public DSMX_Game_Controller DSMX_game_controller;
@@ -62,7 +64,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // ##################################################################################
     private void OnEnable()
     {
-        InputSystem.onEvent += (eventPtr, device) => IO_Proccess_Input_System_Event(eventPtr, device);         
+        InputSystem.onEvent += (eventPtr, device) => IO_Proccess_Input_System_Event(eventPtr, device);
+
+        for (int i = 0; i < 8; i++) input_channel_from_event_proccessing[i] = 0.0f;
     }
     private void OnDisable()
     {
@@ -294,7 +298,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                             if (each_control.displayName.Equals("Button 2"))
                                 ((AxisControl)each_control).ReadValueFromEvent(eventPtr, out input_channel_from_event_proccessing[7]);
                         }
-              
+                    }
+
+                    if (init_controller_reset-- > 0)
+                    {
+                        for (int i = 0; i < 8; i++) input_channel_from_event_proccessing[i] = 0;
                     }
 
                     // Can handle events yourself, for example, and then stop them

@@ -16,7 +16,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Parameter;
-using System.Collections;
+//using System.Collections;
 using System.Runtime.InteropServices;
 using System.Drawing;
 

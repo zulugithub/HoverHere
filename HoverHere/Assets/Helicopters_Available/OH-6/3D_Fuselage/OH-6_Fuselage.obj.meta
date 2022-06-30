@@ -18,8 +18,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Canopy_Interior_Rim
-    second: {fileID: 7741625113677808684, guid: c04eabcae6f3f124d8171850458fa0c8,
-      type: 3}
+    second: {fileID: 2100000, guid: e61dbdeb365aec940a11c9c26a54009b, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

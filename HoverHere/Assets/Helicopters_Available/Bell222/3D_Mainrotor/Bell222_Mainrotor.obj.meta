@@ -17,6 +17,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: MainrotorMechanics
+    second: {fileID: 2100000, guid: 8e5c9fa2eb1b92d468e86a532601d953, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Steel
     second: {fileID: 2100000, guid: 8c95559662033ac44aa18dd8e40828aa, type: 2}
   materials:

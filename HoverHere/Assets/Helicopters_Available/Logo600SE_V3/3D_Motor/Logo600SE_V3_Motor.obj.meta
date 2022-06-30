@@ -3,7 +3,22 @@ guid: a3b87fd47775a8b47a46e2f1c11cf044
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Black
+    second: {fileID: 2100000, guid: 035cfdf36c6e77a41b8a2fc37523bed1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Messing_Motor
+    second: {fileID: 2100000, guid: a876742f5427fdd4b941c6c1f88621ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stainless_Steel
+    second: {fileID: 2100000, guid: e77f98fcc73d6d3418a6878a48670e9c, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
