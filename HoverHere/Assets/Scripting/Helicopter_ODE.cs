@@ -84,8 +84,10 @@ namespace Helisimulator
     public class ODEDebugClass
     {
         public List<Vector3> contact_positionR { get; set; } // in reference frame
-        public List<Vector3> contact_forceR { get; set; } // in reference frame
-        public List<GameObject> line_object_contact_forceR { get; set; }
+        public List<Vector3> contact_forceR1 { get; set; } // in reference frame
+        public List<Vector3> contact_forceR2 { get; set; } // in reference frame
+        public List<GameObject> line_object_contact_forceR1 { get; set; }
+        public List<GameObject> line_object_contact_forceR2 { get; set; }
 
         public float mainrotor_v_i;// [m/s]
         public float Theta_col_mr; // [rad]
@@ -284,8 +286,10 @@ namespace Helisimulator
                         par_temp.transmitter_and_helicopter.helicopter.collision.positions_steering_right.vect3.Count;
 
             ODEDebug.contact_positionR = new List<Vector3>(new Vector3[count]);
-            ODEDebug.contact_forceR = new List<Vector3>(new Vector3[count]);
-            ODEDebug.line_object_contact_forceR = new List<GameObject>(new GameObject[count]);
+            ODEDebug.contact_forceR1 = new List<Vector3>(new Vector3[count]);
+            ODEDebug.contact_forceR2 = new List<Vector3>(new Vector3[count]);
+            ODEDebug.line_object_contact_forceR1 = new List<GameObject>(new GameObject[count]);
+            ODEDebug.line_object_contact_forceR2 = new List<GameObject>(new GameObject[count]);
 
             ODEDebug.mainrotor_forceLH = new Vector3();
             ODEDebug.mainrotor_torqueLH = new Vector3();
@@ -605,7 +609,7 @@ namespace Helisimulator
         // ##################################################################################
         // stiction model - not implemented yet in V2.1 (only friction)         TODO
         // ##################################################################################
-        //private Vector3[] stiction_ancor_point_memoryR = new Vector3[20]; // TOTO: here only max 20 contact points are availabe -> better set size to needed points numbers
+        private Vector3[] stiction_ancor_point_memoryR = new Vector3[30]; // TOTO: here only max 30 contact points are availabe -> better set size to needed points numbers
         private float beta_forward = 1;
         private float beta_sideward = 1;
 
@@ -963,6 +967,11 @@ namespace Helisimulator
                 x_states[36] = 0; // [rad/sec] local rotational velocity vector z   around lateral z-axis - rotor disc
             }
 
+
+
+            // reset stiction position
+            for (int i = 0; i < stiction_ancor_point_memoryR.Length; i++)
+                stiction_ancor_point_memoryR[i] = Vector3.zero;
         }
         #endregion
         // ##################################################################################
@@ -1907,8 +1916,10 @@ const double eta = 0.80f;
         // landing gears collision
         // ##################################################################################
         // if the landing gears are rised / lowered the collision points have to be rised or lowered too. This function calulates the rising in two steps. 1.) rising/lowering gear following a cosinus curve. 2.) if gear is rised the bay doors are closed- then here actually nothing happens - we wait only for the animation
-        private float Landing_Gear_Collision_Point_Transition(float landing_gear_main_transition_time_gear, float landing_gear_main_transition_time_bay, float landing_gear_mechnism_tilted_forward, float positions_rised_offset, float transition)
+        //private float Landing_Gear_Collision_Point_Transition(float landing_gear_main_transition_time_gear, float landing_gear_main_transition_time_bay, float landing_gear_mechnism_tilted_forward, float positions_rised_offset, float transition)
+        private float Landing_Gear_Collision_Point_Transition(float landing_gear_main_transition_time_gear, float landing_gear_main_transition_time_bay, float landing_gear_mechnism_tilted_forward, float transition)
         {
+            const float positions_rised_offset = 1.0f;
             float t_total = landing_gear_main_transition_time_gear + landing_gear_main_transition_time_bay; // [sec]
 
             if (transition < (landing_gear_main_transition_time_gear / t_total))
@@ -1922,7 +1933,6 @@ const double eta = 0.80f;
                 // y = (((Mathf.PI / 2.0f) - (-0.2f)) / (1 - 0)) * (x - 0) + (-0.2f);
                 return -((Mathf.Cos((((Mathf.PI / 2.0f) - (-landing_gear_mechnism_tilted_forward * Mathf.Deg2Rad)) / (1 - 0)) * (tranistion_status - 0) + (-landing_gear_mechnism_tilted_forward * Mathf.Deg2Rad))) - 1) * positions_rised_offset; // [m]
             }
-
             else
             {
                 // time where bay-doors are closed / opened
@@ -2562,12 +2572,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_gear.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_bay.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_mechanism_tilted_forward.val,
-                    par.transmitter_and_helicopter.helicopter.collision.positions_left_rised_offset.val,
                     collision_positions_landing_gear_left_rising_offset);
 
                 point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.collision.positions_left.vect3[i] +
-                    new Vector3(0, gear_rising_offset, 0))); // [m] expressed in inertial frame
-
+                    par.transmitter_and_helicopter.helicopter.collision.positions_left_rised_offset.vect3 * gear_rising_offset)); // [m] expressed in inertial frame
                 point_type.Add(Collision_Point_Type.gear_or_skid_left);
             }
             for (var i = 0; i < par.transmitter_and_helicopter.helicopter.collision.positions_right.vect3.Count; i++)
@@ -2578,11 +2586,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_gear.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_bay.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_mechanism_tilted_forward.val,
-                    par.transmitter_and_helicopter.helicopter.collision.positions_right_rised_offset.val,
-                    collision_positions_landing_gear_right_rising_offset);
+                    collision_positions_landing_gear_right_rising_offset); // [0...1]
 
                 point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.collision.positions_right.vect3[i] +
-                    new Vector3(0, gear_rising_offset, 0))); // [m] expressed in inertial frame
+                    par.transmitter_and_helicopter.helicopter.collision.positions_right_rised_offset.vect3 * gear_rising_offset)); // [m] expressed in inertial frame
                 point_type.Add(Collision_Point_Type.gear_or_skid_right);
             }
             for (var i = 0; i < par.transmitter_and_helicopter.helicopter.collision.positions_steering_center.vect3.Count; i++)
@@ -2593,11 +2600,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_gear.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_bay.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_mechanism_tilted_forward.val,
-                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_center_rised_offset.val,
-                    collision_positions_landing_gear_steering_center_rising_offset);
+                    collision_positions_landing_gear_steering_center_rising_offset); // [0...1]
 
                 point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.collision.positions_steering_center.vect3[i] +
-                    new Vector3(0, gear_rising_offset, 0))); // [m] expressed in inertial frame
+                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_center_rised_offset.vect3 * gear_rising_offset)); // [m] expressed in inertial frame
                 point_type.Add(Collision_Point_Type.gear_or_support_steering_center);
             }
             for (var i = 0; i < par.transmitter_and_helicopter.helicopter.collision.positions_steering_left.vect3.Count; i++)
@@ -2608,11 +2614,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_gear.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_bay.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_mechanism_tilted_forward.val,
-                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_left_rised_offset.val,
-                    collision_positions_landing_gear_steering_left_rising_offset);
+                    collision_positions_landing_gear_steering_left_rising_offset); // [0...1]
 
                 point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.collision.positions_steering_left.vect3[i] +
-                    new Vector3(0, gear_rising_offset, 0))); // [m] expressed in inertial frame
+                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_left_rised_offset.vect3 * gear_rising_offset)); // [m] expressed in inertial frame
                 point_type.Add(Collision_Point_Type.gear_or_support_steering_left);
             }
             for (var i = 0; i < par.transmitter_and_helicopter.helicopter.collision.positions_steering_right.vect3.Count; i++)
@@ -2623,11 +2628,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_gear.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_transition_time_bay.val,
                     par.transmitter_and_helicopter.helicopter.visual_effects.landing_gear_main_mechanism_tilted_forward.val,
-                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_right_rised_offset.val,
-                    collision_positions_landing_gear_steering_right_rising_offset);
+                    collision_positions_landing_gear_steering_right_rising_offset); // [0...1]
 
                 point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.collision.positions_steering_right.vect3[i] +
-                    new Vector3(0, gear_rising_offset, 0))); // [m] expressed in inertial frame
+                    par.transmitter_and_helicopter.helicopter.collision.positions_steering_right_rised_offset.vect3 * gear_rising_offset)); // [m] expressed in inertial frame
                 point_type.Add(Collision_Point_Type.gear_or_support_steering_right);
             }
             point_positionR.Add(vectO + Helper.A_RL(q, par.transmitter_and_helicopter.helicopter.mainrotor.posLH.vect3)); // [m] expressed in inertial frame
@@ -2640,8 +2644,10 @@ float beta_tr = 0; // calculated blade angle not used yet
             //###################################################################
             // main collision detection routine
             //###################################################################
-            if (integrator_function_call_number == 0)
-                contact_informations = Common.Helper.Collision_Point_To_Mesh(vectO, helicopters_aabb, ground_mesh, point_positionR);
+            //if (integrator_function_call_number == 0)
+            //   contact_informations = Common.Helper.Collision_Point_To_Mesh(vectO, helicopters_aabb, ground_mesh, point_positionR);
+            contact_informations = Common.Helper.Collision_Point_To_Mesh(vectO, helicopters_aabb, ground_mesh, point_positionR);
+
 
             //// debug
             //if (integrator_function_call_number == 0)
@@ -2694,8 +2700,12 @@ float beta_tr = 0; // calculated blade angle not used yet
             //###################################################################
             // calculation of collision forces with ground mesh
             //###################################################################
-            const float V_h = 0.1f; // [m/s] friction to stiction transition velocity 
-            //const float U_max = 0.01f; // [m] stiction model's maximal distance to ancor point
+            //const float V_h = 0.02f; // [m/s] friction to stiction transition velocity 
+            //const float U_max = 0.02f; // [m] stiction model's maximal distance to ancor point
+            //const float stiction_factor = 1.5f; // defines the stiction factor (static friction) as x-times the sliding factor
+            float V_h = par.simulation.various.V_h.val; // [m/s] friction to stiction transition velocity 
+            float U_max = par.simulation.various.U_max.val; // [m] stiction model's maximal distance to ancor point                                            
+            float stiction_factor = par.simulation.various.stiction_factor.val; // defines the stiction factor (static friction) as x-times the sliding factor
 
             // local frame to reference frame
             //omegaO = Helper.A_RL(q, omegaLH);  // [rad/sec]
@@ -2723,8 +2733,8 @@ float beta_tr = 0; // calculated blade angle not used yet
                 Vector3 point_velocityR = Helper.A_RL(q, veloLH + Helper.Cross(omegaLH, point_positionL[i])); // [m/sec]
 
                 // normal velocity component (for damping calulation, expressed in trinagles normal direction)
-                float point_velocity_scalar_normal_to_triangle = Vector3.Dot(point_velocityR, contact_informations[i].normalR);
-
+                float point_velocity_scalar_normal_to_triangle = Vector3.Dot(point_velocityR, contact_informations[i].normalR) / contact_informations[i].normalR.magnitude;
+                
                 // velocity vector parallel to triangle surface (expressed in reference frame)
                 Vector3 point_velocity_vector_parallel_to_triangleR = point_velocityR - contact_informations[i].normalR * point_velocity_scalar_normal_to_triangle;
                 //float point_velocity_scalar_parallel_to_triangleR = point_velocity_vector_parallel_to_triangleR.magnitude;
@@ -2733,23 +2743,23 @@ float beta_tr = 0; // calculated blade angle not used yet
                 Vector3 helicopter_forward_directionR = Helper.A_RL(q, new Vector3(1, 0, 0));
                 Vector3 helicopter_forward_direction_projected_to_triangleR = Helper.Projection_Of_A_Vector_Onto_A_Plane(helicopter_forward_directionR, contact_informations[i].normalR);
                 //helicopter_forward_direction_projected_to_triangleR.Normalize();
-                float points_velocity_component_in_helicopters_forward_direction_at_triangle = Vector3.Dot(point_velocity_vector_parallel_to_triangleR, helicopter_forward_direction_projected_to_triangleR);
+                float points_velocity_component_in_helicopters_forward_direction_at_triangle = Vector3.Dot(point_velocity_vector_parallel_to_triangleR, helicopter_forward_direction_projected_to_triangleR) / helicopter_forward_direction_projected_to_triangleR.magnitude;
 
                 // helicopter's sidewards direction velocity component (+z), projected onto triangle 
                 Vector3 helicopter_sidewards_directionR = Helper.A_RL(q, new Vector3(0, 0, 1));
                 Vector3 helicopter_sidewards_direction_projected_to_triangleR = Helper.Projection_Of_A_Vector_Onto_A_Plane(helicopter_sidewards_directionR, contact_informations[i].normalR);
                 //helicopter_right_direction_projected_to_triangleR.Normalize();
-                float points_velocity_component_in_helicopters_sideward_direction_at_triangle = Vector3.Dot(point_velocity_vector_parallel_to_triangleR, helicopter_sidewards_direction_projected_to_triangleR);
+                float points_velocity_component_in_helicopters_sideward_direction_at_triangle = Vector3.Dot(point_velocity_vector_parallel_to_triangleR, helicopter_sidewards_direction_projected_to_triangleR) / helicopter_sidewards_direction_projected_to_triangleR.magnitude;
 
 
 
-                //// store contact point position as ancor point for stiction model
-                //if (points_velocity_component_in_helicopters_forward_direction_at_triangle >= V_h ||
-                //    points_velocity_component_in_helicopters_sideward_direction_at_triangle >= V_h)
-                //{
-                //    if(integrator_function_call_number == 0) // update the poistion only at Runghe Kutta's first call
-                //        stiction_ancor_point_memoryR[i] = point_positionR[i];
-                //}
+                // store contact point position as ancor point for stiction model
+                if (Mathf.Abs(points_velocity_component_in_helicopters_forward_direction_at_triangle) >= V_h ||
+                    Mathf.Abs(points_velocity_component_in_helicopters_sideward_direction_at_triangle) >= V_h || point_velocityR.magnitude >= V_h )
+                {
+                    if (integrator_function_call_number == 0) // update the position only at Runghe Kutta's first call
+                        stiction_ancor_point_memoryR[i] = point_positionR[i];
+                }
 
 
 
@@ -2757,14 +2767,12 @@ float beta_tr = 0; // calculated blade angle not used yet
                 {
 
                     // normal contact force and damping
-                    float v_dampingR;
-                    if (point_velocity_scalar_normal_to_triangle < 0)
-                        v_dampingR = point_velocity_scalar_normal_to_triangle;
-                    else
+                    float v_dampingR = point_velocity_scalar_normal_to_triangle;
+                    if (point_velocity_scalar_normal_to_triangle > 0)
                         v_dampingR = point_velocity_scalar_normal_to_triangle * 0.01f;
 
                     contact_forceR = -par.transmitter_and_helicopter.helicopter.collision.stiffness_factor.val * contact_informations[i].normalR * contact_informations[i].penetration
-                                       - par.transmitter_and_helicopter.helicopter.collision.damping_factor.val * contact_informations[i].normalR * v_dampingR;
+                                     -par.transmitter_and_helicopter.helicopter.collision.damping_factor.val * contact_informations[i].normalR * v_dampingR;
                     torque_contactO = Helper.Cross(point_positionR[i] - vectO, contact_forceR);
                     torque_contactLH = Helper.A_LR(q, torque_contactO);   //[Nm] // reference frame to local frame
 
@@ -2875,11 +2883,11 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                     // friction
                     //float V_rel = point_velocity_scalar_parallel_to_triangleR;
-                    //float mu_v_forward; // friction coefficient
-                    //float mu_v_sideward; // friction coefficient 
-                    //float mu_u_forward; // stiction coefficient
-                    //float mu_u_sideward; // stiction coefficient 
-                    //Vector3 vect_U_rel;
+                    float mu_v_forward = 0f; // friction coefficient
+                    float mu_v_sideward = 0f; // friction coefficient 
+                    float mu_u_forward = 0f; // stiction coefficient
+                    float mu_u_sideward = 0f; // stiction coefficient 
+                    Vector3 vect_U_rel = Vector3.zero; // [m]
 
                     //mu_v_forward = par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val * 0.3f; // friction coefficient
                     //mu_v_sideward = par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val * 1.0f; // friction coefficient 
@@ -2892,45 +2900,56 @@ float beta_tr = 0; // calculated blade angle not used yet
                     if (Mathf.Abs(points_velocity_component_in_helicopters_sideward_direction_at_triangle) < V_h)
                         beta_sideward = Mathf.Sin((Mathf.PI / 2f) * (points_velocity_component_in_helicopters_sideward_direction_at_triangle / V_h)); // transition 
 
-                    float mu_v_forward = Mathf.Abs(beta_forward * mu_forward); // friction coefficient
-                    float mu_v_sideward = Mathf.Abs(beta_sideward * mu_sideward); // friction coefficient
+                    mu_v_forward = Mathf.Abs(beta_forward * mu_forward); // friction coefficient
+                    mu_v_sideward = Mathf.Abs(beta_sideward * mu_sideward); // friction coefficient
+                    
+                    // increase sliding-friction value close to V_h
+                    mu_v_forward *= Helper.Step(Mathf.Abs(points_velocity_component_in_helicopters_forward_direction_at_triangle), V_h, stiction_factor, V_h * 2f, 1.0f);
+                    mu_v_sideward *= Helper.Step(Mathf.Abs(points_velocity_component_in_helicopters_sideward_direction_at_triangle), V_h, stiction_factor, V_h * 2f, 1.0f);
 
+                    // // https://functionbay.com/documentation/onlinehelp/default.htm#!Documents/slidingandstictionfriction.htm
+                    //if (V_rel >= V_h)
+                    if (Mathf.Abs(points_velocity_component_in_helicopters_forward_direction_at_triangle) >= V_h ||
+                        Mathf.Abs(points_velocity_component_in_helicopters_sideward_direction_at_triangle) >= V_h)
+                    {
+                        //if (Mathf.Abs(points_velocity_component_in_helicopters_forward_direction_at_triangle) > 0.00001)
+                        //{
+                        //    float mu = (float)Math.Tanh((double)points_velocity_component_in_helicopters_forward_direction_at_triangle * 20f) * par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val; // mu = f(velo) at v==0 friction coefficient mu must be zero, othervise singulartiy makes sim unstable
+                        //    friction_forceR -= helicopter_forward_direction_projected_to_triangleR.normalized * mu_forward * contact_forceR.magnitude;
+                        //}
+                        //if (Mathf.Abs(points_velocity_component_in_helicopters_sideward_direction_at_triangle) > 0.00001)
+                        //{
+                        //    float mu = (float)Math.Tanh((double)points_velocity_component_in_helicopters_sideward_direction_at_triangle * 20f) * par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val; // mu = f(velo) at v==0 friction coefficient mu must be zero, othervise singulartiy makes sim unstable
+                        //    friction_forceR -= helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_sideward * contact_forceR.magnitude;
+                        //}
+                        //friction_forceR -= helicopter_forward_direction_projected_to_triangleR.normalized * mu_v_forward * contact_forceR.magnitude;
+                        //friction_forceR -= helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_v_sideward * contact_forceR.magnitude;
+                    }
+                    else // stiction
+                    {
+                        vect_U_rel = stiction_ancor_point_memoryR[i] - point_positionR[i];
+                        float vect_U_rel_forward = Vector3.Dot(vect_U_rel, helicopter_forward_direction_projected_to_triangleR) / helicopter_forward_direction_projected_to_triangleR.magnitude;
+                        float vect_U_rel_sideward = Vector3.Dot(vect_U_rel, helicopter_sidewards_direction_projected_to_triangleR) / helicopter_sidewards_direction_projected_to_triangleR.magnitude;
+   
+                        if (Mathf.Abs(vect_U_rel_forward) >= U_max) vect_U_rel_forward = U_max * Mathf.Sign(vect_U_rel_forward);
+                        if (Mathf.Abs(vect_U_rel_sideward) >= U_max) vect_U_rel_sideward = U_max * Mathf.Sign(vect_U_rel_sideward);
 
-                    ////if (V_rel >= V_h)
-                    //if (points_velocity_component_in_helicopters_forward_direction_at_triangle >= V_h ||
-                    //    points_velocity_component_in_helicopters_sideward_direction_at_triangle >= V_h)
-                    //{ 
-                    //   // if ( Mathf.Abs(points_velocity_component_in_helicopters_forward_direction_at_triangle) > 0.00001)
-                    //   // {
-                    //   //    float mu = (float)Math.Tanh((double)points_velocity_component_in_helicopters_forward_direction_at_triangle * 20f) * par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val; // mu = f(velo) at v==0 friction coefficient mu must be zero, othervise singulartiy makes sim unstable
-                    //   //    friction_forceR -= helicopter_forward_direction_projected_to_triangleR.normalized * mu_forward * contact_forceR.magnitude;
-                    //   // }
-                    //   // if (Mathf.Abs(points_velocity_component_in_helicopters_sidewards_direction_at_triangle) > 0.00001)
-                    //   // {
-                    //   //    float mu = (float)Math.Tanh((double)points_velocity_component_in_helicopters_sidewards_direction_at_triangle * 20f) * par.transmitter_and_helicopter.helicopter.collision.friction_coeff.val; // mu = f(velo) at v==0 friction coefficient mu must be zero, othervise singulartiy makes sim unstable
-                    //   //    friction_forceR -= helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_sideward * contact_forceR.magnitude;
-                    //   // }
-                    //   //    friction_forceR -= helicopter_forward_direction_projected_to_triangleR.normalized * mu_v_forward * contact_forceR.magnitude;
-                    //   //    friction_forceR -= helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_v_sideward * contact_forceR.magnitude;
-                    //}
-                    //else // stiction
-                    //{
-                    //    Vector3 vect_U_rel = point_positionR[i] - stiction_ancor_point_memoryR[i];
-                    //    float U_rel = vect_U_rel.magnitude;
+                        float mu_1_forward = Mathf.Sin((Mathf.PI / 2f) * ((vect_U_rel_forward) / U_max)); // [-1...+1]
+                        float mu_1_sideward = Mathf.Sin((Mathf.PI / 2f) * ((vect_U_rel_sideward) / U_max)); // [-1...+1]
 
-                    //    if (U_rel >= U_max) U_rel = U_max;
+                        mu_u_forward = ((1.0f - Mathf.Abs((beta_forward))) * (mu_forward * stiction_factor) * mu_1_forward);
+                        mu_u_sideward = ((1.0f - Mathf.Abs((beta_sideward))) * (mu_sideward * stiction_factor) * mu_1_sideward);
 
-                    //    float mu_1 = Mathf.Sin( (Mathf.PI / 2f) * (U_rel / U_max));
+                    }
 
-                    //    float mu_u = ( ( 1 - (beta_forward * beta_sideward) ) * ( mu_v_forward * mu_v_sideward ) * mu_1 );
+                    friction_forceR -=
+                        -helicopter_forward_direction_projected_to_triangleR.normalized * mu_u_forward * contact_forceR.magnitude +
+                        Mathf.Sign(points_velocity_component_in_helicopters_forward_direction_at_triangle) *
+                        helicopter_forward_direction_projected_to_triangleR.normalized * mu_v_forward * contact_forceR.magnitude;
 
-                    //    //friction_forceR -= vect_U_rel.normalized * mu_u * contact_forceR.magnitude;
-                    //}
-
-
-                    friction_forceR -= Mathf.Sign(points_velocity_component_in_helicopters_forward_direction_at_triangle) *
-                       helicopter_forward_direction_projected_to_triangleR.normalized * mu_v_forward * contact_forceR.magnitude;
-                    friction_forceR -= Mathf.Sign(points_velocity_component_in_helicopters_sideward_direction_at_triangle) *
+                    friction_forceR -=
+                        -helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_u_sideward * contact_forceR.magnitude +
+                        Mathf.Sign(points_velocity_component_in_helicopters_sideward_direction_at_triangle) *
                         helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_v_sideward * contact_forceR.magnitude;
 
                     friction_forceL = Helper.A_LR(q, friction_forceR);
@@ -3036,9 +3055,41 @@ float beta_tr = 0; // calculated blade angle not used yet
                         // in-game visual debug lines 
                         if (i < ODEDebug.contact_positionR.Count)
                         {
-                            ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i]);
-                            ODEDebug.contact_forceR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(contact_forceR + friction_forceR);
+                            //ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i]);
+                            //ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(contact_forceR + friction_forceR);
+
+                            //ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i] + new Vector3(0,0.2f,0));
+                            ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i] + new Vector3(0.0f, 0.0f, 0.0f));
+                            if (par.transmitter_and_helicopter.helicopter.visual_effects.debug_force_arrow_scale.val > 0)
+                            { 
+                                ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(contact_forceR + friction_forceR);
+                                //ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(vect_U_rel);
+                            }
+                            else
+                            {
+                                //ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(
+                                //    helicopter_forward_direction_projected_to_triangleR.normalized * mu_u_forward * contact_forceR.magnitude
+                                //    +helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_u_sideward * contact_forceR.magnitude);
+
+                                Vector3 test = Vector3.zero;
+                                test = -Mathf.Sign(points_velocity_component_in_helicopters_forward_direction_at_triangle) *
+                                        helicopter_forward_direction_projected_to_triangleR.normalized * mu_v_forward * contact_forceR.magnitude;
+                                ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(test);
+                                test = -Mathf.Sign(points_velocity_component_in_helicopters_sideward_direction_at_triangle) *
+                                        helicopter_sidewards_direction_projected_to_triangleR.normalized * mu_v_sideward * contact_forceR.magnitude;
+                                ODEDebug.contact_forceR2[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(test);
+
+                                //Vector3 test = Vector3.zero;
+                                //test = -Mathf.Sign(points_velocity_component_in_helicopters_forward_direction_at_triangle) *
+                                //        helicopter_forward_direction_projected_to_triangleR.normalized;
+                                //ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(test);
+                                //test = -Mathf.Sign(points_velocity_component_in_helicopters_sideward_direction_at_triangle) *
+                                //        helicopter_sidewards_direction_projected_to_triangleR.normalized;
+                                //ODEDebug.contact_forceR2[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(test);
+
+                            }
                         }
+
                     }
 
                 }
@@ -3089,7 +3140,8 @@ float beta_tr = 0; // calculated blade angle not used yet
                     if (i < ODEDebug.contact_positionR.Count)
                     {
                         ODEDebug.contact_positionR[i] = Vector3.zero;
-                        ODEDebug.contact_forceR[i] = Vector3.zero;
+                        ODEDebug.contact_forceR1[i] = Vector3.zero;
+                        ODEDebug.contact_forceR2[i] = Vector3.zero;
                     }
                 }
 
@@ -3539,12 +3591,6 @@ float beta_tr = 0; // calculated blade angle not used yet
             dxdt[11] = -((Jx * Jyz + Jxz * Jyx) * (MLz + wLx * (Jx * wLy + Jxy * wLx) - wLy * (Jxy * wLy + Jy * wLx) - wLz * (Jxz * wLy - Jyz * wLx))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy) - ((Jx * Jz - Jxz * Jzx) * (MLy - wLx * (Jx * wLz + Jxz * wLx) + wLy * (Jxy * wLz - Jyz * wLx) + wLz * (Jxz * wLz + Jz * wLx))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy) - ((Jyx * Jz + Jyz * Jzx) * (MLx - wLx * (Jxy * wLz - Jxz * wLy) + wLy * (Jy * wLz + Jyz * wLy) - wLz * (Jyz * wLz + Jz * wLy))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy);
             dxdt[12] = -((Jx * Jy - Jxy * Jyx) * (MLz + wLx * (Jx * wLy + Jxy * wLx) - wLy * (Jxy * wLy + Jy * wLx) - wLz * (Jxz * wLy - Jyz * wLx))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy) - ((Jx * Jzy + Jxy * Jzx) * (MLy - wLx * (Jx * wLz + Jxz * wLx) + wLy * (Jxy * wLz - Jyz * wLx) + wLz * (Jxz * wLz + Jz * wLx))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy) - ((Jy * Jzx + Jyx * Jzy) * (MLx - wLx * (Jxy * wLz - Jxz * wLy) + wLy * (Jy * wLz + Jyz * wLy) - wLz * (Jyz * wLz + Jz * wLy))) / (Jxy * Jyx * Jz - Jx * Jy * Jz + Jxz * Jy * Jzx + Jx * Jyz * Jzy + Jxy * Jyz * Jzx + Jxz * Jyx * Jzy);
            
-            // error in equation:
-            //dxdt[10] = ((Jyz * Jyz - Jy * Jz) * (MLx + wLx * (Jxy * wLz - Jxz * wLy) - wLy * (Jy * wLz + Jyz * wLy) + wLz * (Jyz * wLz + Jz * wLy))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxz * Jy + Jxy * Jyz) * (MLz - wLx * (Jx * wLy + Jxy * wLx) + wLy * (Jxy * wLy + Jy * wLx) + wLz * (Jxz * wLy - Jyz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxz * Jyz + Jxy * Jz) * (MLy + wLx * (Jx * wLz + Jxz * wLx) - wLy * (Jxy * wLz - Jyz * wLx) - wLz * (Jxz * wLz + Jz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz);
-            //dxdt[11] = ((Jxz * Jxz - Jx * Jz) * (MLy + wLx * (Jx * wLz + Jxz * wLx) - wLy * (Jxy * wLz - Jyz * wLx) - wLz * (Jxz * wLz + Jz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxy * Jxz + Jx * Jyz) * (MLz - wLx * (Jx * wLy + Jxy * wLx) + wLy * (Jxy * wLy + Jy * wLx) + wLz * (Jxz * wLy - Jyz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxz * Jyz + Jxy * Jz) * (MLx + wLx * (Jxy * wLz - Jxz * wLy) - wLy * (Jy * wLz + Jyz * wLy) + wLz * (Jyz * wLz + Jz * wLy))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz);
-            //dxdt[12] = ((Jxy * Jxy - Jx * Jy) * (MLz - wLx * (Jx * wLy + Jxy * wLx) + wLy * (Jxy * wLy + Jy * wLx) + wLz * (Jxz * wLy - Jyz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxy * Jxz + Jx * Jyz) * (MLy + wLx * (Jx * wLz + Jxz * wLx) - wLy * (Jxy * wLz - Jyz * wLx) - wLz * (Jxz * wLz + Jz * wLx))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz) - ((Jxz * Jy + Jxy * Jyz) * (MLx + wLx * (Jxy * wLz - Jxz * wLy) - wLy * (Jy * wLz + Jyz * wLy) + wLz * (Jyz * wLz + Jz * wLy))) / (Jx * (Jyz * Jyz) + (Jxz * Jxz) * Jy + (Jxy * Jxy) * Jz + Jxy * Jxz * Jyz * 2.0 - Jx * Jy * Jz);
-
-
             // mainrotor flapping
             dxdt[13] = dflapping_a_s_mr_LR__int_dt;   // [rad/sec] mainrotor pitch flapping velocity a_s (longitudial direction)
             dxdt[14] = dflapping_b_s_mr_LR__int_dt;   // [rad/sec] mainrotor roll flapping velocity b_s (lateral direction)

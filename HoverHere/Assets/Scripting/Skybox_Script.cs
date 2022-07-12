@@ -611,7 +611,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // Application.persistentDataPath.
         string fullpath_skymap_folder;
         if (((Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)) &&
-            helicopter_ODE.par_temp.simulation.storage.sceneries_file_location.val == 0 )
+            helicopter_ODE.par_temp.simulation.various.sceneries_file_location.val == 0 )
         {
             fullpath_skymap_folder = Path.Combine(Application.streamingAssetsPath, "Skymaps"); // Windows
 

@@ -210,7 +210,7 @@ namespace Rotor
                             {
                                 rotor_blades_material.Add(material);
                                 rotor_blades_material[rotor_blades_material.Count - 1].ToFadeMode();
-                                rotor_blades_material[rotor_blades_material.Count - 1].ChangeTransparency(1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val); // alpha setting
+                                rotor_blades_material[rotor_blades_material.Count - 1].ChangeTransparency(1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val); // alpha setting
                                 break;
                             }
                         }
@@ -232,7 +232,7 @@ namespace Rotor
                                 {
                                     rotor_blades_material.Add(material);
                                     rotor_blades_material[rotor_blades_material.Count - 1].ToFadeMode();
-                                    rotor_blades_material[rotor_blades_material.Count - 1].ChangeTransparency(1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val); // alpha setting
+                                    rotor_blades_material[rotor_blades_material.Count - 1].ChangeTransparency(1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val); // alpha setting
                                     break;
                                 }
                             }
@@ -252,24 +252,24 @@ namespace Rotor
                 if (temp_rotordisk != null)
                 {
                     rotordisk = temp_rotordisk.gameObject;
-                    rotordisk.SetActive(!helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                    rotordisk.SetActive(!helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
 
                 }
                 if (temp_rotordisk_complex != null)
                 {
                     rotordisk_complex = temp_rotordisk_complex.gameObject.transform.GetChild(0).gameObject;
-                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
                 }
 
 
-                //if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                //if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
                 //{
                     if (temp_rotordisk != null)
                     {                        
                         rotordisk_top_material = rotordisk.GetComponent<MeshRenderer>().materials[0];
-                        rotordisk_top_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                        rotordisk_top_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val));
                         rotordisk_bottom_material = rotordisk.GetComponent<MeshRenderer>().materials[1];
-                        rotordisk_bottom_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                        rotordisk_bottom_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val));
                     }
                 //}
                 //else
@@ -277,7 +277,7 @@ namespace Rotor
                     if(temp_rotordisk_complex != null)
                     {
                         rotordisk_complex_material = rotordisk_complex.GetComponent<MeshRenderer>().materials[0];
-                        //rotordisk_complex_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val));
+                        //rotordisk_complex_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val));
                     }
                 //}
                 // ##################################################################################
@@ -287,7 +287,7 @@ namespace Rotor
                 // ##################################################################################
                 // Init deformation of rotor-disk
                 // ##################################################################################
-                //if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                //if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
                 //{
                     if (rotordisk != null)
                     {
@@ -417,17 +417,17 @@ namespace Rotor
         {
             if (rotor_object != null)
             {
-                const float rotational_speed_where_visiblity_is_full_transparent_const = 1000.0f; // [rpm]
+                const float rotational_speed_where_visiblity_is_full_transparent_const = 800.0f; // [rpm]
 
                 float rotational_speed_where_visiblity_is_full_transparent = rotational_speed_where_visiblity_is_full_transparent_const / par_rotor.b.val; // [rpm]
-                float rotor_disk_transparency = (1.0f - helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val);  // [0...1]
+                float rotor_disk_transparency = (1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val);  // [0...1]
                 float normalized_speed_for_rotorvisibility, fade_disk_transparency, fade_blade_transparency;
 
                 // rotor
                 normalized_speed_for_rotorvisibility = Mathf.Clamp(Mathf.Abs(omega) / (rotational_speed_where_visiblity_is_full_transparent * Common.Helper.Rpm_to_RadPerSec), 0.00f, 1f);
 
                 fade_disk_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.3f, 0, 1.0f, 1);
-                //fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 1 - helicopter_ODE.par.simulation.gameplay.rotor_blade_transparency.val);
+                //fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 1 - helicopter_ODE.par.simulation.graphic_settings.rotor_blade_transparency.val);
                 fade_blade_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.2f, 1, 1.0f, 0.000000000000000000f);
 
                 // rotor blades
@@ -443,7 +443,7 @@ namespace Rotor
                 }
 
                 // rotor disk
-                if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
                 {
                     rotordisk_top_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
                     rotordisk_bottom_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
@@ -583,14 +583,14 @@ namespace Rotor
                 // ##################################################################################
                 if (rotordisk != null)
                 {
-                    rotordisk.SetActive(!helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                    rotordisk.SetActive(!helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
                 }
                 if ( rotordisk_complex!= null)
                 {
-                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val);
+                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
                 }
 
-                if (helicopter_ODE.par.simulation.gameplay.rotor_disk_complexity.val == false)
+                if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
                 {
                     if (rotordisk != null)
                     {
@@ -621,7 +621,7 @@ namespace Rotor
                         //////////////////////////////////////////////////////////////////////////
                         // https://mathinsight.org/distance_point_plane
                         Vector3 v = (camera.transform.position - rotordisk.transform.position);
-                        float d = Vector3.Dot(v, Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) * rotordisk.transform.up); // [distance camera poition to rotor's plane] 
+                        float d = Vector3.Dot(v, Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) * rotordisk.transform.up); // [distance camera position to rotor's plane] 
                         float a = (camera.transform.position - rotordisk.transform.position).magnitude; // [m] camera to rotor
                         float alpha_by_camera_angle = Mathf.Abs(Mathf.Asin(d / a) / (Mathf.PI / 2)); // [0...1] camera_angle 
 
@@ -630,13 +630,13 @@ namespace Rotor
                         //////////////////////////////////////////////////////////////////////////
                      
                         // if rpm is very low, hide rotor
-                        const float rotational_speed_where_visiblity_is_full_transparent_const = 500.0f; // [rpm]
+                        const float rotational_speed_where_visiblity_is_full_transparent_const = 550.0f; // [rpm]
                         float rotational_speed_where_visiblity_is_full_transparent = rotational_speed_where_visiblity_is_full_transparent_const / par_rotor.b.val; // [rpm]
                         float normalized_speed_for_rotorvisibility = Mathf.Clamp(Mathf.Abs(omega) / (rotational_speed_where_visiblity_is_full_transparent * Common.Helper.Rpm_to_RadPerSec), 0.00f, 1f);
-                        float fade_disk_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.3f, 0, 1.0f, 1);
+                        float fade_disk_transparency = Helper.Step(normalized_speed_for_rotorvisibility, 0.6f, 0, 1.0f, 1);
 
                         // 
-                        float alpha_offset = (helicopter_ODE.par.simulation.gameplay.rotor_disk_transparency.val - 0.92f ) + 0.00500000000000f;
+                        float alpha_offset = (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val - 0.92f ) + 0.00500000000000f;
                         float rpm_offset = -Omega / 10.0000000000000f; //
 
                         // tailrotor should have rotation offset (important for tandem rotors)

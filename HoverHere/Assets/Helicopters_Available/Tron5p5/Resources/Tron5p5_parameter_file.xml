@@ -117,18 +117,28 @@
     <collision>
       <friction_coeff>  <val>0.4</val>  </friction_coeff>
       <friction_coeff_forward>  <val>0.35</val>  </friction_coeff_forward>
-      <friction_coeff_sideward>  <val>0.5</val>  </friction_coeff_sideward>
+      <friction_coeff_sideward>  <val>0.4</val>  </friction_coeff_sideward>
       <friction_coeff_steering>   <val>0.01</val>  </friction_coeff_steering>
       <stiffness_factor>  <val>3000</val>  </stiffness_factor>
       <damping_factor>  <val>90</val>  </damping_factor>
       <positions_left_type>  <val>0</val>  </positions_left_type>  <!--0:skids,1:gear-->
       <positions_right_type>  <val>0</val>  </positions_right_type>  <!--0:skids,1:gear-->
       <positions_steering_center_type>  <val>0</val>  </positions_steering_center_type>  <!--0:skids,1:gear-->
-      <positions_left_rised_offset>  <val>0.000</val>  </positions_left_rised_offset>  
-      <positions_right_rised_offset>  <val>0.000</val>  </positions_right_rised_offset>  
-      <positions_steering_center_rised_offset>  <val>0.000</val>  </positions_steering_center_rised_offset>  
-      <positions_steering_left_rised_offset>  <val>0.000</val>  </positions_steering_left_rised_offset>  
-      <positions_steering_right_rised_offset>  <val>0.000</val>  </positions_steering_right_rised_offset> 
+      <positions_left_rised_offset>
+        <vect3>  <x>0.000</x>  <y>0.000</y>  <z>0.000</z>  </vect3>
+      </positions_left_rised_offset>
+      <positions_right_rised_offset>
+        <vect3>  <x>0.000</x>  <y>0.000</y>  <z>0.000</z>  </vect3>
+      </positions_right_rised_offset>
+      <positions_steering_center_rised_offset>  
+        <vect3>  <x>0.000</x>  <y>0.000</y>  <z>0.000</z>  </vect3>
+      </positions_steering_center_rised_offset> 
+      <positions_steering_left_rised_offset>
+        <vect3>  <x>0.000</x>  <y>0.000</y>  <z>0.000</z>  </vect3>
+      </positions_steering_left_rised_offset>  
+      <positions_steering_right_rised_offset>
+        <vect3>  <x>0.000</x>  <y>0.000</y>  <z>0.000</z>  </vect3>
+      </positions_steering_right_rised_offset>
       <positions_left>
        <vect3>
           <Vector3>  <x>0.17</x>  <y>-0.158</y>  <z>-0.092</z>  </Vector3>

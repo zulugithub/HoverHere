@@ -97,11 +97,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
-    - _CameraHeight: 1.4
+    - _CameraHeight: 1.6
     - _Cutoff: 0.669
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
-    - _Exposure: 0.5
+    - _Exposure: 0.2
     - _FlippingHorizontaly: 1
     - _GlossMapScale: 0
     - _Glossiness: 1

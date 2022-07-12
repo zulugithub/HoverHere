@@ -17,9 +17,15 @@
       </positions_right>
       <positions_steering_center>
         <vect3>
-          <Vector3>  <x>-0.93</x>  <y>-0.16</y>  <z>0</z>  </Vector3>
+          <Vector3>  <x>-0.93</x>  <y>-0.18</y>  <z>0</z>  </Vector3>
         </vect3>
       </positions_steering_center>
+      <positions_usual>
+        <vect3>
+          <Vector3>  <x>0.000</x>  <y>0.100</y>  <z>0.100</z>  </Vector3>
+          <Vector3>  <x>0.000</x>  <y>0.100</y>  <z>-0.100</z>  </Vector3>
+        </vect3>
+      </positions_usual>
     </collision>
   </helicopter>
 </stru_transmitter_and_helicopter>

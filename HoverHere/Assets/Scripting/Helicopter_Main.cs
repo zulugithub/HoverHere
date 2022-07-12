@@ -959,10 +959,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     public void Create_Debug_Line_GameObjects()
     {
         // create new one
-        //UnityEngine.Debug.Log(" helicopter_ODE.ODEDebug.contact_forceR.Count " + helicopter_ODE.ODEDebug.contact_forceR.Count);
-        for (var i = 0; i < helicopter_ODE.ODEDebug.contact_forceR.Count; i++)
+        //UnityEngine.Debug.Log(" helicopter_ODE.ODEDebug.contact_forceR1.Count " + helicopter_ODE.ODEDebug.contact_forceR1.Count);
+        for (var i = 0; i < helicopter_ODE.ODEDebug.contact_forceR1.Count; i++)
         {
-            helicopter_ODE.ODEDebug.line_object_contact_forceR[i] = Helper.Create_Line(ui_debug_lines, Color.green);
+            helicopter_ODE.ODEDebug.line_object_contact_forceR1[i] = Helper.Create_Line(ui_debug_lines, Color.green);
+            helicopter_ODE.ODEDebug.line_object_contact_forceR2[i] = Helper.Create_Line(ui_debug_lines, new Color( 0f, 0.8f, 0.0f, 1.0f ));
         }
 
         helicopter_ODE.ODEDebug.line_object_mainrotor_forceO = Helper.Create_Line(ui_debug_lines, Color.yellow);
@@ -1156,6 +1157,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 1; // [0...1]
                 }
             }
+            else
+            {
+                collision_positions_landing_gear_left_rising_offset_target = 0; // [0...1]
+                helicopter_ODE.collision_positions_landing_gear_left_rising_offset = 0; // [0...1]
+            }
 
             if (System.Array.Exists(animator_wheels_right.parameters, p => p.name == "Wheel_Status"))
             {
@@ -1173,6 +1179,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     collision_positions_landing_gear_right_rising_offset_target = 1; // [0...1]
                     helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 1; // [0...1]
                 }
+            }
+            else
+            {
+                collision_positions_landing_gear_right_rising_offset_target = 0; // [0...1]
+                helicopter_ODE.collision_positions_landing_gear_right_rising_offset = 0; // [0...1]
             }
 
             // steerable wheels
@@ -2491,7 +2502,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // Update is called once per frame
     void Update()
     {
-        
+
 
         Correct_And_Limit_XR_Camera_Vertical_Position();
 
@@ -2574,8 +2585,27 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //    Application.targetFrameRate = Helper.Clamp(helicopter_ODE.par.simulation.target_frame_rate);
         //    target_frame_rate_old = target_frame_rate;
         //}
-
-        bool motion_blur = helicopter_ODE.par_temp.simulation.graphic_quality.motion_blur.val;
+        
+        bool rotor_disk_complexity, motion_blur, bloom, depthoffield;
+        int quality_setting, resolution_setting;
+        if (!XRSettings.enabled)
+        {
+            //rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
+            motion_blur = helicopter_ODE.par_temp.simulation.graphic_quality.motion_blur.val;
+            bloom = helicopter_ODE.par_temp.simulation.graphic_quality.bloom.val;
+            depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality.depthoffield.val;
+            quality_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality.quality_setting);
+            resolution_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality.resolution_setting);
+        }
+        else
+        {
+            //rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
+            motion_blur = helicopter_ODE.par_temp.simulation.graphic_quality_VR.motion_blur_VR.val;
+            bloom = helicopter_ODE.par_temp.simulation.graphic_quality_VR.bloom_VR.val;
+            depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality_VR.depthoffield_VR.val;
+            quality_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality_VR.quality_setting_VR);
+            resolution_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality_VR.resolution_setting_VR); // is set automatically
+        }
         if (motion_blur != motion_blur_old)
         {
             if (motion_blur_layer != null)
@@ -2583,7 +2613,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             motion_blur_old = motion_blur;
         }
 
-        bool bloom = helicopter_ODE.par_temp.simulation.graphic_quality.bloom.val;
         if (bloom != bloom_old)
         {
             if (bloom_layer != null)
@@ -2591,7 +2620,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             bloom_old = bloom;
         }
 
-        bool depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality.depthoffield.val;
         if (depthoffield != depthoffield_old)
         {
             if (depthoffield_layer != null)
@@ -2599,14 +2627,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             depthoffield_old = depthoffield;
         }
 
-        int quality_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality.quality_setting);
         if (quality_setting != quality_setting_old)
         {
             QualitySettings.SetQualityLevel(quality_setting, true);
             quality_setting_old = quality_setting;
         }
 
-        int resolution_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality.resolution_setting);
         if (resolution_setting != resolution_setting_old)
         {
             //Resolution[] resolutions = Screen.resolutions;
@@ -4357,11 +4383,14 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // plot forces and torques
         if (ui_debug_panel_state > 0)
         {
-            float force_arrow_scale = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.debug_force_arrow_scale.val; // [N/m]
-            float torque_arrow_scale = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.debug_torque_arrow_scale.val; // [Nm/m]
+            float force_arrow_scale = Mathf.Abs(helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.debug_force_arrow_scale.val); // [N/m]
+            float torque_arrow_scale = Mathf.Abs(helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.debug_torque_arrow_scale.val); // [Nm/m]
 
-            for (var i = 0; i < helicopter_ODE.ODEDebug.contact_forceR.Count; i++)
-                Helper.Update_Line(helicopter_ODE.ODEDebug.line_object_contact_forceR[i], helicopter_ODE.ODEDebug.contact_positionR[i], helicopter_ODE.ODEDebug.contact_positionR[i] + helicopter_ODE.ODEDebug.contact_forceR[i] * force_arrow_scale);
+            for (var i = 0; i < helicopter_ODE.ODEDebug.contact_forceR1.Count; i++)
+            { 
+                Helper.Update_Line(helicopter_ODE.ODEDebug.line_object_contact_forceR1[i], helicopter_ODE.ODEDebug.contact_positionR[i], helicopter_ODE.ODEDebug.contact_positionR[i] + helicopter_ODE.ODEDebug.contact_forceR1[i] * force_arrow_scale);
+                Helper.Update_Line(helicopter_ODE.ODEDebug.line_object_contact_forceR2[i], helicopter_ODE.ODEDebug.contact_positionR[i], helicopter_ODE.ODEDebug.contact_positionR[i] + helicopter_ODE.ODEDebug.contact_forceR2[i] * force_arrow_scale);
+            }
 
             Helper.Update_Line(helicopter_ODE.ODEDebug.line_object_mainrotor_forceO, helicopter_ODE.ODEDebug.mainrotor_positionO, helicopter_ODE.ODEDebug.mainrotor_positionO + helicopter_ODE.ODEDebug.mainrotor_forceO * force_arrow_scale);
             Helper.Update_Line(helicopter_ODE.ODEDebug.line_object_mainrotor_torqueO, helicopter_ODE.ODEDebug.mainrotor_positionO, helicopter_ODE.ODEDebug.mainrotor_positionO + helicopter_ODE.ODEDebug.mainrotor_torqueO * torque_arrow_scale);
