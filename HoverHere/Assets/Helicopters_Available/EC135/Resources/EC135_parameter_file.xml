@@ -34,7 +34,7 @@
     <name>EC135</name>
     <reference_to_masscentrum>
       <position>
-        <vect3>  <x>0</x>  <y>0.460</y>  <z>0</z>  </vect3>
+        <vect3>  <x>0</x>  <y>0.500</y>  <z>0</z>  </vect3>
       </position>
       <orientation>
         <vect3>  <x>0</x>  <y>0</y>  <z>0</z>  </vect3>
@@ -52,10 +52,10 @@
       <vect3>  <x>0.1</x>  <y>0.2</y>  <z>0.01</z>  </vect3>
     </Jxy_Jxz_Jyz>
     <collision>
-      <friction_coeff>  <val>0.6</val>  </friction_coeff>
+      <friction_coeff>  <val>0.4</val>  </friction_coeff>
       <friction_coeff_forward>  <val>0.25</val>  </friction_coeff_forward>
-      <friction_coeff_sideward>  <val>0.4</val>  </friction_coeff_sideward>
-      <friction_coeff_steering>   <val>0.4</val>  </friction_coeff_steering>
+      <friction_coeff_sideward>  <val>0.35</val>  </friction_coeff_sideward>
+      <friction_coeff_steering>   <val>0.35</val>  </friction_coeff_steering>
       <stiffness_factor>  <val>3500</val>  </stiffness_factor>
       <damping_factor>  <val>90</val>  </damping_factor>
       <positions_left_type>  <val>0</val>  </positions_left_type>  <!--0:skids,1:gear-->
