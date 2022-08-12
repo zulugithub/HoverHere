@@ -1,14 +1,29 @@
 fileFormatVersion: 2
 guid: bfe7abedcde67fa4c9dd97abeed6f8c5
 ModelImporter:
-  serializedVersion: 20101
+  serializedVersion: 20200
   internalIDToNameTable: []
   externalObjects:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Alu
+    second: {fileID: 2100000, guid: 5f2619f603bdb714c88d08045909bfc9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Edelstahl
+    second: {fileID: 2100000, guid: 5f2619f603bdb714c88d08045909bfc9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Rotorblatt
     second: {fileID: 2100000, guid: e7ec43f55a335394f93e938a2f62694f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stahl
+    second: {fileID: 2100000, guid: 5f2619f603bdb714c88d08045909bfc9, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -100,6 +115,7 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 

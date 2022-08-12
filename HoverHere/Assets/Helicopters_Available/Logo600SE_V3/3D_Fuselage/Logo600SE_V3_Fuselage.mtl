@@ -1,4 +1,4 @@
-# Blender MTL File: 'LOGO600SE_V3_094.blend'
+# Blender MTL File: 'LOGO600SE_V3_098.blend'
 # Material Count: 22
 
 newmtl Alu
@@ -41,7 +41,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Canopy_A.001
+newmtl Canopy_A
 Ns 902.499999
 Ka 0.567273 0.567273 0.567273
 Kd 0.800000 0.800000 0.800000
@@ -50,7 +50,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Logo600SE_V3\\Logo600SE_V3_Canopy_003_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Logo600SE_V3\\Logo600SE_V3_Canopy_002_A.png
 
 newmtl Details_Glossy
 Ns 250.000000
@@ -77,7 +77,7 @@ map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Logo600SE_V3\\Logo600SE_V3_Details
 newmtl Fuselage
 Ns 236.549599
 Ka 1.000000 1.000000 1.000000
-Kd 0.001897 0.001732 0.001785
+Kd 1.000000 0.816928 0.870994
 Ks 0.045455 0.045455 0.045455
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
@@ -213,12 +213,13 @@ Ni 1.450000
 d 1.000000
 illum 3
 
-newmtl Stainless_Steel.001
-Ns 698.237327
-Ka 0.990909 0.990909 0.990909
-Kd 0.575877 0.575877 0.575877
-Ks 0.199242 0.199242 0.199242
+newmtl Wire_Tricolor
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
-illum 3
+illum 2
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Logo600SE_V3\\Wire_Tricolor.png

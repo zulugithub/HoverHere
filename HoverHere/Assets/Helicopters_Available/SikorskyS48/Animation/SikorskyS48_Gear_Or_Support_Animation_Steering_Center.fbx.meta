@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 084339b1885c24f4aa0b38a3291333b2
 ModelImporter:
-  serializedVersion: 20101
+  serializedVersion: 20200
   internalIDToNameTable:
   - first:
       74: -5459464285733654954
@@ -27,6 +27,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Fuselage
     second: {fileID: 2100000, guid: 8830c1b0397cdb148b880ee434f1346a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stahl
+    second: {fileID: 2100000, guid: 5f2619f603bdb714c88d08045909bfc9, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -205,6 +210,7 @@ ModelImporter:
   animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 

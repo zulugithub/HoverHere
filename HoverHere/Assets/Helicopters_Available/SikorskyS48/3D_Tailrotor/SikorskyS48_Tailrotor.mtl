@@ -1,4 +1,4 @@
-# Blender MTL File: 'SikorskyS48_038.blend'
+# Blender MTL File: 'SikorskyS48_050.blend'
 # Material Count: 3
 
 newmtl Heckrotorblatt
@@ -12,17 +12,17 @@ d 1.000000
 illum 3
 map_Kd Tailrotor.png
 
-newmtl Kunstoff_Schwarz.001
+newmtl Kunstoff_Schwarz
 Ns 333.243820
 Ka 1.000000 1.000000 1.000000
-Kd 0.000500 0.000500 0.000500
+Kd 0.016236 0.016236 0.016236
 Ks 0.031818 0.031818 0.031818
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Stahl.001
+newmtl Stahl
 Ns 785.640424
 Ka 0.936364 0.936364 0.936364
 Kd 0.775680 0.775680 0.775680

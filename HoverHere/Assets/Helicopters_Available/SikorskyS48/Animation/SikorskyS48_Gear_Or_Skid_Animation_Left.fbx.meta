@@ -15,6 +15,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Fuselage
     second: {fileID: 2100000, guid: 8830c1b0397cdb148b880ee434f1346a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stahl
+    second: {fileID: 2100000, guid: 5f2619f603bdb714c88d08045909bfc9, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

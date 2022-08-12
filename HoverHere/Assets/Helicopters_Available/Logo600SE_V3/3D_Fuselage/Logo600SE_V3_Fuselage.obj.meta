@@ -47,6 +47,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Canopy_A.001
+    second: {fileID: 2100000, guid: 035cfdf36c6e77a41b8a2fc37523bed1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Details_Glossy
     second: {fileID: 2100000, guid: 1dc6cc94a4b207449932a8e2acc94485, type: 2}
   - first:
@@ -72,12 +77,22 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Schrauben_Schwarz
+    second: {fileID: 2100000, guid: 035cfdf36c6e77a41b8a2fc37523bed1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Stahl
     second: {fileID: 2100000, guid: e77f98fcc73d6d3418a6878a48670e9c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Stainless_Steel
+    second: {fileID: 2100000, guid: e77f98fcc73d6d3418a6878a48670e9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stainless_Steel.001
     second: {fileID: 2100000, guid: e77f98fcc73d6d3418a6878a48670e9c, type: 2}
   - first:
       type: UnityEngine:Material

@@ -1,4 +1,4 @@
-# Blender MTL File: 'SikorskyS67_122.blend'
+# Blender MTL File: 'SikorskyS67_123.blend'
 # Material Count: 4
 
 newmtl Canopy
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS67\\SikorskyS67_Canopy_001_A.png
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS67\\SikorskyS67_Canopy_A_AO.png
 
 newmtl Canopy_Internal
 Ns 250.000000

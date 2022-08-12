@@ -1,4 +1,4 @@
-# Blender MTL File: 'AH-1W_Super_Cobra_015.blend'
+# Blender MTL File: 'AH-1W_Super_Cobra_020.blend'
 # Material Count: 21
 
 newmtl Canopy_000_A
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_Canopy_000_A.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_A.jpg
 
 newmtl Canopy_000_B
 Ns 19.053776
@@ -22,6 +22,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_intake_tail_N.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_B.jpg
 
 newmtl Canopy_000_C
 Ns 21.886996
@@ -33,6 +34,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_landing_accesories_N.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_C.jpg
 
 newmtl Canopy_000_D
 Ns 15.476447
@@ -44,6 +46,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Bump E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\AH-1W_Super_Cobra_guns_N.jpg
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_D.jpg
 
 newmtl Canopy_000_E
 Ns 30.952883
@@ -54,6 +57,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_E.jpg
 
 newmtl Canopy_000_F
 Ns 30.952883
@@ -64,6 +68,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AH-1W_Super_Cobra\\Setup_002\\AH-1W_Super_Cobra_Canopy_002_F.jpg
 
 newmtl Material__29
 Ns 15.476447

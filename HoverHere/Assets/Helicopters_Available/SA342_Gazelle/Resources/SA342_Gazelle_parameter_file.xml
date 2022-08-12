@@ -247,10 +247,13 @@
       <mainrotor_idle_deformation>  <val>7</val>  </mainrotor_idle_deformation>
       <mainrotor_running_deformation>  <val>0.02</val>  </mainrotor_running_deformation>
       <mainrotor_blur_transparency>  <val>1.500</val>  </mainrotor_blur_transparency>
+      <mainrotor_blur_n_blades>  <val>360</val>  </mainrotor_blur_n_blades>  
       <mainrotor_blur_rpm_factor>  <val>1.000</val>  </mainrotor_blur_rpm_factor>
       <tailrotor_blur_transparency>  <val>2.000</val>  </tailrotor_blur_transparency>
+      <tailrotor_blur_n_blades>  <val>100</val>  </tailrotor_blur_n_blades>  
       <tailrotor_blur_rpm_factor>  <val>1.000</val>  </tailrotor_blur_rpm_factor>
       <propeller_blur_transparency>  <val>1.000</val>  </propeller_blur_transparency>
+      <propeller_blur_n_blades>  <val>2</val>  </propeller_blur_n_blades>  
       <propeller_blur_rpm_factor>  <val>1.000</val>  </propeller_blur_rpm_factor>
       <landing_gear_or_skids_deflection_stiffness>  <val>150</val>  </landing_gear_or_skids_deflection_stiffness>
       <debug_force_arrow_scale>  <val>0.05</val>  </debug_force_arrow_scale>

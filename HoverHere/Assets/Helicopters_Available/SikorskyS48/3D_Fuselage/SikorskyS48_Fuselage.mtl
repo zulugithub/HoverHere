@@ -1,5 +1,5 @@
-# Blender MTL File: 'SikorskyS48_038.blend'
-# Material Count: 7
+# Blender MTL File: 'SikorskyS48_050.blend'
+# Material Count: 8
 
 newmtl ALU
 Ns 106.753826
@@ -23,15 +23,14 @@ d 1.000000
 illum 2
 
 newmtl Fuselage
-Ns 212.416621
+Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.784318 0.357086 0.016559
-Ks 0.546240 0.546240 0.546240
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\SikorskyS48\\SikorskyS48_Canopy_001_A.jpg
 
 newmtl Glas
 Ns 900.773554
@@ -64,6 +63,16 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd D:\\Zoltan\\Heli-x_model\\Logo600_Sikorsky_S48\\pilot.png
+
+newmtl Rim
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.027832 0.027832 0.027832
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
 
 newmtl _15535_N2S_234_Stearman_Pilot_v1default
 Ns 250.000000

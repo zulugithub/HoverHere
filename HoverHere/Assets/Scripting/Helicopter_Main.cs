@@ -1782,10 +1782,10 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         /// <summary> disable post_processing_layer if in vr mode (because disorts view if enabled) </summary> 
         // ##################################################################################
-        if (XRSettings.enabled)
-        {
-            if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = false;
-        }
+        //if (XRSettings.enabled)
+        //{
+        //     if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = false;
+        //}
         // ##################################################################################
 
 
@@ -2600,9 +2600,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         else
         {
             //rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
-            motion_blur = helicopter_ODE.par_temp.simulation.graphic_quality_VR.motion_blur_VR.val;
+            motion_blur = false; // "motion blur is available only for non-stereo cameras"
             bloom = helicopter_ODE.par_temp.simulation.graphic_quality_VR.bloom_VR.val;
-            depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality_VR.depthoffield_VR.val;
+            depthoffield = false; // makes no sense in VR -> sickness
             quality_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality_VR.quality_setting_VR);
             resolution_setting = Helper.Clamp(helicopter_ODE.par_temp.simulation.graphic_quality_VR.resolution_setting_VR); // is set automatically
         }
@@ -4114,7 +4114,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         {
             if (bloom_layer != null)
             {
-                bloom_layer.enabled.value = true;
+                //bloom_layer.enabled.value = true;
                 bloom_layer.threshold.value = 1f;
                 bloom_layer.intensity.value = bloom_layer_intensity;
                 bloom_layer_intensity_old = bloom_layer_intensity;
@@ -4130,8 +4130,16 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         if (depthoffield_layer != null)
         {
             depthoffield_layer.focusDistance.value = (helicopters_available.transform.position - main_camera.transform.position).magnitude;
-            depthoffield_layer.aperture.value = 3f;
-            depthoffield_layer.focalLength.value = 35f;
+            if (!XRSettings.enabled)
+            { 
+                depthoffield_layer.aperture.value = 3f;         
+                depthoffield_layer.focalLength.value = 35f;     
+            }
+            else
+            {
+                depthoffield_layer.aperture.value = 20f;         
+                depthoffield_layer.focalLength.value = 1f;    
+            }
         }
         // ##################################################################################
 
@@ -4813,8 +4821,16 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 if (depthoffield_layer != null)
                 {
                     depthoffield_layer.focusDistance.value = 0.3f;
-                    depthoffield_layer.aperture.value = 20f;
-                    depthoffield_layer.focalLength.value = 35;
+                    if (!XRSettings.enabled)
+                    {
+                        depthoffield_layer.aperture.value = 20f;
+                        depthoffield_layer.focalLength.value = 35f;
+                    }
+                    else
+                    {
+                        depthoffield_layer.aperture.value = 20f;
+                        depthoffield_layer.focalLength.value = 1f;
+                    }
                 }
             }
             if (vertical_camera_angle > -10)
@@ -4958,8 +4974,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 { 
                     UnityEngine.Debug.Log("All Subsystems Started!");
 
-                    // disable postprocessing layer (beacuse graphics problems?)
-                    if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = false;
+                    //// disable postprocessing layer (beacuse graphics problems?)
+                    //if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = false;
                     // disable graphmanger (plots curves during debug mode)  TODO instead disable move figures to canvas
                     if (main_camera.GetComponent<GraphManager>() != null) main_camera.GetComponent<GraphManager>().enabled = false;
                     // enable tracked pose diriver
@@ -5035,8 +5051,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         Screen.SetResolution(Int32.Parse(splitArray[0]), Int32.Parse(splitArray[1]), true);
 
 
-        // enable postprocessing layer
-        if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = true;
+        //// enable postprocessing layer
+        //if (main_camera.GetComponent<PostProcessLayer>() != null) main_camera.GetComponent<PostProcessLayer>().enabled = true;
         // enable graphmanger (plots curves during debug mode)  TODO instead disable move figures to canvas
         if (main_camera.GetComponent<GraphManager>() != null) main_camera.GetComponent<GraphManager>().enabled = true;
         // disable tracked pose diriver

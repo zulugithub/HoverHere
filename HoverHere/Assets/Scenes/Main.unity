@@ -12053,6 +12053,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Logo600SE_V3_Mainrotor_Blur
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7fed0be09b71fee47a5cf39f5f1041fe,
+        type: 3}
+      propertyPath: m_Layer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3742102158247976162, guid: 7fed0be09b71fee47a5cf39f5f1041fe,
+        type: 3}
+      propertyPath: m_Layer
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7fed0be09b71fee47a5cf39f5f1041fe, type: 3}
 --- !u!4 &335827011 stripped
@@ -15933,6 +15943,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mainrotor_Disk
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e8bf62186e541aa49823353eb5fc52dc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8bf62186e541aa49823353eb5fc52dc, type: 3}
 --- !u!4 &518940690 stripped
@@ -17820,7 +17835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &580659669
 Transform:
   m_ObjectHideFlags: 0
@@ -20127,6 +20142,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3147569337408907701, guid: 5cc2a2419d1ee6f4caa8b2e43bf75dcc,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 035cfdf36c6e77a41b8a2fc37523bed1, type: 2}
     - target: {fileID: -1813362706828919006, guid: 5cc2a2419d1ee6f4caa8b2e43bf75dcc,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -20138,6 +20158,11 @@ PrefabInstance:
       value: Logo600SE_V3_Fuselage
       objectReference: {fileID: 0}
     - target: {fileID: 1461208999009996264, guid: 5cc2a2419d1ee6f4caa8b2e43bf75dcc,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 035cfdf36c6e77a41b8a2fc37523bed1, type: 2}
+    - target: {fileID: 5933677438278191481, guid: 5cc2a2419d1ee6f4caa8b2e43bf75dcc,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -20219,8 +20244,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.4339025, y: 0.40953174, z: 0.3268336}
-  m_Center: {x: -0.0059422553, y: -0.105000004, z: 0}
+  m_Size: {x: 1.379061, y: 0.39308184, z: 0.3268336}
+  m_Center: {x: -0.033362985, y: -0.096775055, z: 0}
 --- !u!54 &644597831
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -39310,13 +39335,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 784637048}
-  m_LocalRotation: {x: 0.2236653, y: -0.26928985, z: 0.06445197, w: 0.93450665}
-  m_LocalPosition: {x: 3.58, y: 2.72, z: 1.09}
+  m_LocalRotation: {x: 0.387447, y: -0.5538723, z: 0.32984024, w: 0.6590264}
+  m_LocalPosition: {x: 0.7, y: 0.77, z: 3.99}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 9
-  m_LocalEulerAnglesHint: {x: 26.92, y: -32.15, z: 0}
+  m_LocalEulerAnglesHint: {x: 61.17, y: -79.7, z: 0.66}
 --- !u!4 &786738022 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1240721365267465652, guid: 64cd097d40d340b459a0dc39f896b281,
@@ -72191,6 +72216,11 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0.00464499
       objectReference: {fileID: 0}
+    - target: {fileID: 768176325864573410, guid: f00c717362536ff4d8239ad7b36defc3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -31.099976
+      objectReference: {fileID: 0}
     - target: {fileID: 768176325864573411, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
       propertyPath: m_ScrollSensitivity
@@ -74311,8 +74341,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.394533, y: 0.29894498, z: 0.241527}
-  m_Center: {x: 0.010401621, y: -0.03723671, z: 0}
+  m_Size: {x: 2.394533, y: 0.28380212, z: 0.241527}
+  m_Center: {x: 0.010401607, y: -0.029665265, z: 0}
 --- !u!54 &1247282756
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -94047,10 +94077,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -50808373919509168, guid: f0be92564b633c94abde5e134e231398,
+        type: 3}
+      propertyPath: m_Layer
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: f0be92564b633c94abde5e134e231398,
         type: 3}
       propertyPath: m_Name
       value: Logo600SE_V3_Tailrotor_Blur
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f0be92564b633c94abde5e134e231398,
+        type: 3}
+      propertyPath: m_Layer
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f0be92564b633c94abde5e134e231398, type: 3}
@@ -94150,7 +94190,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1627779244
 Transform:
   m_ObjectHideFlags: 0
@@ -119039,6 +119079,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMin.y
       value: 0.142645
+      objectReference: {fileID: 0}
+    - target: {fileID: 768176325864573410, guid: f00c717362536ff4d8239ad7b36defc3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -31.099976
       objectReference: {fileID: 0}
     - target: {fileID: 768176325864573411, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}

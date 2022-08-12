@@ -8,6 +8,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using Parameter;
 //using Unity.Mathematics;
+using UnityEngine.XR;
+using UnityEngine.XR.Management;
 
 
 namespace Rotor
@@ -647,42 +649,58 @@ namespace Rotor
                         rotordisk_complex.transform.parent.localPosition = Helper.ConvertRightHandedToLeftHandedVector(par_rotor.posLH.vect3);
 
                         // tune values with parameter
-                        float blur_rpm_factor=1, blur_transparency=1;
-                        if (rotor_type == 0)
+                        float blur_rpm_factor = 1, blur_transparency = 1, blur_n_blades = 180;
+                        if (rotor_type == 0) // mainrotor
                         {
                             blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.mainrotor_blur_rpm_factor.val;
+                            blur_n_blades = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.mainrotor_blur_n_blades.val;
                             blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.mainrotor_blur_transparency.val;
+
                         }
-                        if (rotor_type == 1)
+                        if (rotor_type == 1) // tailrotor
                         {
                             blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.tailrotor_blur_rpm_factor.val;
+                            blur_n_blades = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.tailrotor_blur_n_blades.val;
                             blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.tailrotor_blur_transparency.val;
                         }
-                        if (rotor_type == 2)
+                        if (rotor_type == 2) // propeller
                         {
                             blur_rpm_factor = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.propeller_blur_rpm_factor.val;
+                            blur_n_blades = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.propeller_blur_n_blades.val;
                             blur_transparency = helicopter_ODE.par.transmitter_and_helicopter.helicopter.visual_effects.propeller_blur_transparency.val;
                         }
+
+                        // 
+                        if (XRSettings.enabled)
+                        {
+                            blur_n_blades /= 2.0f;
+                            blur_transparency *= 1.6f; // [-]
+                        }
+
+                        //if blur_n_blades is smaller than 360, than increase the transparency
+                        //blur_transparency *= (SSB_Samples / (float)blur_n_blades); // [-]
 
                         // blade transparency changes over one rotation to mimic single blured blades
                         float alpha_amplitude = Helper.Step(Mathf.Abs(omega * Helper.RadPerSec_to_Rpm), 800 * blur_rpm_factor, 1, 1200 * blur_rpm_factor, 0); // depends on rpm  --> transparency between blades
                         float alpha_pow = Helper.Step(Mathf.Abs(omega * Helper.RadPerSec_to_Rpm), 400 * blur_rpm_factor, 20, 1200 * blur_rpm_factor, 4)/ par_rotor.b.val; // depends on rpm  --> how sharp the blade blur seams
 
-                        // calculate and create 360 blades 
-                        for (int i = 0; i < SSB_Samples; i++)
+                        // calculate and create maximum 360 blades 
+                        float r = SSB_Material.color.r, g = SSB_Material.color.g, b = SSB_Material.color.b;
+                        float random_phi = UnityEngine.Random.Range(-(Mathf.PI * 4.0f) / blur_n_blades, (Mathf.PI * 4.0f) / blur_n_blades); // [rad] little variation of blade angle phi to try to break repeating pattern of n_blades
+                        for (int i = 0; i < blur_n_blades; i++)
                         {
+#if UNITY_EDITOR
                             SSB_Materials[i].SetFloat("_Metallic", SSB_Material.GetFloat("_Metallic"));
                             SSB_Materials[i].SetFloat("_Glossiness", SSB_Material.GetFloat("_Glossiness"));
-
+#endif
                             // calculate transparency's alpha value for each blade
-                            float alpha = (1 - alpha_by_camera_angle) * (10.00000000000f / (float)SSB_Samples) + 
-                                Mathf.Abs((2.00000000f / (float)SSB_Samples) + alpha_offset) *   
-                                (Mathf.Pow(Mathf.Abs(Mathf.Sin(((float)i / (float)SSB_Samples) * par_rotor.b.val * Mathf.PI + rpm_offset)), alpha_pow) * alpha_amplitude + (1f - alpha_amplitude));
+                            float alpha = (1 - alpha_by_camera_angle) * (10.00000000000f / (float)blur_n_blades) + 
+                                Mathf.Abs((2.00000000f / (float)blur_n_blades) + alpha_offset) *   
+                                (Mathf.Pow(Mathf.Abs(Mathf.Sin(((float)i / (float)blur_n_blades) * par_rotor.b.val * Mathf.PI + rpm_offset)), alpha_pow) * alpha_amplitude + (1f - alpha_amplitude));
 
-                            Color tempColor = new Color(SSB_Material.color.r, SSB_Material.color.g, SSB_Material.color.b, alpha * fade_disk_transparency * blur_transparency);
-                            SSB_Materials[i].color = tempColor;
+                            SSB_Materials[i].color = new Color(r, g, b, alpha * fade_disk_transparency * blur_transparency);
 
-                            float phi = ((float)i / (float)SSB_Samples) * (Mathf.PI * 2.0f); // [rad] rotation around hub
+                            float phi = ((float)i / (float)blur_n_blades) * (Mathf.PI * 2.0f); // [rad] rotation around hub
                             float cyclic_angle = Theta_col * 1.50000000f; // [rad] collectiv signal
                             cyclic_angle += Mathf.Sin(phi) * flapping_a_s_LH * 1.50000000f; // flapping     angle change occures 90° before flapping, therefore use sin instead of cos
                             cyclic_angle += Mathf.Cos(phi) * flapping_b_s_LH * 1.50000000f; // flapping
@@ -695,7 +713,7 @@ namespace Rotor
                             // 1.) cone_angle around z
                             Quaternion q = rotordisk_complex.transform.parent.rotation * 
                                            Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) * 
-                                           Quaternion.Euler(-cyclic_angle * Mathf.Rad2Deg, phi * Mathf.Rad2Deg, 0f) * 
+                                           Quaternion.Euler(-cyclic_angle * Mathf.Rad2Deg, (phi + random_phi) * Mathf.Rad2Deg, 0f) * 
                                            Quaternion.Euler(0f, 0f, cone_angle * Mathf.Rad2Deg);
 
                             // generate mesh

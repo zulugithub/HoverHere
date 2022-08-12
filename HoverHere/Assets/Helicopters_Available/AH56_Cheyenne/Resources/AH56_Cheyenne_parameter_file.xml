@@ -87,6 +87,7 @@
           <Vector3>  <x>1.25</x>  <y>-0.24</y>  <z>0.0</z>  </Vector3>
           <Vector3>  <x>-0.2</x>  <y>-0.15</y>  <z>0.85</z>  </Vector3>
           <Vector3>  <x>-0.2</x>  <y>-0.15</y>  <z>-0.85</z>  </Vector3>
+          <Vector3>  <x>0.4</x>  <y>-0.34</y>  <z>0.0</z>  </Vector3>
         </vect3>
       </positions_usual>
       <collision_force_max>  <val>1700</val>  </collision_force_max>
@@ -282,10 +283,13 @@
       <mainrotor_idle_deformation>  <val>4</val>  </mainrotor_idle_deformation>
       <mainrotor_running_deformation>  <val>0.004</val>  </mainrotor_running_deformation>
       <mainrotor_blur_transparency>  <val>1.500</val>  </mainrotor_blur_transparency>
+      <mainrotor_blur_n_blades>  <val>360</val>  </mainrotor_blur_n_blades>   
       <mainrotor_blur_rpm_factor>  <val>1.000</val>  </mainrotor_blur_rpm_factor>
-      <tailrotor_blur_transparency>  <val>0.700</val>  </tailrotor_blur_transparency>
+      <tailrotor_blur_transparency>  <val>1.000</val>  </tailrotor_blur_transparency>
+      <tailrotor_blur_n_blades>  <val>120</val>  </tailrotor_blur_n_blades> 
       <tailrotor_blur_rpm_factor>  <val>3.000</val>  </tailrotor_blur_rpm_factor>
-      <propeller_blur_transparency>  <val>0.700</val>  </propeller_blur_transparency>
+      <propeller_blur_transparency>  <val>1.000</val>  </propeller_blur_transparency>
+      <propeller_blur_n_blades>  <val>120</val>  </propeller_blur_n_blades> 
       <propeller_blur_rpm_factor>  <val>4.000</val>  </propeller_blur_rpm_factor>
       <landing_gear_or_skids_deflection_stiffness>  <val>660</val>  </landing_gear_or_skids_deflection_stiffness>
       <landing_gear_main_radius>  <val>0.072</val>  </landing_gear_main_radius>

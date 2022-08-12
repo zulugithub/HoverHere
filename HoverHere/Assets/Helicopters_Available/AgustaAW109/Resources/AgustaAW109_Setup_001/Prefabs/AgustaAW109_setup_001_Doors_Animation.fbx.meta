@@ -58,7 +58,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Windows_Small
-    second: {fileID: 2100000, guid: e34f693302f371e4aafa96557f20a093, type: 2}
+    second: {fileID: 2100000, guid: f4356d1be479f6c4c8a265173f0f49cb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

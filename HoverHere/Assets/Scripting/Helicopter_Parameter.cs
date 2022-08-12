@@ -403,27 +403,27 @@ namespace Parameter
     [Serializable]
     public class stru_graphic_quality_VR
     {
-        public stru_bool motion_blur_VR { get; set; } // 
+        //public stru_bool motion_blur_VR { get; set; } // 
         public stru_bool bloom_VR { get; set; } // 
-        public stru_bool depthoffield_VR { get; set; } // 
+        //public stru_bool depthoffield_VR { get; set; } // 
         public stru_list quality_setting_VR { get; set; } // 
         public stru_list resolution_setting_VR { get; set; } // 
 
 
         public stru_graphic_quality_VR()
         {
-            motion_blur_VR = new stru_bool();
+            //motion_blur_VR = new stru_bool();
             bloom_VR = new stru_bool();
-            depthoffield_VR = new stru_bool();
+            //depthoffield_VR = new stru_bool();
             quality_setting_VR = new stru_list();
             resolution_setting_VR = new stru_list();
 
 
-            motion_blur_VR.val = false;
-            motion_blur_VR.hint = "Enables or disables motion blur effect.";
-            motion_blur_VR.comment = "";
-            motion_blur_VR.unit = "-";
-            motion_blur_VR.save_under_player_prefs = true;
+            //motion_blur_VR.val = false;
+            //motion_blur_VR.hint = "Enables or disables motion blur effect.";
+            //motion_blur_VR.comment = "";
+            //motion_blur_VR.unit = "-";
+            //motion_blur_VR.save_under_player_prefs = true;
 
             bloom_VR.val = false;
             bloom_VR.hint = "Enables or disables bloom effect. (stength see under scenery -> sun_bloom_intensity)";
@@ -431,11 +431,11 @@ namespace Parameter
             bloom_VR.unit = "-";
             bloom_VR.save_under_player_prefs = true;
 
-            depthoffield_VR.val = true;
-            depthoffield_VR.hint = "Enables or disables depth of field effect.";
-            depthoffield_VR.comment = "";
-            depthoffield_VR.unit = "-";
-            depthoffield_VR.save_under_player_prefs = true;
+            //depthoffield_VR.val = true;
+            //depthoffield_VR.hint = "Enables or disables depth of field effect.";
+            //depthoffield_VR.comment = "";
+            //depthoffield_VR.unit = "-";
+            //depthoffield_VR.save_under_player_prefs = true;
 
             quality_setting_VR.val = 2;
             quality_setting_VR.str = new List<string> { "Low", "High", "Very High", "Ultra" }; // 0 1 2 3
@@ -574,9 +574,9 @@ namespace Parameter
             this.graphic_quality.quality_setting.val = (PlayerPrefs.GetInt("__simulation_" + "quality_setting", this.graphic_quality.quality_setting.val));
             this.graphic_quality.resolution_setting.val = (PlayerPrefs.GetInt("__simulation_" + "resolution_setting", this.graphic_quality.resolution_setting.val));
 
-            this.graphic_quality_VR.motion_blur_VR.val = (PlayerPrefs.GetInt("__simulation_" + "motion_blur_VR", this.graphic_quality_VR.motion_blur_VR.val == false ? 0 : 1)) == 0 ? false : true;
+            //this.graphic_quality_VR.motion_blur_VR.val = (PlayerPrefs.GetInt("__simulation_" + "motion_blur_VR", this.graphic_quality_VR.motion_blur_VR.val == false ? 0 : 1)) == 0 ? false : true;
             this.graphic_quality_VR.bloom_VR.val = (PlayerPrefs.GetInt("__simulation_" + "bloom_VR", this.graphic_quality_VR.bloom_VR.val == false ? 0 : 1)) == 0 ? false : true;
-            this.graphic_quality_VR.depthoffield_VR.val = (PlayerPrefs.GetInt("__simulation_" + "depthoffield_VR", this.graphic_quality_VR.depthoffield_VR.val == false ? 0 : 1)) == 0 ? false : true;
+            //this.graphic_quality_VR.depthoffield_VR.val = (PlayerPrefs.GetInt("__simulation_" + "depthoffield_VR", this.graphic_quality_VR.depthoffield_VR.val == false ? 0 : 1)) == 0 ? false : true;
             this.graphic_quality_VR.quality_setting_VR.val = (PlayerPrefs.GetInt("__simulation_" + "quality_setting_VR", this.graphic_quality_VR.quality_setting_VR.val));
             this.graphic_quality_VR.resolution_setting_VR.val = (PlayerPrefs.GetInt("__simulation_" + "resolution_setting_VR", this.graphic_quality_VR.resolution_setting_VR.val));
 
@@ -3056,10 +3056,13 @@ namespace Parameter
         public stru_float mainrotor_idle_deformation { get; set; } // [rad] 
         public stru_float mainrotor_running_deformation { get; set; } // [rad] 
         public stru_float mainrotor_blur_transparency { get; set; } // [0...1] 
+        public stru_int mainrotor_blur_n_blades { get; set; } // [90...360] 
         public stru_float mainrotor_blur_rpm_factor { get; set; } // [0...1] 
         public stru_float tailrotor_blur_transparency { get; set; } // [0...1] 
+        public stru_int tailrotor_blur_n_blades { get; set; } // [90...360] 
         public stru_float tailrotor_blur_rpm_factor { get; set; } // [0...1] 
         public stru_float propeller_blur_transparency { get; set; } // [0...1] 
+        public stru_int propeller_blur_n_blades { get; set; } // [90...360] 
         public stru_float propeller_blur_rpm_factor { get; set; } // [0...1] 
         public stru_float landing_gear_or_skids_deflection_stiffness { get; set; } // [-] 
         public stru_float landing_gear_main_radius { get; set; } // [-] 
@@ -3075,10 +3078,13 @@ namespace Parameter
             mainrotor_idle_deformation = new stru_float();
             mainrotor_running_deformation = new stru_float();
             mainrotor_blur_transparency = new stru_float();
+            mainrotor_blur_n_blades = new stru_int();
             mainrotor_blur_rpm_factor = new stru_float();
             tailrotor_blur_transparency = new stru_float();
+            tailrotor_blur_n_blades = new stru_int();
             tailrotor_blur_rpm_factor = new stru_float();
             propeller_blur_transparency = new stru_float();
+            propeller_blur_n_blades = new stru_int();
             propeller_blur_rpm_factor = new stru_float();
             landing_gear_or_skids_deflection_stiffness = new stru_float();
             landing_gear_main_radius = new stru_float();
@@ -3110,12 +3116,20 @@ namespace Parameter
             mainrotor_blur_transparency.comment = "";
             mainrotor_blur_transparency.unit = "-";
 
+            mainrotor_blur_n_blades.val = 360;
+            mainrotor_blur_n_blades.max = 360;
+            mainrotor_blur_n_blades.min = 90;
+            mainrotor_blur_n_blades.hint = "Mainrotor blured: Number of blades";
+            mainrotor_blur_n_blades.comment = "";
+            mainrotor_blur_n_blades.unit = "-";
+
             mainrotor_blur_rpm_factor.val = 1.0f;
             mainrotor_blur_rpm_factor.max = 0.0f;
             mainrotor_blur_rpm_factor.min = 1.0f;
             mainrotor_blur_rpm_factor.hint = "Mainrotor motion blured rotation speed factor";
             mainrotor_blur_rpm_factor.comment = "";
             mainrotor_blur_rpm_factor.unit = "-";
+
 
             tailrotor_blur_transparency.val = 1.0f;
             tailrotor_blur_transparency.max = 0.0f;
@@ -3124,12 +3138,20 @@ namespace Parameter
             tailrotor_blur_transparency.comment = "";
             tailrotor_blur_transparency.unit = "-";
 
+            tailrotor_blur_n_blades.val = 120;
+            tailrotor_blur_n_blades.max = 360;
+            tailrotor_blur_n_blades.min = 90;
+            tailrotor_blur_n_blades.hint = "Tailrotor blured: Number of blades";
+            tailrotor_blur_n_blades.comment = "";
+            tailrotor_blur_n_blades.unit = "-";
+
             tailrotor_blur_rpm_factor.val = 1.0f;
             tailrotor_blur_rpm_factor.max = 0.0f;
             tailrotor_blur_rpm_factor.min = 1.0f;
             tailrotor_blur_rpm_factor.hint = "Tailrotor motion blured rotation speed factor";
             tailrotor_blur_rpm_factor.comment = "";
             tailrotor_blur_rpm_factor.unit = "-";
+
 
             propeller_blur_transparency.val = 1.0f;
             propeller_blur_transparency.max = 0.0f;
@@ -3138,12 +3160,20 @@ namespace Parameter
             propeller_blur_transparency.comment = "";
             propeller_blur_transparency.unit = "-";
 
+            propeller_blur_n_blades.val = 120;
+            propeller_blur_n_blades.max = 360;
+            propeller_blur_n_blades.min = 90;
+            propeller_blur_n_blades.hint = "Tailrotor blured: Number of blades";
+            propeller_blur_n_blades.comment = "";
+            propeller_blur_n_blades.unit = "-";
+
             propeller_blur_rpm_factor.val = 1.0f;
             propeller_blur_rpm_factor.max = 0.0f;
             propeller_blur_rpm_factor.min = 1.0f;
             propeller_blur_rpm_factor.hint = "Propeller motion blured rotation speed factor";
             propeller_blur_rpm_factor.comment = "";
             propeller_blur_rpm_factor.unit = "-";
+
 
             landing_gear_or_skids_deflection_stiffness.val = 100f;
             landing_gear_or_skids_deflection_stiffness.max = 0.00f;
