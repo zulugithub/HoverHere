@@ -1,20 +1,18 @@
-# Blender MTL File: 'Bell222_333.blend'
-# Material Count: 4
+# Blender 3.5.1 MTL File: 'Bell222_335.blend'
+# www.blender.org
 
 newmtl Canopy
-Ns 895.856248
 Ka 0.481818 0.481818 0.481818
-Kd 0.002667 0.002667 0.002667
 Ks 0.240909 0.240909 0.240909
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_000_A.png
-map_Ns E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Roughness_000_A.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_000_A.png
+map_Ns E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_Roughness_000_A.png
 
 newmtl Gummi
-Ns 6.694222
+Ns 6.694221
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.231818 0.231818 0.231818
@@ -24,7 +22,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
@@ -34,12 +32,11 @@ d 1.000000
 illum 3
 
 newmtl TailrotorMechanics
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_TailrotorMechanics_AO.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_TailrotorMechanics_AO.png

@@ -1,5 +1,5 @@
-# Blender MTL File: 'Bell222_333.blend'
-# Material Count: 20
+# Blender 3.5.1 MTL File: 'Bell222_335.blend'
+# www.blender.org
 
 newmtl Black_Total
 Ns 1000.000000
@@ -12,19 +12,17 @@ d 1.000000
 illum 3
 
 newmtl Canopy
-Ns 895.856248
 Ka 0.481818 0.481818 0.481818
-Kd 0.002667 0.002667 0.002667
 Ks 0.240909 0.240909 0.240909
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_000_A.png
-map_Ns E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Roughness_000_A.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_000_A.png
+map_Ns E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_Roughness_000_A.png
 
 newmtl Closure
-Ns 918.792404
+Ns 918.792480
 Ka 1.000000 1.000000 1.000000
 Kd 0.007189 0.007189 0.007189
 Ks 0.329268 0.329268 0.329268
@@ -66,17 +64,15 @@ illum 6
 newmtl Grid
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
-map_d E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Canopy_Grid.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_Grid.png
+map_d E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Canopy_Grid.png
 
 newmtl Gummi
-Ns 6.694222
+Ns 6.694221
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.231818 0.231818 0.231818
@@ -86,18 +82,17 @@ d 1.000000
 illum 2
 
 newmtl Gun
-Ns 937.376034
+Ns 937.376038
 Ka 0.827273 0.827273 0.827273
-Kd 0.748399 0.748399 0.748399
 Ks 0.136364 0.136364 0.136364
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Gun.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Gun.png
 
 newmtl Helmet_Black
-Ns 918.792404
+Ns 918.792480
 Ka 1.000000 1.000000 1.000000
 Kd 0.005603 0.005603 0.005603
 Ks 0.329268 0.329268 0.329268
@@ -107,7 +102,7 @@ d 1.000000
 illum 2
 
 newmtl Helmet_Glases_Black
-Ns 881.766824
+Ns 881.766846
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.500000 0.500000 0.500000
@@ -119,16 +114,15 @@ illum 2
 newmtl Interior_Luxury
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.500347 0.500347 0.500347
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_Interior.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_Interior.png
 
 newmtl Interior_Rim
-Ns 829.136089
+Ns 829.136047
 Ka 0.817073 0.817073 0.817073
 Kd 0.011082 0.010639 0.010639
 Ks 0.500000 0.500000 0.500000
@@ -148,18 +142,17 @@ d 1.000000
 illum 2
 
 newmtl MainrotorMechanics
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_MainrotorMechanics_AO.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_MainrotorMechanics_AO.png
 
 newmtl Mirror
-Ns 998.001000
+Ns 998.001038
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -188,8 +181,18 @@ Ni 1.450000
 d 1.000000
 illum 2
 
+newmtl Steal
+Ns 562.500000
+Ka 1.000000 1.000000 1.000000
+Kd 0.462047 0.462047 0.462047
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+
 newmtl Steel
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
@@ -199,12 +202,11 @@ d 1.000000
 illum 3
 
 newmtl TailrotorMechanics
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
-Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\Bell222\\Bell222_TailrotorMechanics_AO.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/Bell222/Bell222_TailrotorMechanics_AO.png

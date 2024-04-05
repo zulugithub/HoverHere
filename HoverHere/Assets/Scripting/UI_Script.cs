@@ -1022,8 +1022,17 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         Pause_ODE(true);
         Simulation_Thread_Abort();
 
-        // if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
-        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+
+        //if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
+        Application.Quit(0);
+        //System.Diagnostics.Process.GetCurrentProcess().Kill();
+//#if ENABLE_WINMD_SUPPORT
+//Windows.ApplicationModel.Core.CoreApplication.Exit();
+//#endif
+        //System.Diagnostics.Process.GetCurrentProcess().Kill();
     }
     // ##################################################################################
 
@@ -1040,8 +1049,18 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         Pause_ODE(true);
         Simulation_Thread_Abort();
 
-        // if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
-        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
+
+        //if (!Application.isEditor) System.Diagnostics.Process.GetCurrentProcess().Kill();
+        Application.Quit(0);
+        //System.Diagnostics.Process.GetCurrentProcess().Kill();
+
+//#if ENABLE_WINMD_SUPPORT
+//Windows.ApplicationModel.Core.CoreApplication.Exit();
+//#endif
+//        System.Diagnostics.Process.GetCurrentProcess().Kill();
     }
     // ##################################################################################
 

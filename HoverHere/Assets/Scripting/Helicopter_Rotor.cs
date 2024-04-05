@@ -198,6 +198,7 @@ namespace Rotor
                 // Init rotor-blades visibility 
                 // ##################################################################################
                 // 1.) Check i.e. "Mainrotor_Model"
+                rotor_blades_material.Clear();
                 temp = Helicopter_Selected.transform.Find(rotor_name + "_Model/" + helicopter_name + "_" + rotor_name);
                 GameObject rotor = null;
                 if (temp != null)
@@ -230,7 +231,9 @@ namespace Rotor
                             foreach (Material material in each_child.GetComponent<MeshRenderer>().materials)
                             {
                                 //UnityEngine.Debug.Log("rotor_Blades (Instance) found. Mame: " + material.name + "         "  + helicopter_name + "_rotor_Blades (Instance)");
-                                if (material.name == rotor_name + "_Blades (Instance)" || material.name == helicopter_name + "_" + rotor_name + "_Blades (Instance)")
+                                if (material.name == rotor_name + "_Blades (Instance)" || 
+                                    material.name == helicopter_name + "_" + rotor_name + "_Blades" ||
+                                    material.name == helicopter_name + "_" + rotor_name + "_Blades (Instance)")
                                 {
                                     rotor_blades_material.Add(material);
                                     rotor_blades_material[rotor_blades_material.Count - 1].ToFadeMode();
@@ -437,11 +440,14 @@ namespace Rotor
                 {
                     rotor_blade_material.ChangeTransparency(fade_blade_transparency); // alpha setting
 
-                    // faded or transparent materials are rendered in wrong order, therefore set the material back to opaque, if rotating speed is slow. Else the cockpit windows are printed in front of the blades.
+                    // faded or transparent materials are rendered in wrong order, therefore set the material back to opaque, if rotating speed is slow. else the cockpit windows are printed in front of the blades.
                     if (fade_blade_transparency == 1)
                         rotor_blade_material.ToOpaqueMode();
                     else
                         rotor_blade_material.ToFadeMode();
+
+                    //rotor_blade_material.ToFadeMode(); // Test
+                    //rotor_blade_material.ChangeTransparency(0.1f); // alpha setting // Test
                 }
 
                 // rotor disk

@@ -7,6 +7,7 @@
 // ##################################################################################
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Build;
 #endif
 
 using UnityEngine;
@@ -34,7 +35,9 @@ namespace PlotKids.Infra
             var target = EditorUserBuildSettings.activeBuildTarget;
             var group = BuildPipeline.GetBuildTargetGroup(target);
             
-            ScriptingBackend = PlayerSettings.GetScriptingBackend(group).ToString();
+            //ScriptingBackend = PlayerSettings.GetScriptingBackend(group).ToString();
+            //'PlayerSettings.GetScriptingBackend(BuildTargetGroup)' is obsolete: 'Use GetScriptingBackend(NamedBuildTarget buildTarget) instead'
+
         }
 
         [MenuItem("Tools/Gouda/Pring Hg Version")]

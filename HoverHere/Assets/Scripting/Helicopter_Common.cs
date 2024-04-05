@@ -1022,7 +1022,7 @@ namespace Common
 
             // Add here angle-axis of tilting for torque calculation (due to stiffenss / O-ring)
             // https://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
-            // - The angle is given by acos of the dot product of the two(normalised) vectors: v1•v2 = | v1 || v2 | cos(angle)
+            // - The angle is given by acos of the dot product of the two(normalised) vectors: v1ï¿½v2 = | v1 || v2 | cos(angle)
             // - The axis is given by the cross product of the two vectors, the length of this axis is given by | v1 x v2| = | v1 || v2 | sin(angle).
             tilting_angle = Mathf.Acos(Helper.Dot(0f, 1f, 0f, ey_TO__R.x, ey_TO__R.y, ey_TO__R.z)); // "R" is here the rotor-frame, y-axis is the rotation axis of the rotor shaft
             axis_vector = Helper.Cross(new Vector3(0f, 1f, 0f), ey_TO__R.normalized); // TODO: catch if both vector are parallel
@@ -1351,7 +1351,7 @@ namespace Common
         /// <param name="color"></param>
         /// <returns></returns>
         // ############################################################################
-        public static GameObject Create_Line(Transform ui_debug_lines, Color color)
+        public static GameObject Create_Line(Transform ui_debug_lines, UnityEngine.Color color)
         {
             GameObject myLine = new GameObject();
             myLine.transform.parent = ui_debug_lines.transform;
@@ -1963,8 +1963,8 @@ namespace Common
                 int texWid = (int)sprite.rect.width;
                 int texHei = (int)sprite.rect.height;
                 Texture2D newTex = new Texture2D(texWid, texHei);
-                Color[] defaultPixels = Enumerable.Repeat<Color>(new Color(0, 0, 0, 0), texWid * texHei).ToArray();
-                Color[] pixels = sprite.texture.GetPixels((int)sprite.textureRect.x
+                UnityEngine.Color[] defaultPixels = Enumerable.Repeat<UnityEngine.Color>(new UnityEngine.Color(0, 0, 0, 0), texWid * texHei).ToArray();
+                UnityEngine.Color[] pixels = sprite.texture.GetPixels((int)sprite.textureRect.x
                                                         , (int)sprite.textureRect.y
                                                         , (int)sprite.textureRect.width
                                                         , (int)sprite.textureRect.height);
@@ -2387,7 +2387,7 @@ public class TextureScaler
 
         //Get rendered data back to a new texture
         Texture2D result = new Texture2D(width, height, TextureFormat.ARGB32, true);
-        result.Resize(width, height);
+        result.Reinitialize(width, height);
         result.ReadPixels(texR, 0, 0, true);
         return result;
     }
@@ -2405,7 +2405,7 @@ public class TextureScaler
         _gpu_scale(tex, width, height, mode);
 
         // Update new texture
-        tex.Resize(width, height);
+        tex.Reinitialize(width, height);
         tex.ReadPixels(texR, 0, 0, true);
         tex.Apply(true);    //Remove this if you hate us applying textures for you :)
     }
@@ -2421,14 +2421,14 @@ public class TextureScaler
         RenderTexture rtt = new RenderTexture(width, height, 32);
 
         //Set the RTT in order to render to it
-        Graphics.SetRenderTarget(rtt);
+        UnityEngine.Graphics.SetRenderTarget(rtt);
 
         //Setup 2D matrix in range 0..1, so nobody needs to care about sized
         GL.LoadPixelMatrix(0, 1, 1, 0);
 
         //Then clear & draw the texture to fill the entire RTT.
-        GL.Clear(true, true, new Color(0, 0, 0, 0));
-        Graphics.DrawTexture(new Rect(0, 0, 1, 1), src);
+        GL.Clear(true, true, new UnityEngine.Color(0, 0, 0, 0));
+        UnityEngine.Graphics.DrawTexture(new Rect(0, 0, 1, 1), src);
     }
 }
 // ############################################################################

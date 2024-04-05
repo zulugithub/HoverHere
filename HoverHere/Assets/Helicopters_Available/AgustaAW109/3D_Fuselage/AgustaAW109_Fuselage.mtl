@@ -1,19 +1,18 @@
-# Blender MTL File: 'AgustaAW109_458.blend'
-# Material Count: 12
+# Blender 4.1.0 MTL File: 'AgustaAW109_462.blend'
+# www.blender.org
 
 newmtl Canopy
-Ns 51.652902
+Ns 51.652905
 Ka 0.481818 0.481818 0.481818
-Kd 0.494084 0.494084 0.494084
 Ks 0.240909 0.240909 0.240909
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 3
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_000_A.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/AgustaAW109/AgustaAW109_Canopy_000_A.png
 
 newmtl Glas
-Ns 946.198332
+Ns 946.198303
 Ka 0.863636 0.863636 0.863636
 Kd 0.086174 0.086174 0.086174
 Ks 0.322727 0.322727 0.322727
@@ -35,17 +34,15 @@ illum 2
 newmtl Grid
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
-d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
-map_d E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Canopy_Grid.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/AgustaAW109/AgustaAW109_Canopy_Grid.png
+map_d E:/Helikopter/HoverHere/Helicopter/AgustaAW109/AgustaAW109_Canopy_Grid.png
 
 newmtl Gummi
-Ns 6.694222
+Ns 6.694221
 Ka 1.000000 1.000000 1.000000
 Kd 0.006369 0.006369 0.006369
 Ks 0.231818 0.231818 0.231818
@@ -57,13 +54,12 @@ illum 2
 newmtl Interior_Luxury
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.500347 0.500347 0.500347
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd E:\\Helikopter\\HoverHere\\Helicopter\\AgustaAW109\\AgustaAW109_Interior_Luxury.png
+map_Kd E:/Helikopter/HoverHere/Helicopter/AgustaAW109/AgustaAW109_Interior_Luxury.png
 
 newmtl Interior_Rim
 Ns 250.000000
@@ -96,7 +92,7 @@ d 1.000000
 illum 2
 
 newmtl Mirror
-Ns 998.001000
+Ns 998.001038
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
@@ -116,7 +112,7 @@ d 1.000000
 illum 2
 
 newmtl Steel
-Ns 562.500022
+Ns 562.500000
 Ka 1.000000 1.000000 1.000000
 Kd 0.462047 0.462047 0.462047
 Ks 0.500000 0.500000 0.500000

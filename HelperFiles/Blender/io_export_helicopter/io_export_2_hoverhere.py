@@ -24,6 +24,8 @@
 ## 2021.04.18 V1.02
 ## 2021.09.12 V1.03
 ## 2022.06.25 V1.04
+## 2023.05.18 V1.05 use new obj exporter
+## 2024.04.05 V1.06 Blender 4.1
 
 #################################################################################
 ##    ____      ____    
@@ -39,8 +41,8 @@
 bl_info = {
     "name": "Export blender helicopter model to 'Hover Here, a Free-RC_Helicopter-Simulator.",
     "author": "zulu",
-    "version": (1, 0, 5),
-    "blender": (3, 2, 00),
+    "version": (1, 0, 6),
+    "blender": (4, 1, 00),
     "location": "File > Export > HoverHere",
     "description": "Export to HoverHere",
     "warning": "",
@@ -124,9 +126,11 @@ def export_objects():
 				
 			if len(bpy.context.selected_objects): 
 				target_file = os.path.join( target_folder +'\\3D_' + object_name, name_in_unity + '_' + object_name + '.obj')
-				bpy.ops.export_scene.obj(filepath=target_file, check_existing=False, filter_glob="*.obj;*.mtl", use_selection=True, use_animation=False, use_mesh_modifiers=True, use_edges=True, use_smooth_groups=False, use_smooth_groups_bitflags=False, use_normals=True, use_uvs=True, use_materials=True, use_triangles=False, use_nurbs=False, use_vertex_groups=False, use_blen_objects=True, group_by_object=False, group_by_material=True, keep_vertex_order=False, global_scale=scale, path_mode='AUTO', axis_forward='Z', axis_up='Y')
+				#bpy.ops.export_scene.obj(filepath=target_file, check_existing=False, filter_glob="*.obj;*.mtl", use_selection=True, use_animation=False, use_mesh_modifiers=True, use_edges=True, use_smooth_groups=False, use_smooth_groups_bitflags=False, use_normals=True, use_uvs=True, use_materials=True, use_triangles=False, use_nurbs=False, use_vertex_groups=False, use_blen_objects=True, group_by_object=False, group_by_material=True, keep_vertex_order=False, global_scale=scale, path_mode='AUTO', axis_forward='Z', axis_up='Y')
+				bpy.ops.wm.obj_export(filepath=target_file, check_existing=False, filter_blender=False, filter_backup=False, filter_image=False, filter_movie=False, filter_python=False, filter_font=False, filter_sound=False, filter_text=False, filter_archive=False, filter_btx=False, filter_collada=False, filter_alembic=False, filter_usd=False, filter_obj=False, filter_volume=False, filter_folder=True, filter_blenlib=False, filemode=8, display_type='DEFAULT', sort_method='DEFAULT', export_animation=False, start_frame=-2147483648, end_frame=2147483647, forward_axis='Z', up_axis='Y',          global_scale=scale, apply_modifiers=True, export_eval_mode='DAG_EVAL_VIEWPORT', export_selected_objects=True, export_uv=True, export_normals=True, export_colors=False, export_materials=True, export_pbr_extensions=False, path_mode='AUTO', export_triangulated_mesh=False, export_curves_as_nurbs=False, export_object_groups=False, export_material_groups=True, export_vertex_groups=False, export_smooth_groups=False, smooth_group_bitflags=False, filter_glob="*.obj;*.mtl")
+				#bpy.ops.wm.obj_export(filepath=target_file, check_existing=False, filter_blender=False, filter_backup=False, filter_image=False, filter_movie=False, filter_python=False, filter_font=False, filter_sound=False, filter_text=False, filter_archive=False, filter_btx=False, filter_collada=False, filter_alembic=False, filter_usd=False, filter_obj=False, filter_volume=False, filter_folder=True, filter_blenlib=False, filemode=8, display_type='DEFAULT', sort_method='',        export_animation=False, start_frame=-2147483648, end_frame=2147483647, forward_axis='NEGATIVE_Z', up_axis='Y', global_scale=scale, apply_modifiers=True, export_eval_mode='DAG_EVAL_VIEWPORT', export_selected_objects=True, export_uv=True, export_normals=True, export_colors=False, export_materials=True, export_pbr_extensions=False, path_mode='AUTO', export_triangulated_mesh=False, export_curves_as_nurbs=False, export_object_groups=False, export_material_groups=True, export_vertex_groups=False, export_smooth_groups=False, smooth_group_bitflags=False, filter_glob='*.obj;*.mtl')
 	######################################################################################
-	
+
 	
 	######################################################################################
 	## function to export obj file (must be parented to a Empty)
@@ -187,7 +191,8 @@ def export_objects():
 				object.select_set(True)
 				
 				target_file = os.path.join( target_folder +'\\3D_' + folder_name, name_in_unity + '_' + object_name + '.obj')
-				bpy.ops.export_scene.obj(filepath=target_file, check_existing=False, filter_glob="*.obj;*.mtl", use_selection=True, use_animation=False, use_mesh_modifiers=True, use_edges=True, use_smooth_groups=False, use_smooth_groups_bitflags=False, use_normals=True, use_uvs=True, use_materials=True, use_triangles=False, use_nurbs=False, use_vertex_groups=False, use_blen_objects=True, group_by_object=False, group_by_material=True, keep_vertex_order=False, global_scale=scale, path_mode='AUTO', axis_forward='Z', axis_up='Y')
+				#bpy.ops.export_scene.obj(filepath=target_file, check_existing=False, filter_glob="*.obj;*.mtl", use_selection=True, use_animation=False, use_mesh_modifiers=True, use_edges=True, use_smooth_groups=False, use_smooth_groups_bitflags=False, use_normals=True, use_uvs=True, use_materials=True, use_triangles=False, use_nurbs=False, use_vertex_groups=False, use_blen_objects=True, group_by_object=False, group_by_material=True, keep_vertex_order=False, global_scale=scale, path_mode='AUTO', axis_forward='Z', axis_up='Y')
+				bpy.ops.wm.obj_export(filepath=target_file, check_existing=False, filter_blender=False, filter_backup=False, filter_image=False, filter_movie=False, filter_python=False, filter_font=False, filter_sound=False, filter_text=False, filter_archive=False, filter_btx=False, filter_collada=False, filter_alembic=False, filter_usd=False, filter_obj=False, filter_volume=False, filter_folder=True, filter_blenlib=False, filemode=8, display_type='DEFAULT', sort_method='DEFAULT',export_animation=False,start_frame=-2147483648, end_frame=2147483647, forward_axis='Z', up_axis='Y', global_scale=scale, apply_modifiers=True, export_eval_mode='DAG_EVAL_VIEWPORT', export_selected_objects=True, export_uv=True, export_normals=True, export_colors=False, export_materials=True, export_pbr_extensions=False, path_mode='AUTO', export_triangulated_mesh=False, export_curves_as_nurbs=False, export_object_groups=False, export_material_groups=True, export_vertex_groups=False, export_smooth_groups=False, smooth_group_bitflags=False,filter_glob="*.obj;*.mtl")      
 				
 				# restore 
 				object.location = save_location

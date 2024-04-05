@@ -473,13 +473,15 @@ namespace Parameter
         public stru_float V_h { get; set; } // [m/s] friction to stiction transition velocity 
         public stru_float U_max { get; set; } // [m] stiction model's maximal distance to ancor point
         public stru_float stiction_factor { get; set; } // [-]
-        
+        public stru_int refreshRate_VR { get; set; } // [-]
+
         public stru_various()
         {
             sceneries_file_location = new stru_list();
             V_h = new stru_float();
             U_max = new stru_float();
             stiction_factor = new stru_float();
+            refreshRate_VR = new stru_int();
 
 
             sceneries_file_location.val = 1;
@@ -512,6 +514,15 @@ namespace Parameter
             stiction_factor.comment = "";
             stiction_factor.unit = "-";
             stiction_factor.save_under_player_prefs = true;
+
+            refreshRate_VR.val = 90;
+            refreshRate_VR.min = 25;
+            refreshRate_VR.max = 200;
+            refreshRate_VR.hint = "VR refreshrate is used, if automatic detection fails";
+            refreshRate_VR.comment = "";
+            refreshRate_VR.unit = "Hz";
+            refreshRate_VR.save_under_player_prefs = true;
+            
         }
     }
 
@@ -585,7 +596,9 @@ namespace Parameter
             this.various.V_h.val = (PlayerPrefs.GetFloat("__simulation_" + "V_h", this.various.V_h.val));
             this.various.U_max.val = (PlayerPrefs.GetFloat("__simulation_" + "U_max", this.various.U_max.val));
             this.various.stiction_factor.val = (PlayerPrefs.GetFloat("__simulation_" + "stiction_factor", this.various.stiction_factor.val));
+            this.various.refreshRate_VR.val = (PlayerPrefs.GetInt("__simulation_" + "refreshRate_VR", this.various.refreshRate_VR.val));
 
+ 
         // ##################################################################################
     }
 

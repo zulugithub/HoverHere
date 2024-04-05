@@ -11,6 +11,7 @@ using System.Collections;
 using System.Threading;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 
 public abstract class Helicopter_TimestepModel : MonoBehaviour
@@ -19,7 +20,7 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
     public float thread_ODE_deltat; // = 0.001f;
     public Thread thread_ODE;
 
-    public readonly bool threadRunning = true;
+    public bool threadRunning = true;
     //bool stepFree = true;
     //bool stepRunning = false;
     int stepRunning = 0;
@@ -39,9 +40,16 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
 
     ~Helicopter_TimestepModel()
     {
-        Thread.Sleep(0);
-        if(thread_ODE != null)
-            thread_ODE.Abort();
+        //Thread.Sleep(1000);
+        //try
+        //{
+        //    thread_ODE.Join();
+        //}
+        //catch { } // ignore "already exited" exception
+        //Thread.Sleep(1000);
+
+      //  if (thread_ODE != null)
+     //       thread_ODE.Abort();
     }
 
    // public bool GetThreaded()
@@ -57,8 +65,9 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
        // if (threaded)
        // {
             thread_ODE = new Thread(this.ThreadedActions);
-
+            thread_ODE.IsBackground = true;
             thread_ODE.Start();
+            
             //thread_ODE.Priority = System.Threading.ThreadPriority.Lowest;
             sw.Start();
             //UnityEngine.Debug.Log("GetHashCode " + thread_ODE.GetHashCode() + "   ManagedThreadId " + thread_ODE.ManagedThreadId);
@@ -68,7 +77,25 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
 
     public void Simulation_Thread_Abort()
     {
-        thread_ODE.Abort();
+        threadRunning = false;
+        //thread_ODE.Abort();
+        //while (thread_ODE.ThreadState.HasFlag(System.Threading.ThreadState.Aborted))
+        //    Thread.Sleep(0);
+
+        Thread.Sleep(1000);
+        thread_ODE.Join(2000);
+
+        //Thread.Sleep(1000);
+
+        //try
+        //{
+        //    thread_ODE.Join();
+        //}
+        //catch { } // ignore "already exited" exception
+
+        //     if (thread_ODE != null)   
+        //         thread_ODE.Abort();
+
     }
 
 

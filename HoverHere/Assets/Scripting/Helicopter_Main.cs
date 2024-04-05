@@ -68,6 +68,7 @@ using System.Threading;
 using Rotor;
 using Parameter;
 
+
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 //using UnityEngine.InputSystem;
@@ -307,7 +308,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     float mouse_camera_yaw;
     float mouse_camera_pitch;
     const float mouse_fov_limit = 30.0f;
-    const float mouse_scroll_fov_increment = 0.015f;
+    const float mouse_scroll_fov_increment = 1.5f;
     const float mouse_camera_speed_horizontaly = 0.20f;
     const float mouse_camera_speed_verticaly = 0.20f;
 
@@ -450,7 +451,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     public static bool XRDeviceIsPresent()
     {
         var xrDisplaySubsystems = new List<XRDisplaySubsystem>();
-        SubsystemManager.GetInstances<XRDisplaySubsystem>(xrDisplaySubsystems);
+        SubsystemManager.GetSubsystems<XRDisplaySubsystem>(xrDisplaySubsystems);
         foreach (var xrDisplay in xrDisplaySubsystems)
         {
             UnityEngine.Debug.Log("xrDisplay: " + xrDisplay);
@@ -477,7 +478,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     {
         bool vrIsRunning = false;
         displays.Clear();
-        SubsystemManager.GetInstances(displays);
+        SubsystemManager.GetSubsystems(displays);
         foreach (var displaySubsystem in displays)
         {
             if (displaySubsystem.running)
@@ -601,12 +602,16 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         float refreshRate;
 
         if (!XRSettings.enabled)
-            refreshRate = (float)Screen.currentResolution.refreshRate;
+        {
+            //refreshRate = (float)Screen.currentResolution.refreshRate;
+            refreshRate = (float)Screen.currentResolution.refreshRateRatio.value;
+        }
         else
         {
             refreshRate = XRDevice.refreshRate;
             //UnityEngine.Debug.Log("XRDevice.refreshRate " + XRDevice.refreshRate); 
-            if (refreshRate == 0) refreshRate = 90; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
+            //if (refreshRate == 0) refreshRate = 90; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
+            if (refreshRate == 0) refreshRate = helicopter_ODE.par.simulation.various.refreshRate_VR.val; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
         }
 
         if (refresh_rate_sec_found_flag == false)
@@ -962,31 +967,31 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //UnityEngine.Debug.Log(" helicopter_ODE.ODEDebug.contact_forceR1.Count " + helicopter_ODE.ODEDebug.contact_forceR1.Count);
         for (var i = 0; i < helicopter_ODE.ODEDebug.contact_forceR1.Count; i++)
         {
-            helicopter_ODE.ODEDebug.line_object_contact_forceR1[i] = Helper.Create_Line(ui_debug_lines, Color.green);
-            helicopter_ODE.ODEDebug.line_object_contact_forceR2[i] = Helper.Create_Line(ui_debug_lines, new Color( 0f, 0.8f, 0.0f, 1.0f ));
+            helicopter_ODE.ODEDebug.line_object_contact_forceR1[i] = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.green);
+            helicopter_ODE.ODEDebug.line_object_contact_forceR2[i] = Helper.Create_Line(ui_debug_lines, new UnityEngine.Color( 0f, 0.8f, 0.0f, 1.0f ));
         }
 
-        helicopter_ODE.ODEDebug.line_object_mainrotor_forceO = Helper.Create_Line(ui_debug_lines, Color.yellow);
-        helicopter_ODE.ODEDebug.line_object_mainrotor_torqueO = Helper.Create_Line(ui_debug_lines, Color.blue);
-        helicopter_ODE.ODEDebug.line_object_mainrotor_flapping_stiffness_torqueO = Helper.Create_Line(ui_debug_lines, Color.blue);
+        helicopter_ODE.ODEDebug.line_object_mainrotor_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.yellow);
+        helicopter_ODE.ODEDebug.line_object_mainrotor_torqueO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
+        helicopter_ODE.ODEDebug.line_object_mainrotor_flapping_stiffness_torqueO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
 
-        helicopter_ODE.ODEDebug.line_object_tailrotor_forceO = Helper.Create_Line(ui_debug_lines, Color.yellow);
-        helicopter_ODE.ODEDebug.line_object_tailrotor_torqueO = Helper.Create_Line(ui_debug_lines, Color.blue);
-        helicopter_ODE.ODEDebug.line_object_tailrotor_flapping_stiffness_torqueO = Helper.Create_Line(ui_debug_lines, Color.blue);
+        helicopter_ODE.ODEDebug.line_object_tailrotor_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.yellow);
+        helicopter_ODE.ODEDebug.line_object_tailrotor_torqueO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
+        helicopter_ODE.ODEDebug.line_object_tailrotor_flapping_stiffness_torqueO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
 
-        helicopter_ODE.ODEDebug.line_object_propeller_forceO = Helper.Create_Line(ui_debug_lines, Color.yellow);
-        helicopter_ODE.ODEDebug.line_object_propeller_torqueO = Helper.Create_Line(ui_debug_lines, Color.blue);
+        helicopter_ODE.ODEDebug.line_object_propeller_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.yellow);
+        helicopter_ODE.ODEDebug.line_object_propeller_torqueO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
 
         for (var i = 0; i < helicopter_ODE.ODEDebug.line_object_booster_forceO.Count; i++)
         {
-            helicopter_ODE.ODEDebug.line_object_booster_forceO[i] = Helper.Create_Line(ui_debug_lines, Color.yellow);
+            helicopter_ODE.ODEDebug.line_object_booster_forceO[i] = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.yellow);
         }
 
-        helicopter_ODE.ODEDebug.line_object_drag_on_fuselage_drag_on_fuselage_forceO = Helper.Create_Line(ui_debug_lines, Color.red);
-        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_fin_forceO = Helper.Create_Line(ui_debug_lines, Color.red);
-        helicopter_ODE.ODEDebug.line_object_force_on_vertical_fin_forceO = Helper.Create_Line(ui_debug_lines, Color.red);
-        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_wing_left_forceO = Helper.Create_Line(ui_debug_lines, Color.red);
-        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_wing_right_forceO = Helper.Create_Line(ui_debug_lines, Color.red);
+        helicopter_ODE.ODEDebug.line_object_drag_on_fuselage_drag_on_fuselage_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
+        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_fin_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
+        helicopter_ODE.ODEDebug.line_object_force_on_vertical_fin_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
+        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_wing_left_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
+        helicopter_ODE.ODEDebug.line_object_force_on_horizontal_wing_right_forceO = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
 
 
         int r_n = 4;  // radial steps - (polar coordiantes)
@@ -995,9 +1000,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         {
             for (int c = 0; c < c_n; c++)
             {
-                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_velocity[r][c] = Helper.Create_Line(ui_debug_lines, Color.green);
-                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_thrust[r][c] = Helper.Create_Line(ui_debug_lines, Color.blue);
-                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_torque[r][c] = Helper.Create_Line(ui_debug_lines, Color.red);
+                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_velocity[r][c] = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.green);
+                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_thrust[r][c] = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.blue);
+                helicopter_ODE.ODEDebug.line_object_BEMT_blade_segment_torque[r][c] = Helper.Create_Line(ui_debug_lines, UnityEngine.Color.red);
             }
         }
     }
@@ -1639,7 +1644,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         // init filter for find the exact monitor refreshrate
         // ##################################################################################
-        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRate);
+        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / (float)Screen.currentResolution.refreshRateRatio.value);
         // ##################################################################################
 
 
@@ -1891,7 +1896,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     transmitter_display_digits_material[i].renderQueue = 3000;
 
                     // change material color to white
-                    transmitter_display_digits_material[i].SetColor("_Color", Color.white);
+                    transmitter_display_digits_material[i].SetColor("_Color", UnityEngine.Color.white);
                 }
             }
         }
@@ -1988,7 +1993,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //Resolution[] resolutions = Screen.resolutions;
         if (!XRSettings.enabled)
         {
-            refresh_rate_hz = Screen.currentResolution.refreshRate; // [Hz]
+            refresh_rate_hz = (float)Screen.currentResolution.refreshRateRatio.value; // [Hz]
             refresh_rate_sec = 1.0f / refresh_rate_hz; // [sec]
                                                        //refresh_rate_sec = Time.smoothDeltaTime; 
         }
@@ -2586,7 +2591,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //    target_frame_rate_old = target_frame_rate;
         //}
         
-        bool rotor_disk_complexity, motion_blur, bloom, depthoffield;
+        //bool rotor_disk_complexity;
+        bool motion_blur, bloom, depthoffield;
         int quality_setting, resolution_setting;
         if (!XRSettings.enabled)
         {
@@ -4455,12 +4461,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // plot 2d graph
         if (ui_debug_panel_state > 1 && GraphManager.Graph != null)
         {
-            GraphManager.Graph.Plot("mainrotor_forceLH [N]", helicopter_ODE.ODEDebug.mainrotor_forceLH.y, Color.black, plot2D_graph_rect[0]);
-            GraphManager.Graph.Plot("mainrotor_torqueLH [Nm]", helicopter_ODE.ODEDebug.mainrotor_torqueLH.y, Color.black, plot2D_graph_rect[1]);
-            GraphManager.Graph.Plot("omega_mr [rpm]", omega_mr * Helper.RadPerSec_to_Rpm, Color.black, plot2D_graph_rect[2]);
-            GraphManager.Graph.Plot("tailrotor_forceLH [N]", helicopter_ODE.ODEDebug.tailrotor_forceLH.z, Color.black, plot2D_graph_rect[3]);
-            GraphManager.Graph.Plot("veloLH.y [m/s]", helicopter_ODE.veloLH.y, Color.black, plot2D_graph_rect[4]);
-            GraphManager.Graph.Plot("veloLH.xz [m/s]", Mathf.Sqrt(helicopter_ODE.veloLH.x * helicopter_ODE.veloLH.x + helicopter_ODE.veloLH.z * helicopter_ODE.veloLH.z), Color.black, plot2D_graph_rect[5]);
+            GraphManager.Graph.Plot("mainrotor_forceLH [N]", helicopter_ODE.ODEDebug.mainrotor_forceLH.y, UnityEngine.Color.black, plot2D_graph_rect[0]);
+            GraphManager.Graph.Plot("mainrotor_torqueLH [Nm]", helicopter_ODE.ODEDebug.mainrotor_torqueLH.y, UnityEngine.Color.black, plot2D_graph_rect[1]);
+            GraphManager.Graph.Plot("omega_mr [rpm]", omega_mr * Helper.RadPerSec_to_Rpm, UnityEngine.Color.black, plot2D_graph_rect[2]);
+            GraphManager.Graph.Plot("tailrotor_forceLH [N]", helicopter_ODE.ODEDebug.tailrotor_forceLH.z, UnityEngine.Color.black, plot2D_graph_rect[3]);
+            GraphManager.Graph.Plot("veloLH.y [m/s]", helicopter_ODE.veloLH.y, UnityEngine.Color.black, plot2D_graph_rect[4]);
+            GraphManager.Graph.Plot("veloLH.xz [m/s]", Mathf.Sqrt(helicopter_ODE.veloLH.x * helicopter_ODE.veloLH.x + helicopter_ODE.veloLH.z * helicopter_ODE.veloLH.z), UnityEngine.Color.black, plot2D_graph_rect[5]);
         }
         else
         {
@@ -4969,8 +4975,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
 
-                if (IsActive() && IsVrRunning())
-                //if (XR_devide_is_active)
+
+
+                //if (UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head).isValid)
+                if (XRGeneralSettings.Instance.Manager.activeLoader != null)  // XR device detected/loaded
+                // if (IsActive() && IsVrRunning())
+                // if (XR_devide_is_active)
                 { 
                     UnityEngine.Debug.Log("All Subsystems Started!");
 
@@ -4983,7 +4993,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                     // fps
                     refresh_rate_sec_old = 0;
-                    exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRate);
+                    exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
                     refresh_rate_sec_found_flag = false;
                     //Find_Exact_Monitor_Refreshrate();
 
@@ -5060,7 +5070,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
         refresh_rate_sec_old = 0;
-        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRate);
+        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
         refresh_rate_sec_found_flag = false;
         // Find_Exact_Monitor_Refreshrate();
 
@@ -5119,11 +5129,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void OnApplicationQuit()
     {
         //UnityEngine.Debug.Log("Application ending after " + Time.time + " seconds");
-#if UNITY_EDITOR
-        Thread.Sleep(0);
-        if (thread_ODE != null)
-            thread_ODE.Abort();
-#endif
+//#if UNITY_EDITOR
+        //Thread.Sleep(1000);
+        //if (thread_ODE != null)
+        //    thread_ODE.Abort();
+//#endif
 
 #if DEBUG_LOG  
         // debug time ticks to file

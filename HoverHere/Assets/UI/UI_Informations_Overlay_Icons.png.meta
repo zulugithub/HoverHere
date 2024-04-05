@@ -39,7 +39,7 @@ TextureImporter:
       213: -7865713705136075778
     second: UI_Informations_Overlay_Icons_11
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -56,10 +56,12 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
+    flipGreenChannel: 0
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -68,12 +70,12 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: -1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -98,6 +100,8 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -388,9 +392,21 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-  spritePackingTag: 
+    nameFileIdTable:
+      UI_Informations_Overlay_Icons_0: 9115247175938640634
+      UI_Informations_Overlay_Icons_1: 5602080163950251842
+      UI_Informations_Overlay_Icons_10: 4913485022969332429
+      UI_Informations_Overlay_Icons_11: -7865713705136075778
+      UI_Informations_Overlay_Icons_2: 6715634147834341695
+      UI_Informations_Overlay_Icons_3: -2408387064088096809
+      UI_Informations_Overlay_Icons_4: -1110406367295244776
+      UI_Informations_Overlay_Icons_5: -8787321716141627399
+      UI_Informations_Overlay_Icons_6: -8122312076026169112
+      UI_Informations_Overlay_Icons_7: -1537708399374092430
+      UI_Informations_Overlay_Icons_8: 9145876765916165414
+      UI_Informations_Overlay_Icons_9: 1353778250990617375
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 

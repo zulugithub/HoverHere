@@ -72,7 +72,7 @@ This is the author's first Unity project, therefore thre is no claim to having f
 To build this game you need at least a free version of Unity (https://store.unity.com/download). 
 After downloading and installing Unity and the latest files from this repository you can open Unity Hub and browse for the project files. Opening the project the first time takes a while. Then you have to go to "File" -> "Open Scene" -> select "Scenes"-folder -> select "Main.unity" -> klick Open. To run the game in the Unity editor klick the "play" button in the top middle of the screen.
 
-The latest release uses Unity 2020.3.25f1.
+The latest release uses Unity 2023.2.16f1.
 
 ## Credits
 
