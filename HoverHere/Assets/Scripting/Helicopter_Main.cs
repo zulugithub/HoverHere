@@ -141,9 +141,18 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     double time = 0.0; // [sec] time
     readonly double[] u_inputs = new double[8]; // transmitter/controller input signal vector; // input for system of ordenary equations
     readonly Stopwatch stopwatch = new Stopwatch();
-    int counter = 0;
+    int counter_ODE_steps = 0;
     int error_counter = 0;
     float msec_per_thread_call_filtered=0;
+
+    double refresh_rate_hz;
+    double refresh_rate_sec;
+    //float refresh_rate_sec_old = 0;
+   // bool refresh_rate_sec_found_flag = false;
+    //int refresh_rate_sec_found_flag_cntr = 0;
+    //int UnitySelectMonitor = 0;
+   // Helper.Exponential_Moving_Average_Filter exponential_moving_average_filter_for_refresh_rate_sec = new Helper.Exponential_Moving_Average_Filter();
+
 
     // animation: pilot is rising his arms with transmitter
     Animator animator_pilot_with_transmitter;
@@ -335,10 +344,10 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     bool bloom_old;
 
     MotionBlur motion_blur_layer = null;
-    bool motion_blur_old;
+    bool? motion_blur_old;
 
     DepthOfField depthoffield_layer = null;
-    bool depthoffield_old;
+    bool? depthoffield_old;
 
     int quality_setting_old = 0;
     int resolution_setting_old = 0;
@@ -539,11 +548,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // Inside of it the explicit ODE solver is called gets the ODE with all its calculations updated
     // The 4th order Runge Kutta needs four calls to the ODE to get the states for next timestep approximated
     // ##################################################################################
-    public override void TakeStep(float dt)
+    public override void TakeStep(float dt, bool last_takestep_in_frame)
     {
       //  lock (_locker)
        // {
-            IO_AntiStutter__Get_ODE_Transform_Before_Calculation(dt);
+           // IO_AntiStutter__Get_ODE_Transform_Before_Calculation(dt);
 
             //dt = helicopter_ODE.par.simulation.delta_t.val;//  thread_ODE_deltat    override with const-value
 
@@ -551,7 +560,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             stopwatch.Start();
 
             // main solver embedded ode calculations
-            int RK4Step_error = helicopter_ODE.RK4Step(ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37);
+            int RK4Step_error = helicopter_ODE.RK4Step(last_takestep_in_frame, ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37);
 
             // if results are outside of bounds (see check_results()-function) than catch error
             if (RK4Step_error > 0)
@@ -584,9 +593,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
             stopwatch.Stop();
-            counter++;
+            counter_ODE_steps++;
 
-            IO_AntiStutter__Get_ODE_Transform_After_Calculation();
+           // IO_AntiStutter__Get_ODE_Transform_After_Calculation();
        // }
     }
     // ##################################################################################
@@ -599,7 +608,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // ##################################################################################
     public void Find_Exact_Monitor_Refreshrate()
     {
-        float refreshRate;
+        double refreshRate;
 
         if (!XRSettings.enabled)
         {
@@ -614,19 +623,25 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             if (refreshRate == 0) refreshRate = helicopter_ODE.par.simulation.various.refreshRate_VR.val; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
         }
 
-        if (refresh_rate_sec_found_flag == false)
+        refresh_rate_hz = refreshRate;
+        refresh_rate_sec = 1.0 / refreshRate;
+
+        screen_refreshrate_fps = (float)refresh_rate_hz;
+        
+
+       /* if (refresh_rate_sec_found_flag == false)
         {
-            const float range_dT = 0.05f; // 5 %
+            const float range_dT = 0.005f; // 0.5 %
             if (Time.deltaTime < (refreshRate * (1.0f + range_dT)) ||
                 Time.deltaTime > (refreshRate * (1.0f - range_dT)))
             {
                 // do the filtering
                 float refresh_rate_sec_filtered =
-                    (float)exponential_moving_average_filter_for_refresh_rate_sec.Calculate(200, (double)Time.deltaTime);
+                    (float)exponential_moving_average_filter_for_refresh_rate_sec.Calculate(300, (double)Time.deltaTime);
 
                 // clamp the refresh-rate close to the theoretical value
                 float refresh_rate_sec_rounded = 1.0f / refreshRate;
-                const float range = 0.05f; // 5 %
+                const float range = 0.005f; // 0.5 %
                 if (refresh_rate_sec_filtered > (refresh_rate_sec_rounded * (1.0f + range)) ||
                     refresh_rate_sec_filtered < (refresh_rate_sec_rounded * (1.0f - range)))
                     refresh_rate_sec = refresh_rate_sec_rounded;
@@ -638,7 +653,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     if (Mathf.Abs(refresh_rate_sec_old - refresh_rate_sec) < 0.0001f)
                     {
                         refresh_rate_sec_found_flag_cntr++;
-                        if (refresh_rate_sec_found_flag_cntr > 100) // if 100 times the value hasn't changed, then we found the refresh_rate_sec
+                        if (refresh_rate_sec_found_flag_cntr > 10) // if 10 times the value hasn't changed, then we found the refresh_rate_sec
                             refresh_rate_sec_found_flag = true;
                     }
                     else
@@ -651,7 +666,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                 refresh_rate_hz = 1.0f / refresh_rate_sec;
             }
-        }
+        }*/
     }
     // ##################################################################################
 
@@ -668,7 +683,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         helicopter_ODE.Set_Initial_Conditions();
 
         // anti stutter - extrapolation of last two ODE-thread results
-        IO_AntiStutter__Preset_ODE_Thread_Transforms();
+        //IO_AntiStutter__Preset_ODE_Thread_Transforms();
 
         // reset transmitter countdown timer
         transmitter_countdown_minutes_timer = helicopter_ODE.par.transmitter_and_helicopter.transmitter.countdown_minutes.val * 60.0f;
@@ -1600,7 +1615,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             // deleting the key leads later to set to default values
             //PlayerPrefs.DeleteKey("active_helicopter_id");
             //PlayerPrefs.DeleteKey("active_scenery_id");
-            PlayerPrefs.DeleteKey("__simulation_" + "delta_t");
+            //PlayerPrefs.DeleteKey("__simulation_" + "delta_t");
             PlayerPrefs.DeleteKey("__simulation_" + "show_fps");
             PlayerPrefs.DeleteKey("__simulation_" + "v_sync");
             PlayerPrefs.DeleteKey("__simulation_" + "xr_zoom_factor");
@@ -1644,7 +1659,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         // init filter for find the exact monitor refreshrate
         // ##################################################################################
-        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / (float)Screen.currentResolution.refreshRateRatio.value);
+        //exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / (float)Screen.currentResolution.refreshRateRatio.value);
         // ##################################################################################
 
 
@@ -1810,7 +1825,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         rotation = Helper.ConvertRightHandedToLeftHandedQuaternion(rotation); // left handed, []
         velocity = Vector3.zero;
 
-        Pause_ODE(gl_pause_flag = true);
+        gl_pause_flag = true;
         //ui_pause_flag = true;
         // ##################################################################################
 
@@ -1993,20 +2008,20 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //Resolution[] resolutions = Screen.resolutions;
         if (!XRSettings.enabled)
         {
-            refresh_rate_hz = (float)Screen.currentResolution.refreshRateRatio.value; // [Hz]
-            refresh_rate_sec = 1.0f / refresh_rate_hz; // [sec]
+            refresh_rate_hz = Screen.currentResolution.refreshRateRatio.value; // [Hz]
+            refresh_rate_sec = 1.0 / refresh_rate_hz; // [sec]
                                                        //refresh_rate_sec = Time.smoothDeltaTime; 
         }
         else
         {
             refresh_rate_hz = XRDevice.refreshRate; // [Hz]
-            if (refresh_rate_hz == 0) refresh_rate_hz = 90; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
-            refresh_rate_sec = 1.0f / refresh_rate_hz; // [sec]
+            if (refresh_rate_hz == 0) refresh_rate_hz = helicopter_ODE.par.simulation.various.refreshRate_VR.val; // todo see https://docs.unity3d.com/ScriptReference/XR.XRDevice-refreshRate.html
+            refresh_rate_sec = 1.0 / refresh_rate_hz; // [sec]
         }
 
 
         // movement anti-stutter handling initialization
-        Start_IO_AntiStutter();
+        //Start_IO_AntiStutter();
 
         // reset stopwatch
         stopwatch.Reset();
@@ -2026,10 +2041,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //// ##################################################################################
         Simulation_Thread_Start();
         //// ##################################################################################
-
-        //gl_pause_flag = false;
-        //Pause_ODE(gl_pause_flag);
-        //ui_pause_flag = false;
 
 
 
@@ -2280,10 +2291,17 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
         GameObject Helicopter_Selected = helicopters_available.transform.Find(helicopter_name).gameObject;
 
+
+        bool rotor_disk_complexity;
+        if (!XRSettings.enabled)
+            rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
+        else
+            rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_quality_VR.rotor_disk_complexity_VR.val;
+
         helicopter_object = Helicopter_Selected.transform.Find("Helicopter_Model").gameObject.transform.GetChild(0).gameObject;
-        mainrotor_object.Init_Rotor_Data(ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, "Mainrotor", helicopter_id);
-        tailrotor_object.Init_Rotor_Data(ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, "Tailrotor", helicopter_id);
-        propeller_object.Init_Rotor_Data(ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller, "Propeller", helicopter_id);
+        mainrotor_object.Init_Rotor_Data(rotor_disk_complexity, ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, "Mainrotor", helicopter_id);
+        tailrotor_object.Init_Rotor_Data(rotor_disk_complexity, ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, "Tailrotor", helicopter_id);
+        propeller_object.Init_Rotor_Data(rotor_disk_complexity, ref helicopter_ODE, ref Helicopter_Selected, ref helicopter_name, helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller, "Propeller", helicopter_id);
 
 
         // list of materials 
@@ -2463,7 +2481,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void FixedUpdate()
     {
 
-        IO_AntiStutter__Get_FixedUpdate_TimeTick();
+        //IO_AntiStutter__Get_FixedUpdate_TimeTick();
 
     }
     #endregion
@@ -2501,12 +2519,19 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     //                        ppppppppp    
     // ##################################################################################
     #region Update
+    //static long fixedupdate_old = 0;
     // ##################################################################################
     // Update
     // ##################################################################################
     // Update is called once per frame
     void Update()
     {
+        ////ticks.fixedupdate = stopwatch_antistutter.Elapsed.Ticks;  
+        //UnityEngine.Debug.Log("fu:" + (stopwatch_antistutter.Elapsed.Ticks - fixedupdate_old));
+        //fixedupdate_old = ticks.fixedupdate;
+
+        //UnityEngine.Debug.Log("dt:" + Time.deltaTime);
+        
 
 
         Correct_And_Limit_XR_Camera_Vertical_Position();
@@ -2541,8 +2566,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             if (XRSettings.enabled)
                 xr_camera_vertical_position_offset = helicopter_ODE.par.scenery.camera_height.val - main_camera.transform.localPosition.y + 0.0f; // [m]
 
-            //Simulation_Thread_Start();
-            Pause_ODE(gl_pause_flag = false);
+            gl_pause_flag = false;
             ui_pause_flag = false;
         }
         // ##################################################################################
@@ -2550,13 +2574,18 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
 
-        //if (Time.frameCount > 200)
-        if (update_called_cntr > 300)
+        if (update_called_cntr > 50)
         {
             // find the exact referesharte
             Find_Exact_Monitor_Refreshrate();
         }
-
+        if (update_called_cntr == 150)
+        {
+            if(mainrotor_simplified0_or_BEMT1 == 0)
+                realtime_per_step_sec = msec_per_thread_call_filtered * 0.001f * 6f; // BEMT calculation takes about 6x longer. Therefore: If simplifed rotor model is used, multiply the required time for a frame by 10.
+            else
+                realtime_per_step_sec = msec_per_thread_call_filtered * 0.001f;
+        }
 
 
 
@@ -2591,12 +2620,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //    target_frame_rate_old = target_frame_rate;
         //}
         
-        //bool rotor_disk_complexity;
+        bool rotor_disk_complexity;
         bool motion_blur, bloom, depthoffield;
         int quality_setting, resolution_setting;
         if (!XRSettings.enabled)
         {
-            //rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
+            rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
             motion_blur = helicopter_ODE.par_temp.simulation.graphic_quality.motion_blur.val;
             bloom = helicopter_ODE.par_temp.simulation.graphic_quality.bloom.val;
             depthoffield = helicopter_ODE.par_temp.simulation.graphic_quality.depthoffield.val;
@@ -2605,7 +2634,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         }
         else
         {
-            //rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_settings.rotor_disk_complexity.val;
+            rotor_disk_complexity = helicopter_ODE.par_temp.simulation.graphic_quality_VR.rotor_disk_complexity_VR.val;  
             motion_blur = false; // "motion blur is available only for non-stereo cameras"
             bloom = helicopter_ODE.par_temp.simulation.graphic_quality_VR.bloom_VR.val;
             depthoffield = false; // makes no sense in VR -> sickness
@@ -2618,7 +2647,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 motion_blur_layer.enabled.value = motion_blur;
             motion_blur_old = motion_blur;
         }
-
+        
         if (bloom != bloom_old)
         {
             if (bloom_layer != null)
@@ -2663,7 +2692,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // frame FixedUpdate() is called. 
         if (QualitySettings.vSyncCount > 0) // if V_sync on
         {
-            Time.fixedDeltaTime = refresh_rate_sec * 0.98f * helicopter_ODE.par.simulation.physics.timescale.val;
+            Time.fixedDeltaTime = (float)(refresh_rate_sec * 1  * (double)helicopter_ODE.par.simulation.physics.timescale.val);
         }
         else
         {
@@ -2821,9 +2850,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                         PlayerPrefs.SetInt("SavedSetting____" + helicopter_name + "____mainrotor_simplified0_or_BEMT1", mainrotor_simplified0_or_BEMT1);
 
                         // reset model
-                        Pause_ODE(gl_pause_flag = true);
+                        gl_pause_flag = true;
                         Reset_Simulation_States();
-                        Pause_ODE(gl_pause_flag = false);
+                        gl_pause_flag = false;
                     }
                     else
                     {
@@ -2872,7 +2901,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                             else
                                 active_helicopter_id++;
 
-                            Pause_ODE(gl_pause_flag = true);
+                            gl_pause_flag = true;
 
                             Load_Helicopter(ref active_helicopter_id);
 
@@ -2880,7 +2909,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                             // reset model to initial position
                             Reset_Simulation_States();
-                            Pause_ODE(gl_pause_flag = false);
+                            gl_pause_flag = false;
 
                             Reset_Animation_Wheels(Wheels_Status_Variants.lowered);
 
@@ -3085,9 +3114,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                     if (UnityEngine.InputSystem.Keyboard.current.rKey.wasPressedThisFrame)
                     {
-                        Pause_ODE(gl_pause_flag = true);
+                        gl_pause_flag = true;
                         Reset_Simulation_States();
-                        Pause_ODE(gl_pause_flag = false);
+                        gl_pause_flag = false;
                     }
 
                     if (UnityEngine.InputSystem.Keyboard.current.mKey.wasPressedThisFrame)
@@ -3297,7 +3326,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
             Reset_Simulation_States();
 
-            Pause_ODE(gl_pause_flag = false);
+            gl_pause_flag = false;
 
             // setup pilot scale to match camera with pilot's head/eyes position
             Scale_Pilot_To_Match_Camera_Height();
@@ -3314,7 +3343,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // 1.)
         if (load_skymap_state == State_Load_Skymap.starting)
         {
-            Pause_ODE(gl_pause_flag = true);
+            gl_pause_flag = true;
 
             //ui_dropdown_actual_selected_scenery_xml_filename = null; // use dafault value, is done in Check_Skymaps()
             Check_Skymaps(ref active_scenery_id, ref list_skymap_paths);
@@ -3388,22 +3417,14 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
         // ##################################################################################
-        // pause game if requested
-        // ##################################################################################
-        Pause_ODE(gl_pause_flag);
-        // ##################################################################################
-
-
-
-        // ##################################################################################
         // reset sim. if collision forces to hight
         // ##################################################################################
         if (helicopter_ODE.collision_force_too_high_flag)
         {
-            Pause_ODE(gl_pause_flag = true);
+            gl_pause_flag = true;
             Crash_Play_Audio(Application.streamingAssetsPath + "/Audio/crash_audio_001.wav");
             Reset_Simulation_States();
-            Pause_ODE(gl_pause_flag = false);
+            gl_pause_flag = false;
 
             helicopter_ODE.collision_force_too_high_flag = false;
         }
@@ -3944,9 +3965,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             // ##################################################################################
             // map values from ODE to Unity (ODE:right handed, Unity:left handed)
             // ##################################################################################
-           /* if (QualitySettings.vSyncCount == 0)
-            {
-                // <==== moved to IO_AntiStutter__Set_Transform()               
+            // if (QualitySettings.vSyncCount == 0)
+            // {            
                 position = helicopters_available.transform.position;
                 position.x = (float)helicopter_ODE.x_states[0]; // [m] x in reference frame
                 position.y = (float)helicopter_ODE.x_states[1]; // [m] y in reference frame
@@ -3961,13 +3981,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 rotation.z = (float)helicopter_ODE.x_states[6]; // [-] z
                 rotation = Helper.ConvertRightHandedToLeftHandedQuaternion(rotation);
                 helicopters_available.transform.rotation = rotation;
-                // <==== moved to IO_AntiStutter__Set_Transform() 
-            }
-            else
-            {*/
-                IO_AntiStutter__Set_Transform();
-            // }
-
+            //}
 
             velocity = new Vector3
             {
@@ -3996,19 +4010,13 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             Omega_mr = (float)helicopter_ODE.x_states[20] * RIGHT2LEFT_HANDED; // [rad] mainrotor rotation angle
             Omega_tr = ((float)helicopter_ODE.x_states[20] / helicopter_ODE.par.transmitter_and_helicopter.helicopter.transmission.n_mr2tr.val) * RIGHT2LEFT_HANDED; // [rad] tailrotor rotation angle 
             Omega_pr = ((float)helicopter_ODE.x_states[20] / helicopter_ODE.par.transmitter_and_helicopter.helicopter.transmission.n_mr2pr.val) * RIGHT2LEFT_HANDED; // [rad] propeller rotation angle 
+            // ##################################################################################
 
 
-
-            //rotation = helicopters_available.transform.rotation;
-            //rotation.w = (float)helicopter_ODE.x_states[3]; // [-] w
-            //rotation.x = (float)helicopter_ODE.x_states[4]; // [-] x
-            //rotation.y = (float)helicopter_ODE.x_states[5]; // [-] y
-            //rotation.z = (float)helicopter_ODE.x_states[6]; // [-] z
-            //rotation = Helper.ConvertRightHandedToLeftHandedQuaternion(rotation);
-            //helicopters_available.transform.rotation = rotation;
-
-            //mainrotor_object.Update_Rotor_Flapping_BEMT();
-
+            // ##################################################################################
+            // at end of update calculations here, start parallel physics-thread. See Helicopter_TimestepModel class
+            // ##################################################################################
+            thread_pause_signal.Set();
             // ##################################################################################
         }
         else
@@ -4182,9 +4190,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         // change rotor visiblitiy as a function of rotation velocity
         // ##################################################################################
-        mainrotor_object.Update_Rotor_Visiblitiy(ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, (float)helicopter_ODE.Theta_col_mr, ref omega_mr);
-        tailrotor_object.Update_Rotor_Visiblitiy(ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, (float)helicopter_ODE.Theta_col_tr, ref omega_tr);
-        propeller_object.Update_Rotor_Visiblitiy(ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller, (float)helicopter_ODE.Theta_col_pr, ref omega_pr);
+        mainrotor_object.Update_Rotor_Visiblitiy(rotor_disk_complexity, ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, (float)helicopter_ODE.Theta_col_mr, ref omega_mr);
+        tailrotor_object.Update_Rotor_Visiblitiy(rotor_disk_complexity, ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, (float)helicopter_ODE.Theta_col_tr, ref omega_tr);
+        propeller_object.Update_Rotor_Visiblitiy(rotor_disk_complexity, ref helicopter_ODE, helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller, (float)helicopter_ODE.Theta_col_pr, ref omega_pr);
         // ##################################################################################
 
 
@@ -4299,11 +4307,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         // mainrotorblades deformation 
         // ##################################################################################
-        mainrotor_object.Update_Rotor_Deformation(0,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, 
+        mainrotor_object.Update_Rotor_Deformation(rotor_disk_complexity, 0, ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor, 
             flapping_a_s_mr_L, flapping_b_s_mr_L, omega_mr, Omega_mr, (float)helicopter_ODE.Theta_col_mr, main_camera);
-        tailrotor_object.Update_Rotor_Deformation(1,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, 
+        tailrotor_object.Update_Rotor_Deformation(rotor_disk_complexity, 1,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.tailrotor, 
             flapping_a_s_tr_L, flapping_b_s_tr_L, omega_tr, Omega_tr, (float)helicopter_ODE.Theta_col_tr, main_camera);
-        propeller_object.Update_Rotor_Deformation(2,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller,
+        propeller_object.Update_Rotor_Deformation(rotor_disk_complexity, 2,ref helicopter_ODE, (stru_rotor)helicopter_ODE.par.transmitter_and_helicopter.helicopter.propeller,
             flapping_a_s_pr_L, flapping_b_s_pr_L, omega_pr, Omega_pr, (float)helicopter_ODE.Theta_col_pr, main_camera);
         // ##################################################################################         
 
@@ -4388,10 +4396,10 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // ##################################################################################
         // debug
         // ##################################################################################
-        float msec_per_thread_call = (float)((stopwatch.Elapsed.TotalMilliseconds) / counter);
+        float msec_per_thread_call = (float)((stopwatch.Elapsed.TotalMilliseconds) / counter_ODE_steps);
         if (!float.IsNaN(msec_per_thread_call) && !float.IsInfinity(msec_per_thread_call))
             msec_per_thread_call_filtered += (msec_per_thread_call - msec_per_thread_call_filtered)/50f; // simple moving average filter
-        stopwatch.Reset(); counter = 0;
+        stopwatch.Reset(); counter_ODE_steps = 0;
 
 
         // plot forces and torques
@@ -4447,11 +4455,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         {
             // ci = sqrt( (T/A) * 1/(2*tho) )
             float vi_theoretical_hover = Mathf.Sqrt((helicopter_ODE.par.transmitter_and_helicopter.helicopter.mass_total.val * 9.81f) / (Mathf.Pow(helicopter_ODE.par.transmitter_and_helicopter.helicopter.mainrotor.R.val, 2) * Mathf.PI) * (1 / (2.0f * helicopter_ODE.par.scenery.weather.rho_air.val)));
-               
-            ui_debug_text.text = ui_string_connected_input_devices_names + "  er" + error_counter.ToString() + " xr" + (XRSettings.enabled ? 1 : 0) + "\n" + 
-                "thread_ODE_deltat = " + (thread_ODE_deltat*1000).ToString() + "msec" +
+
+            // "thread_ODE_deltat = " + (thread_ODE_deltat*1000).ToString() + "msec" +      (refresh_rate_sec_found_flag ? "*" : "")
+            ui_debug_text.text = ui_string_connected_input_devices_names + "  er" + error_counter.ToString() + " xr" + (XRSettings.enabled ? 1 : 0) + "\n" +  
+                "   takestep_per_frame = " + (physics_takestep_calculations_per_frame).ToString() + " (" + Helper.FormatNumber(physics_takestep_calculations_per_frame * refresh_rate_hz, "0.0") + "Hz / max:" + Helper.FormatNumber(max_physics_calc_rate_per_frame * refresh_rate_hz, "0.0") + "Hz ) " +
                 "   msec_per_thread_call = " + Helper.FormatNumber(msec_per_thread_call_filtered, "0.00") + "msec" +
-                "   monitor_frequency = " + Helper.FormatNumber(refresh_rate_hz, "0.000") + "Hz" + (refresh_rate_sec_found_flag ? "*" : "") +
+                "   monitor_frequency = " + Helper.FormatNumber(refresh_rate_hz, "0.00000") + "Hz" +
                 "   time = " + Helper.FormatNumber(time, "0.00") + "s" +  
                 "   v_i_hover" + Helper.FormatNumber(vi_theoretical_hover, "0.00") + "m/s" + "\n" +
                 helicopter_ODE.ODEDebug.debug_text;
@@ -4465,8 +4474,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             GraphManager.Graph.Plot("mainrotor_torqueLH [Nm]", helicopter_ODE.ODEDebug.mainrotor_torqueLH.y, UnityEngine.Color.black, plot2D_graph_rect[1]);
             GraphManager.Graph.Plot("omega_mr [rpm]", omega_mr * Helper.RadPerSec_to_Rpm, UnityEngine.Color.black, plot2D_graph_rect[2]);
             GraphManager.Graph.Plot("tailrotor_forceLH [N]", helicopter_ODE.ODEDebug.tailrotor_forceLH.z, UnityEngine.Color.black, plot2D_graph_rect[3]);
-            GraphManager.Graph.Plot("veloLH.y [m/s]", helicopter_ODE.veloLH.y, UnityEngine.Color.black, plot2D_graph_rect[4]);
-            GraphManager.Graph.Plot("veloLH.xz [m/s]", Mathf.Sqrt(helicopter_ODE.veloLH.x * helicopter_ODE.veloLH.x + helicopter_ODE.veloLH.z * helicopter_ODE.veloLH.z), UnityEngine.Color.black, plot2D_graph_rect[5]);
+            GraphManager.Graph.Plot("veloLH.y [m/s]", helicopter_ODE.ODEDebug.veloLH.y, UnityEngine.Color.black, plot2D_graph_rect[4]);
+            GraphManager.Graph.Plot("veloLH.xz [m/s]", Mathf.Sqrt(helicopter_ODE.ODEDebug.veloLH.x * helicopter_ODE.ODEDebug.veloLH.x + helicopter_ODE.ODEDebug.veloLH.z * helicopter_ODE.ODEDebug.veloLH.z), UnityEngine.Color.black, plot2D_graph_rect[5]);
         }
         else
         {
@@ -4547,19 +4556,13 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         ui_informations_overlay.rpm = omega_mr * Helper.RadPerSec_to_Rpm;
         ui_informations_overlay.mainrotor_cyclic = helicopter_ODE.ODEDebug.Theta_col_mr * Helper.Rad_to_Deg; 
         ui_informations_overlay.tailrotor_cyclic = helicopter_ODE.ODEDebug.Theta_col_tr * Helper.Rad_to_Deg;
-        ui_informations_overlay.speed = helicopter_ODE.veloLH.magnitude;
+        ui_informations_overlay.speed = helicopter_ODE.ODEDebug.veloLH.magnitude;
         ui_informations_overlay.target_rpm = helicopter_ODE.par.transmitter_and_helicopter.helicopter.governor.target_rpm.vect3[helicopter_ODE.flight_bank]; ;
         ui_informations_overlay.bank = helicopter_ODE.flight_bank+1;
         // ##################################################################################
 
 
 
-        // ##################################################################################
-        // anti stuttering
-        // ##################################################################################
-        // Multiple FixedUpdate() calls may arise at beginning of frame and we only want to update once per frame
-        io_antistutter__fixedupdate_calls_in_this_frame_counter = 0;
-        // ##################################################################################
     }
     // ##################################################################################
     #endregion
@@ -4870,6 +4873,13 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         }
         // ##################################################################################
 
+
+        //// ##################################################################################
+        //// anti stuttering
+        //// ##################################################################################
+        //// Multiple FixedUpdate() calls may arise at beginning of frame and we only want to update once per frame
+       // io_antistutter__fixedupdate_calls_in_this_frame_counter = 0;
+        //// ##################################################################################
     }
     #endregion
 
@@ -4976,7 +4986,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
 
-
                 //if (UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head).isValid)
                 if (XRGeneralSettings.Instance.Manager.activeLoader != null)  // XR device detected/loaded
                 // if (IsActive() && IsVrRunning())
@@ -4992,9 +5001,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     //if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = true;
 
                     // fps
-                    refresh_rate_sec_old = 0;
-                    exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
-                    refresh_rate_sec_found_flag = false;
+                    //refresh_rate_sec_old = 0;
+                   // exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
+                   // refresh_rate_sec_found_flag = false;
                     //Find_Exact_Monitor_Refreshrate();
 
                     Commentator_Play_Audio(Application.streamingAssetsPath + "/Audio/female_voice_virtual_reality_mode_enabled.wav");
@@ -5069,9 +5078,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = false;
 
 
-        refresh_rate_sec_old = 0;
-        exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
-        refresh_rate_sec_found_flag = false;
+        //refresh_rate_sec_old = 0;
+       // exponential_moving_average_filter_for_refresh_rate_sec.Init_Mean_Value(1.0f / Screen.currentResolution.refreshRateRatio.value);
+       // refresh_rate_sec_found_flag = false;
         // Find_Exact_Monitor_Refreshrate();
 
         Commentator_Play_Audio(Application.streamingAssetsPath + "/Audio/female_voice_virtual_reality_mode_disabled.wav");

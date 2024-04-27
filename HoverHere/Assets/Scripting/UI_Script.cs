@@ -1019,9 +1019,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void Listener_UI_Pie_Menu_Keyboard_Shorcuts_Button() { ui_menu_logic_info(); }
     void Listener_UI_Pie_Menu_Exit_Game_Button( )
     {
-        Pause_ODE(true);
-        Simulation_Thread_Abort();
-
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
@@ -1046,8 +1043,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //// debug time ticks to file
         Debug_Save_Time_Ticks();
 #endif
-        Pause_ODE(true);
-        Simulation_Thread_Abort();
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -1108,7 +1103,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         ui_exit_panel_flag = false;
 
         ui_pause_flag = false;
-        Pause_ODE(ui_pause_flag);
         gl_pause_flag = false;
     }
     // ##################################################################################
@@ -1313,7 +1307,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         Destroy_Debug_Line_GameObjects();
 
         // update the variables also in the ODE thread
-        if (gl_pause_flag == false) // threadRunning == true && 
+        if (gl_pause_flag == false) 
         {
             // if game is running the ODE-thread updates the parameter 
             // flag signals in ODE-thread, that new data is available
@@ -1425,7 +1419,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         Change_Skybox_Sun_Sound_Camera_Parameter();
 
         // change ODE timing parameter
-        thread_ODE_deltat = Helper.Clamp(helicopter_ODE.par.simulation.physics.delta_t);
+        //thread_ODE_deltat = Helper.Clamp(helicopter_ODE.par.simulation.physics.delta_t);
 
         // controller parameter
         stru_controller_settings_work.list_channel_settings[stru_controller_settings_work.channel_collective].axis_settings.clearance = helicopter_ODE.par.transmitter_and_helicopter.transmitter.stick_collective.clearance.vect3[helicopter_ODE.flight_bank];

@@ -67,7 +67,7 @@ abstract public class Helicopter_Integrator  {
 	/// </summary>
 	/// <param name="x">The values being integrated.</param>
 	/// <param name="xdot">The derivatives being calculated.</param>
-	abstract public void ODE(int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
+	abstract public void ODE(bool last_takestep_in_frame, int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
 	//abstract public void ODE_DISC(int integrator_function_call_number, ref double[] x, double[] u, double[] xdot, double t , double dt);
 
 	/// <summary>
@@ -75,9 +75,9 @@ abstract public class Helicopter_Integrator  {
 	/// </summary>
 	/// <param name="x">The values being integrated.</param>
 	/// <param name="h">The time step.</param>
-	public bool EulerStep(double [] x, double[] u, ref double t, double h) {
+	public bool EulerStep(bool last_takestep_in_frame, double[] x, double[] u, ref double t, double h) {
         int integrator_function_call_number = 0;
-        ODE(integrator_function_call_number++, ref x, u, k1, t, h);
+        ODE(last_takestep_in_frame, integrator_function_call_number++, ref x, u, k1, t, h);
 		for(int i=0;i<nEquations;i++) {
 			x[i] += k1[i]*h;
 		}
@@ -89,24 +89,24 @@ abstract public class Helicopter_Integrator  {
 	/// </summary>
 	/// <param name="x">The values being integrated.</param>
 	/// <param name="h">The time step.</param>
-	public int RK4Step(ref double [] x, double[] u, ref double t, double h, int state_begin, int state_end) {
+	public int RK4Step(bool last_takestep_in_frame, ref double [] x, double[] u, ref double t, double h, int state_begin, int state_end) {
         int integrator_function_call_number = 0;
-        ODE (integrator_function_call_number++, ref x, u, k1, t , h / 2.00000000000f);
+        ODE (last_takestep_in_frame, integrator_function_call_number++, ref x, u, k1, t , h / 2.00000000000f);
 		if (check_results(x)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			store [i] = x [i] + k1 [i] * h / 2.0;
 		}
-        ODE(integrator_function_call_number++, ref store, u, k2, t + 0.5f * h, h / 2);
+        ODE(last_takestep_in_frame, integrator_function_call_number++, ref store, u, k2, t + 0.5f * h, h / 2);
 		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++){
 			store [i] = x [i] + k2 [i] * h / 2.0;
 		}
-        ODE(integrator_function_call_number++, ref store, u, k3, t + 0.5f * h, h / 2);
+        ODE(last_takestep_in_frame, integrator_function_call_number++, ref store, u, k3, t + 0.5f * h, h / 2);
 		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			store [i] = x [i] + k3 [i] * h;
 		}
-        ODE(integrator_function_call_number++, ref store, u, k4, t + h, h);
+        ODE(last_takestep_in_frame, integrator_function_call_number++, ref store, u, k4, t + h, h);
 		if (check_results(store)) return integrator_function_call_number;
 		for (int i = state_begin; i < state_end; i++) {
 			x [i] = x [i] + (k1[i] +2.0*k2[i]+ 2.0*k3 [i]+k4[i]) * h/6.0;
@@ -233,7 +233,7 @@ abstract public class Helicopter_Integrator  {
 	 * @param h Duration of step
 	 * @return Error prediction at end of step
 	 */
-	public double abmStep(double [] x, double[] u, double t, double h) {
+	public double abmStep(bool last_takestep_in_frame, double [] x, double[] u, double t, double h) {
 		abmRms2 = 0.0;
         int integrator_function_call_number=0;
 		if(abmSteps==0) {
@@ -241,9 +241,9 @@ abstract public class Helicopter_Integrator  {
 				ym3[i] = x[i];
 				ym2[i] = x[i];
 			}
-			ODE(integrator_function_call_number++, ref dm3, u, ym3,t,h);
-			RK4Step(ref ym2, u, ref t, h, 0, nEquations);
-			ODE(integrator_function_call_number++, ref dm2, u, ym2, t,h);
+			ODE(last_takestep_in_frame, integrator_function_call_number++, ref dm3, u, ym3,t,h);
+			RK4Step(last_takestep_in_frame, ref ym2, u, ref t, h, 0, nEquations);
+			ODE(last_takestep_in_frame, integrator_function_call_number++, ref dm2, u, ym2, t,h);
 			for(int i=0;i<x.Length;i++) {
 				x[i] = ym2[i];
 			}
@@ -253,20 +253,20 @@ abstract public class Helicopter_Integrator  {
 			for(int i=0;i<x.Length;i++) {
 				ym1[i] = ym2[i];
 			}
-			RK4Step(ref ym1, u, ref t,  h, 0, nEquations);
-			ODE(integrator_function_call_number++, ref dm1, u, ym1, t, h);
+			RK4Step(last_takestep_in_frame, ref ym1, u, ref t,  h, 0, nEquations);
+			ODE(last_takestep_in_frame, integrator_function_call_number++, ref dm1, u, ym1, t, h);
 			for(int i=0;i<x.Length;i++) {
 				x[i] = ym1[i];
 			}
 			abmSteps +=1;
 			return 1.0;
 		} else {
-			ODE(integrator_function_call_number++, ref k1, u, x, t, h);
+			ODE(last_takestep_in_frame, integrator_function_call_number++, ref k1, u, x, t, h);
 			for(int i=0;i<x.Length;i++) {
 				P[i] = x[i] + (h/24.0)*
 					(55.0*k1[i]-59.0*dm1[i]+37.0*dm2[i]-9.0*dm3[i]);
 			}
-			ODE(integrator_function_call_number++, ref dp1, u, P, t+h, h);
+			ODE(last_takestep_in_frame, integrator_function_call_number++, ref dp1, u, P, t+h, h);
 			abmRms2 = 0.0;
 			for(int i=0;i<x.Length;i++) {
 				store[i] = x[i];

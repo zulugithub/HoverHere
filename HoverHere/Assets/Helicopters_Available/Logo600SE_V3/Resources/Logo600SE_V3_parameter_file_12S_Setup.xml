@@ -27,14 +27,14 @@
       <K_a><vect3>    <x>550</x><y>600</y><z>650</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>2.0</x><y>2.0</y><z>2.0</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.19</x><y>0.22</y><z>0.25</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.0001</x><y>0.0001</y><z>0.0001</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
     </gyro>
     <flybarless>
       <K_a><vect3>    <x>300</x><y>310</y><z>330</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>2.3</x><y>2.3</y><z>2.3</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.08</x><y>0.08</y><z>0.08</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.0001</x><y>0.0001</y><z>0.0001</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_flybarless>  <val>false</val>  </direct_feadtrough_flybarless>
     </flybarless>  </helicopter>
     <flapping>

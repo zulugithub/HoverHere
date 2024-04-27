@@ -109,21 +109,21 @@ namespace Parameter
     [Serializable]
     public class stru_physics
     {
-        public stru_float delta_t { get; set; } // [sec]
+        //public stru_float delta_t { get; set; } // [sec]
         public stru_float timescale { get; set; } // [-] timescale factor
 
         public stru_physics()
         {
-            delta_t = new stru_float();
+            //delta_t = new stru_float();
             timescale = new stru_float();
         
-            delta_t.val = 0.0050f;
-            delta_t.min = 0.0001f;
-            delta_t.max = 0.0100f;
-            delta_t.hint = "Physics simulation step size";
-            delta_t.comment = "";
-            delta_t.unit = "sec";
-            delta_t.save_under_player_prefs = true;
+            //delta_t.val = 0.0050f;
+            //delta_t.min = 0.0001f;
+            //delta_t.max = 0.0100f;
+            //delta_t.hint = "Physics simulation step size";
+            //delta_t.comment = "";
+            //delta_t.unit = "sec";
+            //delta_t.save_under_player_prefs = true;
 
             timescale.val = 1f;
             timescale.max = 3.00f;
@@ -403,21 +403,29 @@ namespace Parameter
     [Serializable]
     public class stru_graphic_quality_VR
     {
+        
+        public stru_bool rotor_disk_complexity_VR { get; set; } // 
         //public stru_bool motion_blur_VR { get; set; } // 
         public stru_bool bloom_VR { get; set; } // 
         //public stru_bool depthoffield_VR { get; set; } // 
         public stru_list quality_setting_VR { get; set; } // 
         public stru_list resolution_setting_VR { get; set; } // 
 
-
         public stru_graphic_quality_VR()
         {
+            rotor_disk_complexity_VR = new stru_bool();
             //motion_blur_VR = new stru_bool();
             bloom_VR = new stru_bool();
             //depthoffield_VR = new stru_bool();
             quality_setting_VR = new stru_list();
             resolution_setting_VR = new stru_list();
 
+
+            rotor_disk_complexity_VR.val = false;
+            rotor_disk_complexity_VR.hint = "Rotor disk simple (false) oder complex (true) model";
+            rotor_disk_complexity_VR.comment = "";
+            rotor_disk_complexity_VR.unit = "-";
+            rotor_disk_complexity_VR.save_under_player_prefs = true;
 
             //motion_blur_VR.val = false;
             //motion_blur_VR.hint = "Enables or disables motion blur effect.";
@@ -437,7 +445,7 @@ namespace Parameter
             //depthoffield_VR.unit = "-";
             //depthoffield_VR.save_under_player_prefs = true;
 
-            quality_setting_VR.val = 2;
+            quality_setting_VR.val = 1;
             quality_setting_VR.str = new List<string> { "Low", "High", "Very High", "Ultra" }; // 0 1 2 3
             quality_setting_VR.hint = "Sets graphics quality level.";
             quality_setting_VR.comment = "";
@@ -454,8 +462,7 @@ namespace Parameter
                 //if (resolutions[i].width == Screen.width && resolutions[i].height == Screen.height)
                 //    resolution_setting.val = i; // currentResolutionIndex 
             }
-            if (resolution_setting_VR.str.Count > 0) // set highest resolution as default
-                resolution_setting_VR.val = resolution_setting_VR.str.Count - 1;
+            resolution_setting_VR.val = 0;// set lowest resolution as default
             resolution_setting_VR.hint = "Change monitor resolution.";
             resolution_setting_VR.comment = "";
             resolution_setting_VR.unit = "";
@@ -555,7 +562,7 @@ namespace Parameter
             // ##################################################################################
             // Get PlayerPrefs for "simulation"-structure
             // ##################################################################################
-            this.physics.delta_t.val = PlayerPrefs.GetFloat("__simulation_" + "delta_t", this.physics.delta_t.val);
+            //this.physics.delta_t.val = PlayerPrefs.GetFloat("__simulation_" + "delta_t", this.physics.delta_t.val);
             this.physics.timescale.val = PlayerPrefs.GetFloat("__simulation_" + "timescale", this.physics.timescale.val);
 
             this.audio.master_sound_volume.val = PlayerPrefs.GetFloat("__simulation_" + "master_sound_volume", this.audio.master_sound_volume.val);
@@ -585,6 +592,7 @@ namespace Parameter
             this.graphic_quality.quality_setting.val = (PlayerPrefs.GetInt("__simulation_" + "quality_setting", this.graphic_quality.quality_setting.val));
             this.graphic_quality.resolution_setting.val = (PlayerPrefs.GetInt("__simulation_" + "resolution_setting", this.graphic_quality.resolution_setting.val));
 
+            this.graphic_quality_VR.rotor_disk_complexity_VR.val = (PlayerPrefs.GetInt("__simulation_" + "rotor_disk_complexity_VR", this.graphic_quality_VR.rotor_disk_complexity_VR.val == false ? 0 : 1)) == 0 ? false : true;
             //this.graphic_quality_VR.motion_blur_VR.val = (PlayerPrefs.GetInt("__simulation_" + "motion_blur_VR", this.graphic_quality_VR.motion_blur_VR.val == false ? 0 : 1)) == 0 ? false : true;
             this.graphic_quality_VR.bloom_VR.val = (PlayerPrefs.GetInt("__simulation_" + "bloom_VR", this.graphic_quality_VR.bloom_VR.val == false ? 0 : 1)) == 0 ? false : true;
             //this.graphic_quality_VR.depthoffield_VR.val = (PlayerPrefs.GetInt("__simulation_" + "depthoffield_VR", this.graphic_quality_VR.depthoffield_VR.val == false ? 0 : 1)) == 0 ? false : true;
@@ -3270,7 +3278,7 @@ namespace Parameter
             expo = new stru_Vector3();
             dualrate = new stru_Vector3();
 
-            clearance.vect3 = new Vector3 { x = 0.01f, y = 0.01f, z = 0.01f }; // bank 1 2 3 
+            clearance.vect3 = new Vector3 { x = 0.03f, y = 0.03f, z = 0.03f }; // bank 1 2 3 
             //clearance.min = 0.00f;
             //clearance.max = 0.50f;
             clearance.hint = "Stick center position clearance";

@@ -83,6 +83,8 @@ namespace Helisimulator
     // ##################################################################################
     public class ODEDebugClass
     {
+        public Vector3 veloLH; // in local frame
+
         public List<Vector3> contact_positionR { get; set; } // in reference frame
         public List<Vector3> contact_forceR1 { get; set; } // in reference frame
         public List<Vector3> contact_forceR2 { get; set; } // in reference frame
@@ -240,7 +242,7 @@ namespace Helisimulator
         public double[] x_states;
         public double[] x_states_old;
 
-        static int log_output_frequency = 0;
+        //static int log_output_frequency = 0;
 
         bool flag_motor_controller_saturation;
         float omega_mo_target_with_soft_start;
@@ -278,6 +280,8 @@ namespace Helisimulator
         // debug variables
         public void Update_ODE_Debug_Variables()
         {
+            ODEDebug.veloLH = new Vector3();
+
             int count = par_temp.transmitter_and_helicopter.helicopter.collision.positions_usual.vect3.Count +
                         par_temp.transmitter_and_helicopter.helicopter.collision.positions_left.vect3.Count + 
                         par_temp.transmitter_and_helicopter.helicopter.collision.positions_right.vect3.Count +
@@ -394,7 +398,8 @@ namespace Helisimulator
         private double omega_pr; // [rad/sec] propeller rotation velocity 
         private Quaternion q = new Quaternion(0, 0, 0, 1);  // unity: x, y, z, w --> [0], [1], [2], [3]
         private Vector3 vectO = Vector3.zero; // [m]
-        public Vector3 veloLH { get; protected set; } // = Vector3.zero; // [m/sec]
+        //public Vector3 veloLH { get; protected set; } // = Vector3.zero; // [m/sec]
+        private Vector3 veloLH = Vector3.zero; // [m/sec]
         private Vector3 veloO = Vector3.zero; // [m/sec]
         private Vector3 omegaLH = Vector3.zero; // [rad/sec] 
         //private Vector3 omegaO = Vector3.zero; // [rad/sec]
@@ -752,6 +757,9 @@ namespace Helisimulator
         #region initial_conditions
         public void Set_Initial_Conditions()
         {
+            bool last_takestep_in_frame = false;
+
+
             Initial_Position_And_Orientation(out Vector3 r_LHO_O, out Quaternion q_LHO);
 
             x_states[0] = r_LHO_O.x; // [m]
@@ -869,7 +877,7 @@ namespace Helisimulator
             if (flag_motor_enabled == true)
             {
                 Wind_Model(out velo_wind_LH, out velo_wind_O);
-                Fuselage_Model(out force_fuselageLH, out force_fuselageO);
+                Fuselage_Model(last_takestep_in_frame, out force_fuselageLH, out force_fuselageO);
                 Mainrotor_Thrust_and_Torque_with_Precalculations(0, (float)0.001, 0, force_fuselageLH, out thrust_mr, out torque_mr, out v_i_mr, out dflapping_a_s_mr_LR__int_dt, out dflapping_b_s_mr_LR__int_dt);
                 Tailrotor_Thrust_and_Torque_with_Precalculations(0, (float)0.001, 0, force_fuselageLH, out thrust_tr, out torque_tr, out v_i_tr, out dflapping_a_s_tr_LR__int_dt, out dflapping_b_s_tr_LR__int_dt);
                 if (par.transmitter_and_helicopter.helicopter.propeller.rotor_exists.val)
@@ -1226,7 +1234,7 @@ namespace Helisimulator
         // ##################################################################################
         // simple fuselage air-drag physics model
         // ##################################################################################
-        private void Fuselage_Model(out Vector3 force_fuselageLH, out Vector3 force_fuselageO)
+        private void Fuselage_Model(bool last_takestep_in_frame, out Vector3 force_fuselageLH, out Vector3 force_fuselageO)
         {
             velo_u_aLH = (veloLH.x - velo_wind_LH.x); // [m/sec] longitudinal front-back direction local velocity
             velo_v_aLH = (veloLH.y - velo_wind_LH.y); // [m/sec] vertical top-bottom direction local velocity    (y is w! in 2011_Book_UnmannedRotorcraftSystems.pdf)
@@ -1250,8 +1258,11 @@ namespace Helisimulator
             forcesO += force_fuselageO; // [N]
             torquesLH += Vector3.zero; // [Nm]
 
-            ODEDebug.drag_on_fuselage_positionO = Helper.ConvertRightHandedToLeftHandedVector(new Vector3((float)x_R, (float)y_R, (float)z_R) + Helper.A_RL(q, new Vector3(0, 0, 0))); // [m]
-            ODEDebug.drag_on_fuselage_drag_on_fuselage_forceO = Helper.ConvertRightHandedToLeftHandedVector(force_fuselageO); // [N] also threat right to lefthandside conv.
+            if(last_takestep_in_frame)
+            { 
+                ODEDebug.drag_on_fuselage_positionO = Helper.ConvertRightHandedToLeftHandedVector(new Vector3((float)x_R, (float)y_R, (float)z_R) + Helper.A_RL(q, new Vector3(0, 0, 0))); // [m]
+                ODEDebug.drag_on_fuselage_drag_on_fuselage_forceO = Helper.ConvertRightHandedToLeftHandedVector(force_fuselageO); // [N] also threat right to lefthandside conv.
+            }
         }
         // ##################################################################################
 
@@ -1972,35 +1983,20 @@ const double eta = 0.80f;
         // ##################################################################################
         #region ordinary_differential_equations
         public override void ODE(
+            bool last_takestep_in_frame,                // [IN] mark the last TakeStep calculation per frame, so i.e. debbugging can only made in this last TakeStep calculation
             int integrator_function_call_number,        // [IN]  
-            ref double[] x_states,                          // [IN] states 
+            ref double[] x_states,                      // [IN] states 
             double[] u_inputs,                          // [IN] inputs
             double[] dxdt,                              // [OUT] derivatives
             double time,                                // [IN] time 
             double dtime)                               // [IN] timestep    
         {
 
-
             // ##################################################################################
-            // thread safe setting of parameter between threads (if a new helicopter oder new parameter sets are loaded in the main thread)
+            // update debugging info only in the last Runge-Kutta solver call of ODE (once per frame)
             // ##################################################################################
-            if (integrator_function_call_number == 0 && flag_load_new_parameter_in_ODE_thread == true)
-            {
-                //UnityEngine.Debug.Log("flag_load_new_parameter_in_ODE_thread");
+            last_takestep_in_frame = (integrator_function_call_number == 3 && last_takestep_in_frame);
 
-                //par_temp.simulation.get_stru_simulation_settings_from_player_prefs();
-                par_temp.transmitter_and_helicopter.Update_Calculated_Parameter();
-
-                // copy new values from par_temp-object to par-object
-                par = par_temp.Deep_Clone();
-
-                par.transmitter_and_helicopter.Update_Calculated_Parameter();
-
-                Update_ODE_Debug_Variables();
-
-                flag_load_new_parameter_in_ODE_thread = false;
-            }
-            // ##################################################################################    
 
 
 
@@ -2216,7 +2212,7 @@ const double eta = 0.80f;
                             DELTA_x_roll__diff_old = delta_error;
                         delta_lat_mr = par.transmitter_and_helicopter.helicopter.flybarless.K_p.vect3[flight_bank] * delta_error +
                                        par.transmitter_and_helicopter.helicopter.flybarless.K_I.vect3[flight_bank] * (float)DELTA_x_roll__int +
-                                       par.transmitter_and_helicopter.helicopter.flybarless.K_d.vect3[flight_bank] * (float)DELTA_x_roll__diff; // [rad/sec] roll
+                                       par.transmitter_and_helicopter.helicopter.flybarless.K_d.vect3[flight_bank] * 0.001f * (float)DELTA_x_roll__diff; // [rad/sec] roll
                         dDELTA_x_roll__int_dt = delta_error; // [rad/sec] error value to be integrated
 
                         delta_error = (par.transmitter_and_helicopter.helicopter.gyro.K_a.vect3[flight_bank] * Mathf.Deg2Rad * input_y_yaw - (float)wy_LH); // [rad/sec] error value in PI controller
@@ -2226,7 +2222,7 @@ const double eta = 0.80f;
                             DELTA_y_yaw__diff_old = delta_error;
                         delta_col_tr = par.transmitter_and_helicopter.helicopter.gyro.K_p.vect3[flight_bank] * delta_error +
                                        par.transmitter_and_helicopter.helicopter.gyro.K_I.vect3[flight_bank] * (float)DELTA_y_yaw__int +
-                                       par.transmitter_and_helicopter.helicopter.gyro.K_d.vect3[flight_bank] * (float)DELTA_y_yaw__diff; // [rad/sec] yaw
+                                       par.transmitter_and_helicopter.helicopter.gyro.K_d.vect3[flight_bank] * 0.001f * (float)DELTA_y_yaw__diff; // [rad/sec] yaw
                         dDELTA_y_yaw__int_dt = delta_error; // [rad/sec] error value to be integrated
 
                         delta_error = (par.transmitter_and_helicopter.helicopter.flybarless.K_a.vect3[flight_bank] * Mathf.Deg2Rad * input_z_pitch - (float)wz_LH); // [rad/sec] error value in PI controller
@@ -2236,7 +2232,7 @@ const double eta = 0.80f;
                             DELTA_z_pitch__diff_old = delta_error;
                         delta_lon_mr = par.transmitter_and_helicopter.helicopter.flybarless.K_p.vect3[flight_bank] * delta_error +
                                        par.transmitter_and_helicopter.helicopter.flybarless.K_I.vect3[flight_bank] * (float)DELTA_z_pitch__int +
-                                       par.transmitter_and_helicopter.helicopter.flybarless.K_d.vect3[flight_bank] * (float)DELTA_z_pitch__diff; // [rad/sec] pitch
+                                       par.transmitter_and_helicopter.helicopter.flybarless.K_d.vect3[flight_bank] * 0.001f * (float)DELTA_z_pitch__diff; // [rad/sec] pitch
                         dDELTA_z_pitch__int_dt = delta_error; // [rad/sec] error value to be integrated
                         delta_error_debug = delta_error;
 
@@ -3050,8 +3046,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                             wheel_rolling_velocity_steering_right_temp = point_velocity_vector_parallel_to_triangleR.magnitude;
                             wheel_rolling_distance_steering_right_temp += wheel_rolling_velocity_steering_right_temp * (float)dtime;
                         }
+                    }
 
-
+                    if (last_takestep_in_frame)
+                    {
                         // in-game visual debug lines 
                         if (i < ODEDebug.contact_positionR.Count)
                         {
@@ -3061,7 +3059,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                             //ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i] + new Vector3(0,0.2f,0));
                             ODEDebug.contact_positionR[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(point_positionR[i] + new Vector3(0.0f, 0.0f, 0.0f));
                             if (par.transmitter_and_helicopter.helicopter.visual_effects.debug_force_arrow_scale.val > 0)
-                            { 
+                            {
                                 ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(contact_forceR + friction_forceR);
                                 //ODEDebug.contact_forceR1[i] = Common.Helper.ConvertRightHandedToLeftHandedVector(vect_U_rel);
                             }
@@ -3089,7 +3087,6 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                             }
                         }
-
                     }
 
                 }
@@ -3136,12 +3133,14 @@ float beta_tr = 0; // calculated blade angle not used yet
                     }
 
 
-
-                    if (i < ODEDebug.contact_positionR.Count)
+                    if (last_takestep_in_frame)
                     {
-                        ODEDebug.contact_positionR[i] = Vector3.zero;
-                        ODEDebug.contact_forceR1[i] = Vector3.zero;
-                        ODEDebug.contact_forceR2[i] = Vector3.zero;
+                        if (i < ODEDebug.contact_positionR.Count)
+                        {
+                            ODEDebug.contact_positionR[i] = Vector3.zero;
+                            ODEDebug.contact_forceR1[i] = Vector3.zero;
+                            ODEDebug.contact_forceR2[i] = Vector3.zero;
+                        }
                     }
                 }
 
@@ -3251,7 +3250,7 @@ float beta_tr = 0; // calculated blade angle not used yet
             // ##################################################################################
             // drag on fuselage
             // ##################################################################################
-            Fuselage_Model(out force_fuselageLH, out force_fuselageO);
+            Fuselage_Model(last_takestep_in_frame, out force_fuselageLH, out force_fuselageO);
             // ##################################################################################
 
 
@@ -3270,8 +3269,12 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                 forcesO += wing_forceO; // [N]
                 torquesLH += wing_torque_wrp_cgLH; // [Nm]
-                ODEDebug.force_on_horizontal_fin_positionO = debug_wing_positionO;
-                ODEDebug.force_on_horizontal_fin_forceO = debug_wing_forceO;
+
+                if (last_takestep_in_frame)
+                {
+                    ODEDebug.force_on_horizontal_fin_positionO = debug_wing_positionO;
+                    ODEDebug.force_on_horizontal_fin_forceO = debug_wing_forceO;
+                }
             }
             // ##################################################################################
 
@@ -3290,8 +3293,12 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                 forcesO += wing_forceO; // [N]
                 torquesLH += wing_torque_wrp_cgLH; // [Nm]
-                ODEDebug.force_on_vertical_fin_positionO = debug_wing_positionO;
-                ODEDebug.force_on_vertical_fin_forceO = debug_wing_forceO;
+
+                if (last_takestep_in_frame)
+                {
+                    ODEDebug.force_on_vertical_fin_positionO = debug_wing_positionO;
+                    ODEDebug.force_on_vertical_fin_forceO = debug_wing_forceO;
+                }
             }
             // ##################################################################################
 
@@ -3310,8 +3317,12 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                 forcesO += wing_forceO; // [N]
                 torquesLH += wing_torque_wrp_cgLH; // [Nm]
-                ODEDebug.force_on_horizontal_wing_left_positionO = debug_wing_positionO;
-                ODEDebug.force_on_horizontal_wing_left_forceO = debug_wing_forceO;
+
+                if (last_takestep_in_frame)
+                {
+                    ODEDebug.force_on_horizontal_wing_left_positionO = debug_wing_positionO;
+                    ODEDebug.force_on_horizontal_wing_left_forceO = debug_wing_forceO;
+                }
             }
             // ##################################################################################
 
@@ -3330,8 +3341,12 @@ float beta_tr = 0; // calculated blade angle not used yet
 
                 forcesO += wing_forceO; // [N]
                 torquesLH += wing_torque_wrp_cgLH; // [Nm]
-                ODEDebug.force_on_horizontal_wing_right_positionO = debug_wing_positionO;
-                ODEDebug.force_on_horizontal_wing_right_forceO = debug_wing_forceO;
+
+                if (last_takestep_in_frame)
+                {
+                    ODEDebug.force_on_horizontal_wing_right_positionO = debug_wing_positionO;
+                    ODEDebug.force_on_horizontal_wing_right_forceO = debug_wing_forceO;
+                }
             }
             // ##################################################################################
 
@@ -3460,36 +3475,41 @@ float beta_tr = 0; // calculated blade angle not used yet
                 
                 thrust_mr_for_rotordisc_conical_deformation = (float)F_thrustsumLD_LD.y; // [N] 
 
-
-                int r_n = 4;  // radial steps - (polar coordiantes)
-                int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
-                for (int r = 0; r < r_n; r++)
+                if (last_takestep_in_frame)
                 {
-                    for (int c = 0; c < c_n; c++)
+                    int r_n = 4;  // radial steps - (polar coordiantes)
+                    int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
+                    for (int r = 0; r < r_n; r++)
                     {
-                        ODEDebug.BEMT_blade_segment_position[r][c] = Helper.ConvertRightHandedToLeftHandedVector(r_LBO_O[r, c]);
-                        ODEDebug.BEMT_blade_segment_velocity[r][c] = Helper.ConvertRightHandedToLeftHandedVector(dr_LBO_O_dt[r, c]);
-                        ODEDebug.BEMT_blade_segment_thrust[r][c] = Helper.ConvertRightHandedToLeftHandedVector(F_LB_O_thrust[r, c]);
-                        ODEDebug.BEMT_blade_segment_torque[r][c] = Helper.ConvertRightHandedToLeftHandedVector(F_LB_O_torque[r, c]);
+                        for (int c = 0; c < c_n; c++)
+                        {
+                            ODEDebug.BEMT_blade_segment_position[r][c] = Helper.ConvertRightHandedToLeftHandedVector(r_LBO_O[r, c]);
+                            ODEDebug.BEMT_blade_segment_velocity[r][c] = Helper.ConvertRightHandedToLeftHandedVector(dr_LBO_O_dt[r, c]);
+                            ODEDebug.BEMT_blade_segment_thrust[r][c] = Helper.ConvertRightHandedToLeftHandedVector(F_LB_O_thrust[r, c]);
+                            ODEDebug.BEMT_blade_segment_torque[r][c] = Helper.ConvertRightHandedToLeftHandedVector(F_LB_O_torque[r, c]);
+                        }
                     }
+                    ODEDebug.P_mr_pr = (float)(torque_mr * omega_mr); // [W]
                 }
-                ODEDebug.P_mr_pr = (float)(torque_mr * omega_mr); // [W]
             }
             else
             {
                 T_stiffLR_CH = Vector3.zero;
                 T_dampLR_CH = Vector3.zero;
 
-                int r_n = 4;  // radial steps - (polar coordiantes)
-                int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
-                for (int r = 0; r < r_n; r++)
+                if (last_takestep_in_frame)
                 {
-                    for (int c = 0; c < c_n; c++)
+                    int r_n = 4;  // radial steps - (polar coordiantes)
+                    int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
+                    for (int r = 0; r < r_n; r++)
                     {
-                        ODEDebug.BEMT_blade_segment_position[r][c] = Vector3.zero;
-                        ODEDebug.BEMT_blade_segment_velocity[r][c] = Vector3.zero;
-                        ODEDebug.BEMT_blade_segment_thrust[r][c] = Vector3.zero;
-                        ODEDebug.BEMT_blade_segment_torque[r][c] = Vector3.zero;
+                        for (int c = 0; c < c_n; c++)
+                        {
+                            ODEDebug.BEMT_blade_segment_position[r][c] = Vector3.zero;
+                            ODEDebug.BEMT_blade_segment_velocity[r][c] = Vector3.zero;
+                            ODEDebug.BEMT_blade_segment_thrust[r][c] = Vector3.zero;
+                            ODEDebug.BEMT_blade_segment_torque[r][c] = Vector3.zero;
+                        }
                     }
                 }
             }
@@ -3656,6 +3676,11 @@ float beta_tr = 0; // calculated blade angle not used yet
                 //dxdt[36] = domega_mr_dt; // [rad/sec^2] mainrotor motor rotational acceleration   
                 dxdt[36] = (MLz + wLx * wLy * (Jx - Jy)) / Jz;
             }
+
+            if (last_takestep_in_frame)
+            {
+                ODEDebug.veloLH = veloLH;
+            }
             // ##################################################################################
 
 
@@ -3676,9 +3701,8 @@ float beta_tr = 0; // calculated blade angle not used yet
 
 
             // ##################################################################################
-            if (log_output_frequency++ == 50)
-            {
-                
+            if (last_takestep_in_frame)        
+            {                
                 ODEDebug.debug_text = "";
                 ODEDebug.debug_text += " INFO:       veloLHx=" + Helper.FormatNumber(veloLH.x, "0.00") + "m/s" + "   veloLHy=" + Helper.FormatNumber(veloLH.y, "0.00") + "m/s" + "   veloLHz=" + Helper.FormatNumber(veloLH.z, "0.00") + "m/s" +
                                                     "   omegaLHx=" + Helper.FormatNumber(omegaLH.x * Mathf.Rad2Deg, "0.0") + "deg/s" + "   omegaLHy=" + Helper.FormatNumber(omegaLH.y * Mathf.Rad2Deg, "0.0") + "deg/s" + "   omegaLHz = " + Helper.FormatNumber(omegaLH.z * Mathf.Rad2Deg, "0.0") + "deg/s" + "\n";
@@ -3719,9 +3743,33 @@ float beta_tr = 0; // calculated blade angle not used yet
                 //ODEDebug.debug_text += " beta_forward:" + Helper.FormatNumber(beta_forward, "0.000") + "\n";
                 //ODEDebug.debug_text += " beta_sideward:" + Helper.FormatNumber(beta_sideward, "0.000") + "\n";
 
-                log_output_frequency = 0;
+               // log_output_frequency = 0;
             }
             // ##################################################################################
+
+
+
+
+            // ##################################################################################
+            // thread safe setting of parameter between threads (if a new helicopter oder new parameter sets are loaded in the main thread)
+            // ##################################################################################
+            if (last_takestep_in_frame == true && flag_load_new_parameter_in_ODE_thread == true)
+            {
+                //UnityEngine.Debug.Log("flag_load_new_parameter_in_ODE_thread");
+
+                //par_temp.simulation.get_stru_simulation_settings_from_player_prefs();
+                par_temp.transmitter_and_helicopter.Update_Calculated_Parameter();
+
+                // copy new values from par_temp-object to par-object
+                par = par_temp.Deep_Clone();
+
+                par.transmitter_and_helicopter.Update_Calculated_Parameter();
+
+                Update_ODE_Debug_Variables();
+
+                flag_load_new_parameter_in_ODE_thread = false;
+            }
+            // ##################################################################################    
 
 
         }

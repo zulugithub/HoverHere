@@ -6085,7 +6085,7 @@ PrefabInstance:
     - target: {fileID: 1750257032349432890, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
       propertyPath: m_ScrollSensitivity
-      value: 400
+      value: 2000
       objectReference: {fileID: 0}
     - target: {fileID: 1851779848862216423, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
@@ -6712,7 +6712,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 294520175}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13658,6 +13658,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canopy_A
       objectReference: {fileID: 0}
+    - target: {fileID: -2340245359974277820, guid: 4900882a027738f48991fddedd9cdd60,
+        type: 3}
+      propertyPath: m_Name
+      value: Canopy_A
+      objectReference: {fileID: 0}
     - target: {fileID: -748235682159732602, guid: 4900882a027738f48991fddedd9cdd60,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -15317,7 +15322,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 464640882}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18342,7 +18347,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 580278858}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -62959,7 +62964,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 905011045}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -73570,7 +73575,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1125585654}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -74199,7 +74204,7 @@ PrefabInstance:
     - target: {fileID: 768176325864573411, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
       propertyPath: m_ScrollSensitivity
-      value: 100
+      value: 1500
       objectReference: {fileID: 0}
     - target: {fileID: 768176326263461152, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
@@ -97955,10 +97960,10 @@ MonoBehaviour:
   m_DirectionalAnchorRotationAction:
     m_UseReference: 0
     m_Action:
-      m_Name: 
+      m_Name: Directional Anchor Rotation
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 
+      m_Id: 075d719c-6bae-4f2b-b6a2-91046912cf5a
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -98790,8 +98795,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb0566bfa207c1244969c5695ed17e0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thread_ODE_deltat: 0
-  threadRunning: 1
+  physics_takestep_calculations_per_frame: 0
+  screen_refreshrate_fps: 60
+  realtime_per_step_sec: 0.001
   helicopters_available: {fileID: 347304719}
   ui_informations_overlay: {fileID: 1536402803}
   gl_pause_flag: 1
@@ -122498,7 +122504,7 @@ PrefabInstance:
     - target: {fileID: 768176325864573411, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
       propertyPath: m_ScrollSensitivity
-      value: 100
+      value: 1500
       objectReference: {fileID: 0}
     - target: {fileID: 768176326263461152, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
@@ -123440,7 +123446,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1909850116}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -124016,7 +124022,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926720786}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

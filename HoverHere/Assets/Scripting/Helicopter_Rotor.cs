@@ -129,7 +129,7 @@ namespace Rotor
         //    MMMMMMMM               MMMMMMMM    eeeeeeeeeeeeee            ttttttttttt  hhhhhhh     hhhhhhh   ooooooooooo      ddddddddd   ddddd  sssssssssss   
         // ##################################################################################
         #region methods
-        public void Init_Rotor_Data(ref Helisimulator.Helicopter_ODE helicopter_ODE, ref GameObject Helicopter_Selected, ref string helicopter_name, stru_rotor par_rotor, string rotor_name, int helicopter_id)
+        public void Init_Rotor_Data(bool rotor_disk_complexity, ref Helisimulator.Helicopter_ODE helicopter_ODE, ref GameObject Helicopter_Selected, ref string helicopter_name, stru_rotor par_rotor, string rotor_name, int helicopter_id)
         {
 
             // ##################################################################################
@@ -257,17 +257,17 @@ namespace Rotor
                 if (temp_rotordisk != null)
                 {
                     rotordisk = temp_rotordisk.gameObject;
-                    rotordisk.SetActive(!helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
+                    rotordisk.SetActive(!rotor_disk_complexity);
 
                 }
                 if (temp_rotordisk_complex != null)
                 {
                     rotordisk_complex = temp_rotordisk_complex.gameObject.transform.GetChild(0).gameObject;
-                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
+                    rotordisk_complex.SetActive(rotor_disk_complexity);
                 }
 
 
-                //if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
+                //if (rotor_disk_complexity == false)
                 //{
                     if (temp_rotordisk != null)
                     {                        
@@ -292,7 +292,7 @@ namespace Rotor
                 // ##################################################################################
                 // Init deformation of rotor-disk
                 // ##################################################################################
-                //if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
+                //if (rotor_disk_complexity == false)
                 //{
                     if (rotordisk != null)
                     {
@@ -418,7 +418,7 @@ namespace Rotor
         // ##################################################################################
         // change rotor visibility as a function of rotation velocity
         // ##################################################################################
-        public void Update_Rotor_Visiblitiy(ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float Theta_col, ref float omega)
+        public void Update_Rotor_Visiblitiy(bool rotor_disk_complexity, ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float Theta_col, ref float omega)
         {
             if (rotor_object != null)
             {
@@ -451,7 +451,7 @@ namespace Rotor
                 }
 
                 // rotor disk
-                if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
+                if (rotor_disk_complexity == false)
                 {
                     rotordisk_top_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
                     rotordisk_bottom_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting
@@ -550,7 +550,7 @@ namespace Rotor
         // ##################################################################################
         // rotor deformation
         // ##################################################################################
-        public void Update_Rotor_Deformation(int rotor_type, ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float flapping_a_s_LH, float flapping_b_s_LH, float omega, float Omega, float Theta_col, Camera camera)
+        public void Update_Rotor_Deformation(bool rotor_disk_complexity, int rotor_type, ref Helisimulator.Helicopter_ODE helicopter_ODE, stru_rotor par_rotor, float flapping_a_s_LH, float flapping_b_s_LH, float omega, float Omega, float Theta_col, Camera camera)
         {
             if (rotor_object != null)
             {
@@ -591,14 +591,14 @@ namespace Rotor
                 // ##################################################################################
                 if (rotordisk != null)
                 {
-                    rotordisk.SetActive(!helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
+                    rotordisk.SetActive(!rotor_disk_complexity);
                 }
                 if ( rotordisk_complex!= null)
                 {
-                    rotordisk_complex.SetActive(helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val);
+                    rotordisk_complex.SetActive(rotor_disk_complexity);
                 }
 
-                if (helicopter_ODE.par.simulation.graphic_settings.rotor_disk_complexity.val == false)
+                if (rotor_disk_complexity == false)
                 {
                     if (rotordisk != null)
                     {
@@ -1349,7 +1349,7 @@ namespace Rotor
             double P_pa = Math.Abs(force_fuselageLH.x * u_a) + Math.Abs(force_fuselageLH.y * (-v_a - v_i)) + Math.Abs(force_fuselageLH.z * w_a); // [W] parasite power
             double P_c = mass_total * v_rotor_hub_yO * 9.81f * Helper.Step((float)Math.Abs(v_rotor_hub_yO), 0.001f, 0.0f, 0.01f, 1); // par.scenery.gravity.val;  // [W] climbing power TODOOOOOOOOOOOOOOOOOOOOOOOOoo  -- 
 
-            double P_rotor = P_pr + P_i + P_pa + P_c; // [W] 
+            double P_rotor = P_pr + P_i + P_pa * 0.01000000000 + P_c * 0.01000000000; // [W]  "0.01000000000" tuning parameter
 
             //N = power_rotor / Helper.Step( Mathf.Abs((float)omega), 0.0001f, 0.0000f, 1.0f, (float)omega);
 

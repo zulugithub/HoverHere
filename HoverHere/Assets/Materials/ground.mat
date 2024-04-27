@@ -104,7 +104,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _CameraHeight: 1.65
+    - _CameraHeight: 1.4
     - _Cutoff: 0.669
     - _DetailNormalMapScale: 1
     - _DstBlend: 10

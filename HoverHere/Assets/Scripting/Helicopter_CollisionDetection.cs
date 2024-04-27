@@ -26,10 +26,8 @@ public class Helicopter_CollisionDetection : MonoBehaviour
         //Debug.Log("Collision!!!");
         if(Helicopter_Main.gl_pause_flag == false)
         {
-            Helicopter_Main.Pause_ODE(true);
             Helicopter_Main.Crash_Play_Audio(Application.streamingAssetsPath + "/Audio/crash_audio_001.wav");
             Helicopter_Main.Reset_Simulation_States();
-            Helicopter_Main.Pause_ODE(false);
         }
     }
 

@@ -241,7 +241,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             // no controller connected
             gl_controller_connected_flag = false;
             gl_pause_flag = true;
-            Pause_ODE(gl_pause_flag);
         }
 
     }
@@ -869,7 +868,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 calibration_state = State_Calibration.not_running;
                 calibration_abortable = false;
                 gl_pause_flag = false;
-                Pause_ODE(gl_pause_flag);
 
                 //// debug
                 //for (int i = 0; i < 8; i++)
@@ -898,7 +896,6 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 calibration_state = State_Calibration.not_running;
                 calibration_abortable = false;
                 gl_pause_flag = false;
-                Pause_ODE(gl_pause_flag);
             }
             // #################################################################################
 

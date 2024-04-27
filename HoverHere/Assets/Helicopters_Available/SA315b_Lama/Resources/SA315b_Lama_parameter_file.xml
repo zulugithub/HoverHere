@@ -4,22 +4,22 @@
     <countdown_minutes>  <val>10.0</val>  </countdown_minutes>
     <countdown_volume>  <val>60.0</val>  </countdown_volume>
     <stick_roll>
-      <clearance><vect3>    <x>0.015</x><y>0.015</y><z>0.015</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
+      <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
       <expo><vect3>    <x>25</x><y>25</y><z>25</z>  </vect3></expo> <!-- bank 1 2 3 -->  
       <dualrate><vect3>    <x>100</x><y>100</y><z>100</z>  </vect3></dualrate> <!-- bank 1 2 3 -->  
     </stick_roll>
     <stick_pitch>
-      <clearance><vect3>    <x>0.015</x><y>0.015</y><z>0.015</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
+      <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
       <expo><vect3>    <x>25</x><y>25</y><z>25</z>  </vect3></expo> <!-- bank 1 2 3 -->  
       <dualrate><vect3>    <x>100</x><y>100</y><z>100</z>  </vect3></dualrate> <!-- bank 1 2 3 --> 
     </stick_pitch>
     <stick_yaw>
-      <clearance><vect3>    <x>0.015</x><y>0.015</y><z>0.015</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
+      <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
       <expo><vect3>    <x>25</x><y>25</y><z>25</z>  </vect3></expo> <!-- bank 1 2 3 -->  
       <dualrate><vect3>    <x>100</x><y>100</y><z>100</z>  </vect3></dualrate> <!-- bank 1 2 3 -->   
     </stick_yaw>
     <stick_collective>
-      <clearance><vect3>    <x>0.015</x><y>0.015</y><z>0.015</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
+      <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
       <expo><vect3>    <x>25</x><y>25</y><z>25</z>  </vect3></expo> <!-- bank 1 2 3 -->  
       <dualrate><vect3>    <x>100</x><y>100</y><z>100</z>  </vect3></dualrate> <!-- bank 1 2 3 --> 
     </stick_collective>
@@ -98,14 +98,14 @@
       <K_a><vect3>    <x>180</x><y>190</y><z>200</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>0.5</x><y>0.6</y><z>0.6</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.2</x><y>0.3</y><z>0.3</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.0000</x><y>0.0000</y><z>0.0000</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
     </gyro>
     <flybarless>
       <K_a><vect3>    <x>130</x><y>140</y><z>150</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>1.5</x><y>1.5</y><z>1.5</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.02</x><y>0.02</y><z>0.02</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.0003</x><y>0.0003</y><z>0.0003</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_flybarless>  <val>false</val>  </direct_feadtrough_flybarless>
     </flybarless>
     <servo_damping>          

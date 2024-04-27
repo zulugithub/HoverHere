@@ -6,6 +6,16 @@
 //
 // Unity c# code
 // ##################################################################################
+//        Frame 1                                  Frame 2                                  Frame 3
+// -------|--x--------------x----------------------|--x-------------------x-----------------|--x--------x------------->  time [s]                
+//         FU()           Up()                      FU()                Up()                 FU()     Up()               FixedUpdate(), Update()
+//                          |                                              |                            |              
+//                          v                                              v                            v               
+//                          [TS][TS][TS][TS][TS][TS]                       [TS][TS][TS][TS][TS][TS]     [TS][TS][TS][TS][TS][TS]   TakeStep 
+//
+// One frame is divided in a number of TakeStep ODE-calculations. If the Frame-time would be at 60Hz 0.01666 sec and 10 TakeSteps
+// would be calculated, then each takeStep would have the physical time step of 0.001666 sec.
+// ##################################################################################
 using UnityEngine;
 using System.Collections;
 using System.Threading;
@@ -17,196 +27,69 @@ using System.Runtime.InteropServices;
 public abstract class Helicopter_TimestepModel : MonoBehaviour
 {
     [HideInInspector]
-    public float thread_ODE_deltat; // = 0.001f;
+    //public float thread_ODE_deltat; // = 0.001f;
     public Thread thread_ODE;
-
-    public bool threadRunning = true;
-    //bool stepFree = true;
-    //bool stepRunning = false;
-    int stepRunning = 0;
-    //public float model_t = 0.0f;
-
-    //public bool threaded = true;
-    //bool fastrun = true;
-    bool paused = false;
-
-    bool paused_flag_old = false;
-
+    public static AutoResetEvent thread_pause_signal = new AutoResetEvent(false);
+    public float max_physics_calc_rate_per_frame { get; private set; }
+    public int physics_takestep_calculations_per_frame { get; private set; }
+    public float screen_refreshrate_fps = 60.0f;
+    public float realtime_per_step_sec = 0.001f;
+    private const float max_calculation_frequency_hz = 1000; 
     Stopwatch sw = new Stopwatch();
 
     static readonly object _locker = new object();
 
-
-
     ~Helicopter_TimestepModel()
     {
-        //Thread.Sleep(1000);
-        //try
-        //{
-        //    thread_ODE.Join();
-        //}
-        //catch { } // ignore "already exited" exception
-        //Thread.Sleep(1000);
+        Thread.Sleep(100);
+        thread_pause_signal.Set();
+        thread_ODE.Abort(1000);
 
-      //  if (thread_ODE != null)
-     //       thread_ODE.Abort();
+        thread_ODE.Join(100);
     }
 
-   // public bool GetThreaded()
-    //{
-   //     return threaded;
-   // }
 
     // Use this for initialization
     public void Simulation_Thread_Start()
     {
-        //model_t = 0.0f;
-        // create thread before finishing Start
-       // if (threaded)
-       // {
-            thread_ODE = new Thread(this.ThreadedActions);
-            thread_ODE.IsBackground = true;
-            thread_ODE.Start();
-            
-            //thread_ODE.Priority = System.Threading.ThreadPriority.Lowest;
-            sw.Start();
-            //UnityEngine.Debug.Log("GetHashCode " + thread_ODE.GetHashCode() + "   ManagedThreadId " + thread_ODE.ManagedThreadId);
-       // }
+        thread_ODE = new Thread(this.ThreadedActions);
+        thread_ODE.IsBackground = true;
+        thread_ODE.Start();
+        thread_ODE.Priority = System.Threading.ThreadPriority.Highest;
+        sw.Start();
     }
-
-
-    public void Simulation_Thread_Abort()
-    {
-        threadRunning = false;
-        //thread_ODE.Abort();
-        //while (thread_ODE.ThreadState.HasFlag(System.Threading.ThreadState.Aborted))
-        //    Thread.Sleep(0);
-
-        Thread.Sleep(1000);
-        thread_ODE.Join(2000);
-
-        //Thread.Sleep(1000);
-
-        //try
-        //{
-        //    thread_ODE.Join();
-        //}
-        //catch { } // ignore "already exited" exception
-
-        //     if (thread_ODE != null)   
-        //         thread_ODE.Abort();
-
-    }
-
 
     public void ThreadedActions()
     {
-        //long oldTime = DateTime.Now.Ticks;
-        long oldTime = sw.Elapsed.Ticks;
-        long currentTime;
-        float waitTime;
-        float deltaTime;
-
-
-        while (threadRunning)
+        while (true)
         {
-            Thread.Sleep(0); //Make sure Unity does not freeze
-            waitTime = thread_ODE_deltat*1000; // [ms]
-
-            //currentTime = DateTime.Now.Ticks;
-            currentTime = sw.Elapsed.Ticks;
-            deltaTime = (float)TimeSpan.FromTicks(currentTime - oldTime).TotalMilliseconds; // [ms]
-
-            // timescale setting (slow motion)       
-            //deltaTime *= thread_ODE_timescale;
-
-
-            if (deltaTime < 0.01f) // [ms]
-                deltaTime = 0.01f;
-
-            if (deltaTime >= waitTime)
-            {
-                oldTime = currentTime; //Store current Time
-                //UnityEngine.Debug.Log("deltaTime: " + deltaTime + "  waitTime: " + waitTime + "  model_dt: " + model_dt);
-
-                //stepRunning = true;
-                stepRunning = 1000000;
-                // TakeStep(model_dt);
-                // model_t += model_dt; //am I doing this twice?
-                if (!paused)
-                {
-                    TakeStep(deltaTime * 0.001f); // [s]
-                }
-                //model_t += deltaTime; 
-                //stepRunning = false;
-                stepRunning = 0;
-            }
-           
-
-            /*
             try
             {
-                if (stepFree || fastrun)
+                Thread.Sleep(0); //Make sure Unity does not freeze
+
+                thread_pause_signal.WaitOne(); // Blockiert den aktuellen thread, bis das aktuelle WaitHandle ein signal empfängt.
+
+                float screen_refresh_rate_sec = 1.0f / screen_refreshrate_fps;
+                max_physics_calc_rate_per_frame = screen_refresh_rate_sec / realtime_per_step_sec;
+                //float max_physics_calc_rate_per_sec       = screen_refreshrate_fps * (screen_refresh_rate_sec / realtime_per_step_sec);
+                physics_takestep_calculations_per_frame = (int)(max_physics_calc_rate_per_frame * 0.700f); // use 60% of time per frame for ODE takesteps calculations
+                if ((physics_takestep_calculations_per_frame * screen_refreshrate_fps) > max_calculation_frequency_hz)
+                    physics_takestep_calculations_per_frame = (int)(max_calculation_frequency_hz / screen_refreshrate_fps); //[] limit maximal calculation frequency
+                float physics_timestep = screen_refresh_rate_sec / physics_takestep_calculations_per_frame;
+
+                for (int i = 0; i < physics_takestep_calculations_per_frame; i++)
                 {
-                    stepRunning = true;
-                    TakeStep(model_dt);
-                    model_t += model_dt;//am I doing this twice?
-                    stepRunning = false;
+                    bool last_takestep_in_frame = (i == (physics_takestep_calculations_per_frame - 1)); // mark the last TakeStep claculation per frame, so i.e. debbugging can only made in this last TakeStep calculation
+
+                    TakeStep(physics_timestep, last_takestep_in_frame); // [s] 
                 }
-                if (!fastrun)
-                    lock (_locker)
-                    {
-                        stepFree = false;
-                    }
             }
-            //(ThreadAbortException ex) 
-            catch
+            catch (ThreadAbortException ex)
             {
-                threadRunning = false;
+                UnityEngine.Debug.Log("Thread is aborted and the code is " + ex.ExceptionState);
             }
-            */
         }
     }
 
-    // Frame-rate independent message for physics calculations
-   /* void FixedUpdate()
-    {
-        if (threaded)
-        {
-            lock (_locker)
-            {
-                stepFree = true;
-            }
-        }
-        else
-        {
-            stepRunning = true;
-            TakeStep(model_dt);
-            model_t += model_dt;
-            stepRunning = false;
-        }
-    }*/
-
-    public void Pause_ODE(bool paused_flag)
-    {
-        if(paused_flag != paused_flag_old) // change pause state only if setting has changed
-        { 
-            lock (_locker)
-            {
-                //stepFree = false;
-                // would a lock be more efficient here?
-
-                //while (stepRunning) { }
-                while ( (stepRunning--) > 0) {  } // wait for step to finish to avoid race condition   <<<<< commented out, because IL2CPP hangs here
-                                                  // grow array if needed
-
-                //UnityEngine.Debug.Log("Pause");
-
-                paused = paused_flag;
-            }
-            paused_flag_old = paused_flag;
-        }
-    }
-
-    public abstract void TakeStep(float dt);
+    public abstract void TakeStep(float dt, bool last_takestep_in_frame);
 }

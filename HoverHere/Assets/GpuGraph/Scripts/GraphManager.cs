@@ -363,7 +363,7 @@ public class GraphManager : MonoBehaviour
                             MaxText = MaxUI.AddComponent<Text>();
                             MaxText.text = "20.0";
                             MaxText.color = Color.white;
-                            MaxText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                            MaxText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "LegacyRuntime.ttf");
                             MaxText.alignment = TextAnchor.UpperLeft;
                             MaxText.horizontalOverflow = HorizontalWrapMode.Overflow;
                         }
@@ -399,7 +399,7 @@ public class GraphManager : MonoBehaviour
                             AvgText = AvgUI.AddComponent<Text>();
                             AvgText.text = "0.0f";
                             AvgText.color = Color.white;
-                            AvgText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                            AvgText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "LegacyRuntime.ttf");
                             AvgText.alignment = TextAnchor.MiddleLeft;
                         }
                         else
@@ -434,7 +434,7 @@ public class GraphManager : MonoBehaviour
                             MinText = MinUI.AddComponent<Text>();
                             MinText.text = "20.0";
                             MinText.color = Color.white;
-                            MinText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+                            MinText.font = (Font)Resources.GetBuiltinResource(typeof(Font), "LegacyRuntime.ttf");
                             MinText.alignment = TextAnchor.LowerLeft;
                         }
                         else

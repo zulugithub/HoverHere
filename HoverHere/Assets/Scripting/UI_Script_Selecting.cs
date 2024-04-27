@@ -458,7 +458,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
             UI_Update_Parameter_Settings_UI();
 
-            Pause_ODE(gl_pause_flag = false);
+            gl_pause_flag = false;
 
             ui_helicopter_selection_menu_flag = false;
         }
