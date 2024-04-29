@@ -1,0 +1,76 @@
+{
+    "name": "MyInputActions",
+    "maps": [
+        {
+            "name": "My XR UI",
+            "id": "88b8dda8-fc80-4521-bb87-d9cbcdb1fb26",
+            "actions": [
+                {
+                    "name": "MYMouseClick",
+                    "type": "Button",
+                    "id": "e56337c7-c50a-4699-850f-521ad7773ad5",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MyMouseScroll",
+                    "type": "Value",
+                    "id": "7f1f5813-26d3-4a7e-95bf-1b1bf5885aae",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "7ea762e4-cd92-49d8-9a4d-8f8b643e0aa1",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MYMouseClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1279f84-47fc-4716-9a26-35ad5b301c32",
+                    "path": "<Touchscreen>/touch*/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MYMouseClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "03b73964-1606-4d01-ada8-26b931b33f6c",
+                    "path": "<Mouse>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MYMouseClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c07178dd-c9fb-469f-8df4-5ecce880bc5f",
+                    "path": "<Mouse>/scroll",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MyMouseScroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

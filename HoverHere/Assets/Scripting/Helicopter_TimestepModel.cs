@@ -72,7 +72,7 @@ public abstract class Helicopter_TimestepModel : MonoBehaviour
                 float screen_refresh_rate_sec = 1.0f / screen_refreshrate_fps;
                 max_physics_calc_rate_per_frame = screen_refresh_rate_sec / realtime_per_step_sec;
                 //float max_physics_calc_rate_per_sec       = screen_refreshrate_fps * (screen_refresh_rate_sec / realtime_per_step_sec);
-                physics_takestep_calculations_per_frame = (int)(max_physics_calc_rate_per_frame * 0.700f); // use 60% of time per frame for ODE takesteps calculations
+                physics_takestep_calculations_per_frame = (int)(max_physics_calc_rate_per_frame * 0.700f); // use 70% of time per frame for ODE takesteps calculations
                 if ((physics_takestep_calculations_per_frame * screen_refreshrate_fps) > max_calculation_frequency_hz)
                     physics_takestep_calculations_per_frame = (int)(max_calculation_frequency_hz / screen_refreshrate_fps); //[] limit maximal calculation frequency
                 float physics_timestep = screen_refresh_rate_sec / physics_takestep_calculations_per_frame;

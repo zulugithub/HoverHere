@@ -71,6 +71,8 @@ using Parameter;
 
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.InputSystem.XR;
 //using UnityEngine.InputSystem;
 
 // ##################################################################################
@@ -2827,7 +2829,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                 if ((Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor))
                 {
-                    if (UnityEngine.InputSystem.Keyboard.current.pageUpKey.wasPressedThisFrame)
+                    if (UnityEngine.InputSystem.Keyboard.current.vKey.wasPressedThisFrame)
                     {
                         xr_mode_flag ^= true;
 
@@ -4612,45 +4614,46 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     void LateUpdate()
     {
 
-
-        // ##################################################################################
-        // zoom with mouse wheel
-        // ##################################################################################
-        if (UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y != 0f &&
+        if (!XRSettings.enabled)
+        { 
+            // ##################################################################################
+            // zoom with mouse wheel
+            // ##################################################################################
+            if (UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y != 0f &&
             ui_parameter_panel_flag == false && ui_welcome_panel_flag == false && ui_info_panel_flag == false &&
             ui_helicopter_selection_menu_flag == false && ui_scenery_selection_menu_flag == false && ui_pie_menu_flag == false )
-        {
-            mouse_fov -= UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y * mouse_scroll_fov_increment;
-            mouse_fov = Mathf.Clamp(mouse_fov, -mouse_fov_limit, +mouse_fov_limit);
+            {
+                mouse_fov -= UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y * mouse_scroll_fov_increment;
+                mouse_fov = Mathf.Clamp(mouse_fov, -mouse_fov_limit, +mouse_fov_limit);
+            }
+            // ##################################################################################
+
+
+            // ##################################################################################
+            // look around with mouse while holding middle mouse wheel or right mouse button
+            // ##################################################################################
+            if (UnityEngine.InputSystem.Mouse.current.middleButton.isPressed ||
+                UnityEngine.InputSystem.Mouse.current.rightButton.isPressed ||
+                UnityEngine.InputSystem.Keyboard.current.leftAltKey.isPressed ||
+                UnityEngine.InputSystem.Keyboard.current.rightAltKey.isPressed)
+            {
+                // rotate camera
+                mouse_camera_yaw += (mouse_camera_speed_horizontaly * (fieldOfView / fieldOfView_max) * Time.deltaTime) * UnityEngine.InputSystem.Mouse.current.delta.ReadValue().x; // * Helper.Step(Mathf.Abs(x), 30, 0, 80, 1);
+                mouse_camera_pitch -= (mouse_camera_speed_verticaly * (fieldOfView / fieldOfView_max) * Time.deltaTime) * UnityEngine.InputSystem.Mouse.current.delta.ReadValue().y; // * Helper.Step(Mathf.Abs(y), 30, 0, 80, 1);
+
+                mouse_camera_yaw -= Mathf.Sign(mouse_camera_yaw) * Helper.Step(fieldOfView, fieldOfView_min, 0.0010f, fieldOfView_max, 0.015f); // reduce velocity -> slow down movement
+                mouse_camera_pitch -= Mathf.Sign(mouse_camera_pitch) * Helper.Step(fieldOfView, fieldOfView_min, 0.0010f, fieldOfView_max, 0.015f); // reduce velocity -> slow down movement
+
+                //UnityEngine.Debug.Log( "x " + x.ToString() + " y " + y.ToString() ); 
+            }
+            else
+            {
+                // get view override back to zero (look again at helicopter)
+                mouse_camera_yaw = 0;
+                mouse_camera_pitch = 0;
+            }
+            // ##################################################################################
         }
-        // ##################################################################################
-
-
-        // ##################################################################################
-        // look around with mouse while holding middle mouse wheel or right mouse button
-        // ##################################################################################
-        if (UnityEngine.InputSystem.Mouse.current.middleButton.isPressed ||
-            UnityEngine.InputSystem.Mouse.current.rightButton.isPressed ||
-            UnityEngine.InputSystem.Keyboard.current.leftAltKey.isPressed ||
-            UnityEngine.InputSystem.Keyboard.current.rightAltKey.isPressed)
-        {
-            // rotate camera
-            mouse_camera_yaw += (mouse_camera_speed_horizontaly * (fieldOfView / fieldOfView_max) * Time.deltaTime) * UnityEngine.InputSystem.Mouse.current.delta.ReadValue().x; // * Helper.Step(Mathf.Abs(x), 30, 0, 80, 1);
-            mouse_camera_pitch -= (mouse_camera_speed_verticaly * (fieldOfView / fieldOfView_max) * Time.deltaTime) * UnityEngine.InputSystem.Mouse.current.delta.ReadValue().y; // * Helper.Step(Mathf.Abs(y), 30, 0, 80, 1);
-
-            mouse_camera_yaw -= Mathf.Sign(mouse_camera_yaw) * Helper.Step(fieldOfView, fieldOfView_min, 0.0010f, fieldOfView_max, 0.015f); // reduce velocity -> slow down movement
-            mouse_camera_pitch -= Mathf.Sign(mouse_camera_pitch) * Helper.Step(fieldOfView, fieldOfView_min, 0.0010f, fieldOfView_max, 0.015f); // reduce velocity -> slow down movement
-
-            //UnityEngine.Debug.Log( "x " + x.ToString() + " y " + y.ToString() ); 
-        }
-        else
-        {
-            // get view override back to zero (look again at helicopter)
-            mouse_camera_yaw = 0;
-            mouse_camera_pitch = 0;
-        }
-        // ##################################################################################
-
 
 
 
@@ -4998,7 +5001,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     // disable graphmanger (plots curves during debug mode)  TODO instead disable move figures to canvas
                     if (main_camera.GetComponent<GraphManager>() != null) main_camera.GetComponent<GraphManager>().enabled = false;
                     // enable tracked pose diriver
-                    //if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = true;
+                    if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = true;
 
                     // fps
                     //refresh_rate_sec_old = 0;
@@ -5012,6 +5015,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                     Canvas canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
                     RectTransform canva_rt = canvas.GetComponent<RectTransform>(); 
                     canvas.renderMode = RenderMode.WorldSpace;
+                    GameObject.Find("EventSystem").GetComponent<InputSystemUIInputModule>().enabled = false;
+                    ui_parameter_panel.transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 5;
+                    ui_helicopter_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 5;
+                    ui_scenery_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 5;
+                    ui_info_panel.transform.Find("SrollRect").GetComponent<ScrollRect>().scrollSensitivity = 5;
                     canva_rt.anchorMin = new Vector2(0, 0);
                     canva_rt.anchorMax = new Vector2(0, 0);
                     canva_rt.pivot = new Vector2(0.5f, 0.5f);
@@ -5041,6 +5049,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                 else
                 {
                     GameObject.Find("Canvas").GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                    GameObject.Find("EventSystem").GetComponent<InputSystemUIInputModule>().enabled = true;
+                    ui_parameter_panel.transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 2000;
+                    ui_helicopter_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+                    ui_scenery_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+                    ui_info_panel.transform.Find("SrollRect").GetComponent<ScrollRect>().scrollSensitivity = 1500;
                     UnityEngine.Debug.LogError("Starting Subsystems Failed. Directing to Normal Interaciton Mode...!");
                     StopXR();
                 }
@@ -5049,6 +5062,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             else
             {
                 GameObject.Find("Canvas").GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+                GameObject.Find("EventSystem").GetComponent<InputSystemUIInputModule>().enabled = true;
+                ui_parameter_panel.transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 2000;
+                ui_helicopter_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+                ui_scenery_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+                ui_info_panel.transform.Find("SrollRect").GetComponent<ScrollRect>().scrollSensitivity = 1500;
                 UnityEngine.Debug.LogError("Starting Subsystems Failed. Directing to Normal Interaciton Mode...!");
                 StopXR();
             }
@@ -5075,7 +5093,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // enable graphmanger (plots curves during debug mode)  TODO instead disable move figures to canvas
         if (main_camera.GetComponent<GraphManager>() != null) main_camera.GetComponent<GraphManager>().enabled = true;
         // disable tracked pose diriver
-        //if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = false;
+        if (main_camera.GetComponent<TrackedPoseDriver>() != null) main_camera.GetComponent<TrackedPoseDriver>().enabled = false;
 
 
         //refresh_rate_sec_old = 0;
@@ -5087,6 +5105,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
         // set ui-canvas to screenspaceoverlay
         GameObject.Find("Canvas").GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+        GameObject.Find("EventSystem").GetComponent<InputSystemUIInputModule>().enabled = true;
+        ui_parameter_panel.transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 2000;
+        ui_helicopter_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+        ui_scenery_selection_panel.transform.Find("List Panel").transform.Find("Scroll View").GetComponent<ScrollRect>().scrollSensitivity = 1500;
+        ui_info_panel.transform.Find("SrollRect").GetComponent<ScrollRect>().scrollSensitivity = 1500;
 
         //activate heat blur effect -GrabPass in "Custom/GlassStainedBumpDistort" seams not to work in "single pass instenced" VR
         // hat blur appears in xr-not correct, therefore as workaround deactivate it.--> here activate it again.  TODO fix heatblur in VR

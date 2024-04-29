@@ -43,8 +43,6 @@ public class UI_XR_Canvas_Mouse_Interaction : MonoBehaviour
         {
             CursorObject.SetActive(true);
 
-
-
             //Debug.Log("x: " + UnityEngine.InputSystem.Mouse.current.position.ReadValue().x + "  y: " + UnityEngine.InputSystem.Mouse.current.position.ReadValue().y);
             mousePosition = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
 
@@ -54,7 +52,6 @@ public class UI_XR_Canvas_Mouse_Interaction : MonoBehaviour
 
             CursorObject.GetComponent<RectTransform>().localPosition = mousePosition;
             //arrow3Dobject.transform.position = rt.transform.TransformPoint(mousePosition); // local to world
-
 
             // mouse pressed
             if (UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame)

@@ -74,7 +74,7 @@ public class UI_XR_Canvas_Mouse : MonoBehaviour
         mouse_position.y = Mathf.Clamp(mouse_position.y, mousePosY_min, mousePosY_max);
 
         // move "LeftHand Controller"'s parent object
-        transform.localPosition = new Vector3(mouse_position.x, mouse_position.y, -100f);
+        transform.localPosition = new Vector3(mouse_position.x, mouse_position.y, -5f);
         // move arrow
         Arrow3D.transform.localPosition = new Vector3(mouse_position.x, mouse_position.y, -2f);
 
