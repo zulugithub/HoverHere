@@ -11,7 +11,7 @@
     <stick_pitch>
       <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
       <expo><vect3>    <x>15</x><y>15</y><z>15</z>  </vect3></expo> <!-- bank 1 2 3 -->  
-      <dualrate><vect3>    <x>100</x><y>100</y><z>100</z>  </vect3></dualrate> <!-- bank 1 2 3 --> 
+      <dualrate><vect3>    <x>70</x><y>80</y><z>90</z>  </vect3></dualrate> <!-- bank 1 2 3 --> 
     </stick_pitch>
     <stick_yaw>
       <clearance><vect3>    <x>0.030</x><y>0.030</y><z>0.030</z>  </vect3></clearance> <!-- bank 1 2 3 -->  
@@ -50,7 +50,7 @@
       <K_a><vect3>    <x>100</x><y>110</y><z>120</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>0.5</x><y>0.5</y><z>0.5</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>1.0</x><y>1.0</y><z>1.0</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.30</x><y>0.30</y><z>0.30</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
     </gyro>
     <flybarless>
@@ -323,7 +323,7 @@
 			<v_vertical>  <val>-2.5</val>  </v_vertical>
 			<force_reduction_factor>  <val>0.35</val>  </force_reduction_factor>
 			<torque_reduction_factor>  <val>0.35</val>  </torque_reduction_factor>
-			<stength_rising_speed_factor>  <val>0.010</val>  </stength_rising_speed_factor>
+			<stength_rising_speed_factor>  <val>0.006</val>  </stength_rising_speed_factor>
 		</vortex_ring_state>
 		<turbulence>
 			<rotational_velocity_limit>  <val>2</val>  </rotational_velocity_limit>

@@ -74,6 +74,16 @@ After downloading and installing Unity and the latest files from this repository
 
 The latest release uses Unity 2023.2.16f1.
 
+## VR Mode
+
+Tested with Pimax 8K (RTX 3080 Ti) at 90Hz 
+* PiTool: Native 90Hz, Fixed Foveated Rendering Maximum, Smarth Smoothing On, Vertical Sync Off
+* OpenComposite Runtime (OpenXR): set to OpenComposite
+* PimaxXR RUNTIME v0.4.4: default settings
+* OpenXRToolkit 1.3.2: Default settings
+* In Game OpenXR Toolit Menu (v1.3.2): Turbo mode (Experimantal) On
+* In Game Parameter Simulation Graphic Quality VR: rotor_disk_complexity off, quality_setting_VR Very High
+ 
 ## Credits
 
 Some of the code is based on different sources from the internet recherches. Please reffer to the links given in the soure code.

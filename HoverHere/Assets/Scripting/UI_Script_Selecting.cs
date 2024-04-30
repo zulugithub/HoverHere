@@ -303,6 +303,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         prefab_instance.transform.SetParent(ui_selection.ui_scroll_view_content, true);
         prefab_instance.transform.localScale = new Vector3(1, 1, 1);
         prefab_instance.transform.localPosition = new Vector3(10, -prefabs_vertical_position_on_scroll_view_ui, 0);
+        prefab_instance.transform.localRotation = Quaternion.Euler(0, 0, 0);
         prefabs_vertical_position_on_scroll_view_ui += 150;
 
         return prefab_instance;

@@ -73,6 +73,7 @@ using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem.XR;
+using Unity.XR.CoreUtils;
 //using UnityEngine.InputSystem;
 
 // ##################################################################################
@@ -1797,6 +1798,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         //sub_camera = main_camera.transform.Find("Sub Camera").gameObject.GetComponent<Camera>();
         //var test = main_camera.GetComponent<PostProcessVolume>(); // access bloom... http://synersteel.com/blog/2019/1/28/unity3d-bloom-animation-script
         //UnityEngine.XR.InputTracking.disablePositionalTracking = true;
+        // recenter camera to helicopter
+        XR_Origin_Recentering(helicopter_ODE.par_temp.scenery.initial_position.position.vect3);
         // ##################################################################################
 
 
@@ -3270,6 +3273,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                         }
                     }
 
+                    // recenter xr camera
+                    if (UnityEngine.InputSystem.Keyboard.current.numpad5Key.wasPressedThisFrame)
+                    {
+                        XR_Origin_Recentering(helicopters_available.transform.position);
+                    }
 
                 }
             }
@@ -3332,6 +3340,9 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
             // setup pilot scale to match camera with pilot's head/eyes position
             Scale_Pilot_To_Match_Camera_Height();
+
+            // recenter camera to helicopter
+            XR_Origin_Recentering(helicopter_ODE.par_temp.scenery.initial_position.position.vect3);
 
             load_skymap_state = State_Load_Skymap.not_running;
         }
@@ -3419,7 +3430,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
 
         // ##################################################################################
-        // reset sim. if collision forces to hight
+        // reset sim. if collision forces to high
         // ##################################################################################
         if (helicopter_ODE.collision_force_too_high_flag)
         {
