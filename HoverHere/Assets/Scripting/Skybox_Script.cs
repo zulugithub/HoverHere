@@ -463,6 +463,24 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     // ############################################################################
 
 
+    // ############################################################################
+    // recenter XR_Origin Camera
+    // ############################################################################
+    void XR_Origin_Recentering(Vector3 target_position)
+    {
+        //if (XRSettings.enabled) 
+        //{
+            var camera_rotation = Quaternion.LookRotation(target_position - main_camera.transform.position, Vector3.up).eulerAngles;
+            var rotationAngleY = camera_rotation.y - main_camera.transform.rotation.eulerAngles.y;
+            GameObject.Find("XR Origin (VR)").transform.Rotate(0, rotationAngleY, 0);
+        //}
+        //else
+        //{
+        //    GameObject.Find("XR Origin (VR)").transform.Rotate(0, 0, 0);
+        //}
+    }
+    // ############################################################################
+
 
 
     // ############################################################################

@@ -106,4 +106,20 @@
       </number_of_animals>
     </insect_flock>
   </animals>
+  <xr>
+    <canvas_position>
+      <vect3>
+        <x>0.0</x>
+        <y>3.2</y>
+        <z>7.0</z>
+      </vect3>
+    </canvas_position>
+    <canvas_rotation>
+      <vect3>
+        <x>-5.0</x>
+        <y>90.0</y>
+        <z>0.0</z>
+      </vect3>
+    </canvas_rotation>
+  </xr>
 </stru_scenery>

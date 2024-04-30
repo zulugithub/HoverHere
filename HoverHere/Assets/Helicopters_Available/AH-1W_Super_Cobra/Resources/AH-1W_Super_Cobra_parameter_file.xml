@@ -99,7 +99,7 @@
       <K_a><vect3>    <x>220</x><y>230</y><z>240</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>2.0</x><y>2.0</y><z>2.0</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.25</x><y>0.25</y><z>0.25</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.10</x><y>0.10</y><z>0.10</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
     </gyro>
     <flybarless>

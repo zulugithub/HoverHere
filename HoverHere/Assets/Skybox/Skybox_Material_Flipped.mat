@@ -116,6 +116,6 @@ Material:
     - _Rotationaxis: {r: 0, g: 1, b: 0, a: 1}
     - _Rotationinput_channel_from_RX2SIM_workaround: {r: 0, g: 1, b: 0, a: 1}
     - _Tint: {r: 1, g: 1, b: 1, a: 0}
-    - _TintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TintColor: {r: 0.95, g: 1.05, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

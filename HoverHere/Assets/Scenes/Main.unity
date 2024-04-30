@@ -16695,7 +16695,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1503608904}
   m_Direction: 2
   m_Value: 0.99999994
-  m_Size: 0.35879993
+  m_Size: 0.24546663
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -83025,8 +83025,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 56428574}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 0.7545333}
+  m_AnchorMax: {x: 1, y: 0.99999994}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -134184,24 +134184,25 @@ MonoBehaviour:
     \t\tTake snapshot\nESC \t\t\t\tAbort current operation or close user interface
     window\nc \t\t\t\t \t\tStart input device calibration\no\t\t\t\t \t\tOpen parameter
     menu\n\nv      \t\t\t    Switch between virtual reality and normal mode. Requires
-    headset, Windows.\n\np \t\t\t\t \t\tPause\nr \t\t\t\t \t\tModel reset \nd \t\t\t\t
-    \t\tDebug information modi selection\ni \t\t\t\t \t\tInformation overlay show/hide
-    \ng  \t\t\t \t\tRetract  / lowering landing gear\nb \t\t\t\t\t    Wheel brake
-    on / off\nl                       Position lights off / blinking / on\n\nm \t\t\t\t\tMotor
-    on / off\n1 \t\t\t\t\t    Governor speed setting 1 ( see under Options -> Helicopter
-    ->  target_rpm_1)\n2 \t\t\t\t\t    Governor speed setting 2 ( see under Options
-    -> Helicopter ->  target_rpm_2)\n3 \t\t\t\t\t    Governor speed setting 3 ( see
-    under Options -> Helicopter ->  target_rpm_3)\narrow up\t\tPusher propeller full
-    positive thrust (AH56 Cheyenne, Airwolf's thruster)\narrow le./ri.\tPusher propeller
-    zero thrust (AH56 Cheyenne, Airwolf's thruster)\narrow down\tPusher propeller
-    full negative thrust (AH56 Cheyenne)\n\nj \t\t\t\t \t\tGet next input device\nshift
-    + j\t\t \tGet last input device\n\nh\t\t\t\t\t\tGet next helicopter model\nh
-    pressed\t\tOpen helicopter selector menu\nshift + h \t \tGet last helicopter
-    model\n\nt \t\t\t \t \t\tGet next helicopter texture\nshift + t \t \t \tGet last
-    helicopter texture\n\ns \t\t\t\t \t\tGet next scenery\ns pressed\t\tOpen scenery
-    selector menu\nshift + s\t\t \tGet last scenery\n\na  \t\t\t \t\tPlay animation
-    (open / close doors)\na pressed     Play secondary animation (open / close rear
-    doors / weapon bay / ...)\n\nmouse wheel \t   \t\t                                                      
+    headset, Windows.\nNumpad 5     Recenter VR camera to helicopter.\n\np \t\t\t\t
+    \t\tPause\nr \t\t\t\t \t\tModel reset \nd \t\t\t\t \t\tDebug information modi
+    selection\ni \t\t\t\t \t\tInformation overlay show/hide \ng  \t\t\t \t\tRetract 
+    / lowering landing gear\nb \t\t\t\t\t    Wheel brake on / off\nl                      
+    Position lights off / blinking / on\n\nm \t\t\t\t\tMotor on / off\n1 \t\t\t\t\t   
+    Governor speed setting 1 ( see under Options -> Helicopter ->  target_rpm_1)\n2
+    \t\t\t\t\t    Governor speed setting 2 ( see under Options -> Helicopter -> 
+    target_rpm_2)\n3 \t\t\t\t\t    Governor speed setting 3 ( see under Options ->
+    Helicopter ->  target_rpm_3)\narrow up\t\tPusher propeller full positive thrust
+    (AH56 Cheyenne, Airwolf's thruster)\narrow le./ri.\tPusher propeller zero thrust
+    (AH56 Cheyenne, Airwolf's thruster)\narrow down\tPusher propeller full negative
+    thrust (AH56 Cheyenne)\n\nj \t\t\t\t \t\tGet next input device\nshift + j\t\t
+    \tGet last input device\n\nh\t\t\t\t\t\tGet next helicopter model\nh pressed\t\tOpen
+    helicopter selector menu\nshift + h \t \tGet last helicopter model\n\nt \t\t\t
+    \t \t\tGet next helicopter texture\nshift + t \t \t \tGet last helicopter texture\n\ns
+    \t\t\t\t \t\tGet next scenery\ns pressed\t\tOpen scenery selector menu\nshift
+    + s\t\t \tGet last scenery\n\na  \t\t\t \t\tPlay animation (open / close doors)\na
+    pressed     Play secondary animation (open / close rear doors / weapon bay /
+    ...)\n\nmouse wheel \t   \t\t                                                      
     \t\t            Change camera field of view angle\nhold middle or left mouse
     button + mouse movement \t\tLook around\n\t- look down as far as possible raises
     the pilot's hand\n\t- looking above the horizont lowers the pilot's arm \n\nnum-enter    
@@ -136231,7 +136232,7 @@ PrefabInstance:
     - target: {fileID: 173375270220361007, guid: a7da351950173b94c9be93438563cfca,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7648337671170256082, guid: a7da351950173b94c9be93438563cfca,
         type: 3}

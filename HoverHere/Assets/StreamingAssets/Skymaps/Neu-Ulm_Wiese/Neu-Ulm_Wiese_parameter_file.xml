@@ -111,13 +111,13 @@
 		<vect3>
 		  <x>0.0</x>
 		  <y>3.3</y>
-		  <z>7.0</z>
+		  <z>6.0</z>
 		</vect3>
 	</canvas_position>
 	<canvas_rotation>
 		<vect3>
 		  <x>-5.0</x>
-		  <y>0.0</y>
+		  <y>10.0</y>
 		  <z>0.0</z>
         </vect3>
 	</canvas_rotation>

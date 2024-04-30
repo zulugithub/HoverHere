@@ -98,7 +98,7 @@
       <K_a><vect3>    <x>180</x><y>190</y><z>200</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>0.5</x><y>0.6</y><z>0.6</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.2</x><y>0.3</y><z>0.3</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.03</x><y>0.03</y><z>0.03</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
     </gyro>
     <flybarless>
@@ -265,7 +265,7 @@
 			<v_vertical>  <val>-2.5</val>  </v_vertical>
 			<force_reduction_factor>  <val>0.50</val>  </force_reduction_factor>
 			<torque_reduction_factor>  <val>0.35</val>  </torque_reduction_factor>
-			<stength_rising_speed_factor>  <val>0.015</val>  </stength_rising_speed_factor>
+			<stength_rising_speed_factor>  <val>0.010</val>  </stength_rising_speed_factor>
 		</vortex_ring_state>
 		<turbulence>
 			<rotational_velocity_limit>  <val>2</val>  </rotational_velocity_limit>

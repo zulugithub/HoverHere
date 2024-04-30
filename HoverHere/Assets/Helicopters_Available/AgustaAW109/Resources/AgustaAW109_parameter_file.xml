@@ -55,9 +55,9 @@
       <K_a><vect3>    <x>160</x><y>180</y><z>250</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>2.0</x><y>2.5</y><z>3.0</z>  </vect3></K_I> <!-- bank 1 2 3 -->
       <K_p><vect3>    <x>0.30</x><y>0.40</y><z>0.40</z>  </vect3></K_p> <!-- bank 1 2 3 -->
-      <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
+      <K_d><vect3>    <x>0.10</x><y>0.10</y><z>0.10</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_gyroscope>  <val>false</val>  </direct_feadtrough_gyroscope>
-    </gyro>
+    </gyro>r
     <flybarless>
       <K_a><vect3>    <x>120</x><y>140</y><z>150</z>  </vect3></K_a> <!-- bank 1 2 3 -->  
       <K_I><vect3>    <x>0.6</x><y>0.6</y><z>0.6</z>  </vect3></K_I> <!-- bank 1 2 3 -->

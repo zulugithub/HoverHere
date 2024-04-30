@@ -272,7 +272,7 @@
 			<v_vertical>  <val>-2.5</val>  </v_vertical>
 			<force_reduction_factor>  <val>0.40</val>  </force_reduction_factor>
 			<torque_reduction_factor>  <val>0.35</val>  </torque_reduction_factor>
-			<stength_rising_speed_factor>  <val>0.015</val>  </stength_rising_speed_factor>
+			<stength_rising_speed_factor>  <val>0.010</val>  </stength_rising_speed_factor>
 		</vortex_ring_state>
 		<turbulence>
 			<rotational_velocity_limit>  <val>2</val>  </rotational_velocity_limit>

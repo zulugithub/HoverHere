@@ -1577,6 +1577,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             prefab_object.transform.SetParent(parent_ui_container, true);
             prefab_object.transform.localScale = new Vector3(1, 1, 1);
             prefab_object.transform.localPosition = new Vector3(40 + indent_string.Length * 0, -(prefabs_vertical_position_on_scroll_view_ui), 00);
+            prefab_object.transform.localRotation = Quaternion.Euler(0, 0, 0);
 
             Text text_object_name = prefab_object.transform.Find("Text").GetComponent<Text>();
 
