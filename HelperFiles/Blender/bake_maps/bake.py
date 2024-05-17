@@ -35,7 +35,7 @@
 bl_info = {
     "name": "Bake Textures",
     "author": "zulu",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (4, 1, 1),
     "location": "Node Editor > Sidebar > TextureBake",
     "description": "Bakes Textures",
@@ -63,6 +63,7 @@ bl_info = {
 # give Python access to Blender's functionality
 import bpy
 import time
+from pathlib import Path
 
 from bpy.props import (StringProperty,
                        BoolProperty,
@@ -167,7 +168,16 @@ class Bake_Settings(PropertyGroup):
         default = True
         )
         
-
+        
+        
+    my_enum_normal_bitdepth : EnumProperty(
+        name = "Normal Map",
+        description = "Normal map: Bit depth per channel",
+        items = [
+            ("16" , "Float(Half)" , "16-bit color channels"),
+            ("32" , "Float(Full)" , "32-bit color channels")
+        ]
+        )
     my_int_cycles_samples : IntProperty(
         name = "Set number of cycles samples",
         description="Set number of cycles samples",
@@ -182,6 +192,14 @@ class Bake_Settings(PropertyGroup):
         min = 1,
         max = 1000
         )
+      
+        
+    #Path(bpy.path.basename(bpy.data.filepath)).stem    
+    my_file_name: bpy.props.StringProperty(name="File name",
+                                        description="Additional string added at beginning of filenames",
+                                        default="",
+                                        maxlen=256,
+                                        subtype="NONE")
 #################################################################################
 
 
@@ -218,6 +236,8 @@ class NODE_EDITOR_PT_bake_panel(bpy.types.Panel):  # class naming convention ‘
         row.alignment = 'RIGHT'
   
         # subpanel caption
+        layout.use_property_split = True
+        layout.use_property_decorate = False
         row = layout.row()
         icon = 'DOWNARROW_HLT' if context.scene.subpanel_status_resolutions else 'RIGHTARROW'
         row.prop(context.scene, 'subpanel_status_resolutions', icon=icon, icon_only=True)
@@ -253,14 +273,37 @@ class NODE_EDITOR_PT_bake_panel(bpy.types.Panel):  # class naming convention ‘
             col1.prop(mytool, "my_bool_NORMAL", text="Normal") 
             col1.prop(mytool, "my_bool_AO", text="AO")
           
+        if context.scene.baking_maps_tool.my_bool_NORMAL:
+            layout.separator(factor=0) 
+            layout.use_property_split = False
+            layout.use_property_decorate = False
+            row = layout.row(align=True)
+            row.label(text='Normal Map')
+            col = row.column(align=True)
+            col.scale_x = 0.75
+            col.use_property_split = False
+            col.prop(mytool, "my_enum_normal_bitdepth", expand=True)
+         
+        layout.separator(factor=0) 
+        layout.use_property_split = False
+        layout.use_property_decorate = False
+        
         layout.prop(mytool, "my_int_cycles_samples", text="Cycles samples", slider=True)
-        layout.prop(mytool, "my_int_cycles_samples_AO", text="Cycles samples AO", slider=True)
+        if context.scene.baking_maps_tool.my_bool_AO:
+            layout.prop(mytool, "my_int_cycles_samples_AO", text="Cycles samples AO", slider=True)
 
-        row = layout.row()
-        row.alignment = 'CENTER'
-        col = row.column()
-        col.scale_x = 1
-        col.operator("object.bake_maps", text="Bake Maps")   
+        layout.prop(mytool, "my_file_name", text="Name")
+
+        if (context.scene.baking_maps_tool.my_bool_DIFFUSE or
+           context.scene.baking_maps_tool.my_bool_METALLIC or
+           context.scene.baking_maps_tool.my_bool_ROUGHNESS or
+           context.scene.baking_maps_tool.my_bool_NORMAL or
+           context.scene.baking_maps_tool.my_bool_AO ):     
+            row = layout.row()
+            row.alignment = 'CENTER'
+            col = row.column()
+            col.scale_x = 1 
+            col.operator("object.bake_maps", text="Bake Maps")   
 #################################################################################
 
 
@@ -281,7 +324,8 @@ class NODE_EDITOR_PT_bake_panel(bpy.types.Panel):  # class naming convention ‘
 class Bake_Routines(bpy.types.Operator):
     bl_idname = "object.bake_maps"
     bl_label = "Bake"
-
+    bl_description = "Baking might take several minutes..."
+    
     def execute(self, context):
         print("ok")
         
@@ -303,8 +347,14 @@ class Bake_Routines(bpy.types.Operator):
         par['enable']['ROUGHNESS']     = context.scene.baking_maps_tool.my_bool_ROUGHNESS
         par['enable']['NORMAL']        = context.scene.baking_maps_tool.my_bool_NORMAL
         par['enable']['AO']            = context.scene.baking_maps_tool.my_bool_AO
+        par['normal_bitdepth'] 	       = context.scene.baking_maps_tool.my_enum_normal_bitdepth 
         par['cycles_samples'] 		   = context.scene.baking_maps_tool.my_int_cycles_samples
-        par['cycles_samples_AO'] 	   = context.scene.baking_maps_tool.my_int_cycles_samples_AO
+        par['cycles_samples_AO'] 	   = context.scene.baking_maps_tool.my_int_cycles_samples_AO  
+        print(context.scene.baking_maps_tool.my_file_name)
+        if context.scene.baking_maps_tool.my_file_name == "":
+            par['my_file_name']        = ""
+        else:  
+            par['my_file_name'] 	   = context.scene.baking_maps_tool.my_file_name + '_'
         #############################################################################################
 
 
@@ -344,7 +394,13 @@ class Bake_Routines(bpy.types.Operator):
         # bake
         #############################################################################################  
         obj = bpy.context.active_object
-        img = bpy.data.images.new(obj.name + '_BakedTextureTemp', int(par['img_size']['DIFFUSE']*par['img_size']['scale_all']), int(par['img_size']['DIFFUSE']*par['img_size']['scale_all']))
+        img = bpy.data.images.new(  obj.name + '_BakedTextureTemp', 
+                                    int(par['img_size']['DIFFUSE']*par['img_size']['scale_all']), 
+                                    int(par['img_size']['DIFFUSE']*par['img_size']['scale_all']), 
+                                    alpha=False,
+                                    float_buffer=True,
+                                    is_data=True,
+        )
 
 
         #----------------------------------------------------------------------------------
@@ -408,8 +464,13 @@ class Bake_Routines(bpy.types.Operator):
             img.generated_width = int(par['img_size']['DIFFUSE']*par['img_size']['scale_all'])
             img.generated_height = int(par['img_size']['DIFFUSE']*par['img_size']['scale_all'])
             img.colorspace_settings.name = 'sRGB'
+            settings = context.scene.render.image_settings 
+            settings.file_format = 'PNG'  # Options: 'BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'WEBP'
+            settings.color_mode = 'RGB'  # Options: 'BW', 'RGB', 'RGBA' (depends on file_format)
+            settings.color_depth = '8'  # Options: '8', '10', '12', '16', '32' (depends on file_format)
+            settings.compression = 20  # Range: 0 - 100
             bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'}, save_mode='EXTERNAL')
-            img.save_render(filepath=bpy.path.abspath('//'+obj.name + '___baked_COLOR.png'))
+            img.save_render(filepath=bpy.path.abspath('//' + par['my_file_name'] + obj.name + '_Color.png'))
         #----------------------------------------------------------------------------------
         # METALLIC - use/connect to emission color input to bake
         if(par['enable']['METALLIC']):
@@ -422,8 +483,12 @@ class Bake_Routines(bpy.types.Operator):
             mat.node_tree.nodes["Principled BSDF"].inputs['Emission Strength'].default_value = 1    
                               
             img.colorspace_settings.name = 'Non-Color'
+            settings.file_format = 'PNG'  # Options: 'BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'WEBP'
+            settings.color_mode = 'RGB'  # Options: 'BW', 'RGB', 'RGBA' (depends on file_format)
+            settings.color_depth = '8'  # Options: '8', '10', '12', '16', '32' (depends on file_format)
+            settings.compression = 20  # Range: 0 - 100
             bpy.ops.object.bake(type='EMIT', save_mode='EXTERNAL') # use EMIT but bake METALLIC info
-            img.save_render(filepath=bpy.path.abspath('//'+obj.name + '___baked_METALLIC.png'))   
+            img.save_render(filepath=bpy.path.abspath('//' +  par['my_file_name'] + obj.name + '_Metallic.png'))   
 
             if restore['metallic_link_found']:
                 # remove emission again
@@ -437,16 +502,27 @@ class Bake_Routines(bpy.types.Operator):
             img.generated_width = int(par['img_size']['ROUGHNESS']*par['img_size']['scale_all'])
             img.generated_height = int(par['img_size']['ROUGHNESS']*par['img_size']['scale_all'])
             img.colorspace_settings.name = 'Non-Color'
+            settings.file_format = 'PNG'  # Options: 'BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'WEBP'
+            settings.color_mode = 'RGB'  # Options: 'BW', 'RGB', 'RGBA' (depends on file_format)
+            settings.color_depth = '8'  # Options: '8', '10', '12', '16', '32' (depends on file_format)
+            settings.compression = 20  # Range: 0 - 100
             bpy.ops.object.bake(type='ROUGHNESS', save_mode='EXTERNAL')
-            img.save_render(filepath=bpy.path.abspath('//'+obj.name + '___baked_ROUGHNESS.png')) 
+            img.save_render(filepath=bpy.path.abspath('//' + par['my_file_name'] + obj.name + '_Roughness.png')) 
         #----------------------------------------------------------------------------------
         # NORMAL
         if(par['enable']['NORMAL']):
             img.generated_width = int(par['img_size']['NORMAL']*par['img_size']['scale_all'])
             img.generated_height = int(par['img_size']['NORMAL']*par['img_size']['scale_all'])
             img.colorspace_settings.name = 'Non-Color'
+            img.use_generated_float = True
+            settings = context.scene.render.image_settings 
+            settings.file_format = 'OPEN_EXR'  # Options: 'BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'WEBP'
+            settings.color_mode = 'RGB'  # Options: 'BW', 'RGB', 'RGBA' (depends on file_format)
+            settings.color_depth = context.scene.baking_maps_tool.my_enum_normal_bitdepth  # Options: '8', '10', '12', '16', '32' (depends on file_format)
+            settings.compression = 0  # Range: 0 - 100
+            print(f' has_linear_colorspace: ' + str(settings.has_linear_colorspace))
             bpy.ops.object.bake(type='NORMAL', save_mode='EXTERNAL')
-            img.save_render(filepath=bpy.path.abspath('//'+obj.name + '___baked_NORMAL.png')) 
+            img.save_render(filepath=bpy.path.abspath('//' + par['my_file_name'] + obj.name + '_Normal.exr')) 
         #----------------------------------------------------------------------------------
         # AO
         if(par['enable']['AO']):
@@ -456,7 +532,11 @@ class Bake_Routines(bpy.types.Operator):
             img.generated_height = int(par['img_size']['AO']*par['img_size']['scale_all'])
             img.colorspace_settings.name = 'Non-Color'
             bpy.ops.object.bake(type='AO', save_mode='EXTERNAL')
-            img.save_render(filepath=bpy.path.abspath('//'+obj.name + '___baked_AO.png'))   
+            settings.file_format = 'PNG'  # Options: 'BMP', 'IRIS', 'PNG', 'JPEG', 'JPEG2000', 'TARGA', 'TARGA_RAW', 'CINEON', 'DPX', 'OPEN_EXR_MULTILAYER', 'OPEN_EXR', 'HDR', 'TIFF', 'WEBP'
+            settings.color_mode = 'RGB'  # Options: 'BW', 'RGB', 'RGBA' (depends on file_format)
+            settings.color_depth = '16'  # Options: '8', '10', '12', '16', '32' (depends on file_format)
+            settings.compression = 20  # Range: 0 - 100
+            img.save_render(filepath=bpy.path.abspath('//' + par['my_file_name'] + obj.name + '_AO.png'))   
             print('AO baking time is:', "{:.2f}".format(time.time()-t), 'sec')
         #############################################################################################  
 
