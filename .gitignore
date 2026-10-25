@@ -1,5 +1,6 @@
 # 1. Ignore folder
-Documents
+Temp
+Python
 HelperFiles/SceneryShooting/**
 
 # 2. exclude from ignore

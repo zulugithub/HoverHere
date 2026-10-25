@@ -33,6 +33,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DepthMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -73,6 +77,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -104,7 +112,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _CameraHeight: 1.6
+    - _CameraHeight: 1.4
     - _Cutoff: 0.669
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
@@ -113,8 +121,10 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 1
     - _GlossyReflections: 1
+    - _HeightScale: 0.1
     - _Metallic: 0
     - _Mode: 3
+    - _NormalActive: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _Rotation: 0
@@ -133,6 +143,6 @@ Material:
     - _RotationAxis: {r: 0, g: 1, b: 0, a: 1}
     - _ShadowColor: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
-    - _TintColor: {r: 0.95, g: 1.05, b: 1, a: 0}
+    - _TintColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

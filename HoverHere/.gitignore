@@ -179,6 +179,15 @@ crashlytics-build.properties
 # Blender backups
 *.blend1
 
-
-
+# Ignore all files with the extension "- Copy" (case-insensitive)
 *- Copy*
+
+bemt_rotor_test.csv
+vrs_plot_data.csv
+
+Assets/Materials/ParallaxOcclusionTest
+
+
+
+
+RAH66_Comanche*
