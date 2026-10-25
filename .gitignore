@@ -1,0 +1,7 @@
+# 1. Ignore folder
+Documents
+HelperFiles/SceneryShooting/**
+
+# 2. exclude from ignore
+!HelperFiles/SceneryShooting/scenery_creation_workflow.md
+!HelperFiles/SceneryShooting/28mm_72shot_template.pto

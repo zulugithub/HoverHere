@@ -1,0 +1,987 @@
+# Hugin project file template - 72-Shot Symmetrical Grid
+# Camera: Sony A6600 (APS-C, 3:2 Aspect Ratio) | Lens: 28mm Portrait (4024x6024 px)
+# Layout: 9 Upper (+67.5 deg), 18 Mid-Sky (+37.5 deg), 18 Horizon (0 deg), 18 Ground (-37.5 deg), 9 Lower (-67.5 deg)
+
+p f2 w3092 h1546 v360  k0 E0 R0 n"TIFF_m c:LZW r:CROP"
+
+# --- IMAGE GRID SETUP ---
+
+# Row 1: Upper Sky (+67.5 deg pitch, 40 deg yaw steps) - 9 shots
+i w4024 h6024 f0 v36 y0 p67.5 r0 n"p67p5deg_001.tif"
+i w4024 h6024 f0 v36 y40 p67.5 r0 n"p67p5deg_002.tif"
+i w4024 h6024 f0 v36 y80 p67.5 r0 n"p67p5deg_003.tif"
+i w4024 h6024 f0 v36 y120 p67.5 r0 n"p67p5deg_004.tif"
+i w4024 h6024 f0 v36 y160 p67.5 r0 n"p67p5deg_005.tif"
+i w4024 h6024 f0 v36 y200 p67.5 r0 n"p67p5deg_006.tif"
+i w4024 h6024 f0 v36 y240 p67.5 r0 n"p67p5deg_007.tif"
+i w4024 h6024 f0 v36 y280 p67.5 r0 n"p67p5deg_008.tif"
+i w4024 h6024 f0 v36 y320 p67.5 r0 n"p67p5deg_009.tif"
+
+# Row 2: Mid Sky (+37.5 deg pitch, 20 deg yaw steps) - 18 shots
+i w4024 h6024 f0 v36 y0 p37.5 r0 n"p37p5deg_001.tif"
+i w4024 h6024 f0 v36 y20 p37.5 r0 n"p37p5deg_002.tif"
+i w4024 h6024 f0 v36 y40 p37.5 r0 n"p37p5deg_003.tif"
+i w4024 h6024 f0 v36 y60 p37.5 r0 n"p37p5deg_004.tif"
+i w4024 h6024 f0 v36 y80 p37.5 r0 n"p37p5deg_005.tif"
+i w4024 h6024 f0 v36 y100 p37.5 r0 n"p37p5deg_006.tif"
+i w4024 h6024 f0 v36 y120 p37.5 r0 n"p37p5deg_007.tif"
+i w4024 h6024 f0 v36 y140 p37.5 r0 n"p37p5deg_008.tif"
+i w4024 h6024 f0 v36 y160 p37.5 r0 n"p37p5deg_009.tif"
+i w4024 h6024 f0 v36 y180 p37.5 r0 n"p37p5deg_010.tif"
+i w4024 h6024 f0 v36 y200 p37.5 r0 n"p37p5deg_011.tif"
+i w4024 h6024 f0 v36 y220 p37.5 r0 n"p37p5deg_012.tif"
+i w4024 h6024 f0 v36 y240 p37.5 r0 n"p37p5deg_013.tif"
+i w4024 h6024 f0 v36 y260 p37.5 r0 n"p37p5deg_014.tif"
+i w4024 h6024 f0 v36 y280 p37.5 r0 n"p37p5deg_015.tif"
+i w4024 h6024 f0 v36 y300 p37.5 r0 n"p37p5deg_016.tif"
+i w4024 h6024 f0 v36 y320 p37.5 r0 n"p37p5deg_017.tif"
+i w4024 h6024 f0 v36 y340 p37.5 r0 n"p37p5deg_018.tif"
+
+# Row 3: Horizon (0.0 deg pitch, 20 deg yaw steps) - 18 shots
+i w4024 h6024 f0 v36 y0 p0 r0 n"p0deg_001.tif"
+i w4024 h6024 f0 v36 y20 p0 r0 n"p0deg_002.tif"
+i w4024 h6024 f0 v36 y40 p0 r0 n"p0deg_003.tif"
+i w4024 h6024 f0 v36 y60 p0 r0 n"p0deg_004.tif"
+i w4024 h6024 f0 v36 y80 p0 r0 n"p0deg_005.tif"
+i w4024 h6024 f0 v36 y100 p0 r0 n"p0deg_006.tif"
+i w4024 h6024 f0 v36 y120 p0 r0 n"p0deg_007.tif"
+i w4024 h6024 f0 v36 y140 p0 r0 n"p0deg_008.tif"
+i w4024 h6024 f0 v36 y160 p0 r0 n"p0deg_009.tif"
+i w4024 h6024 f0 v36 y180 p0 r0 n"p0deg_010.tif"
+i w4024 h6024 f0 v36 y200 p0 r0 n"p0deg_011.tif"
+i w4024 h6024 f0 v36 y220 p0 r0 n"p0deg_012.tif"
+i w4024 h6024 f0 v36 y240 p0 r0 n"p0deg_013.tif"
+i w4024 h6024 f0 v36 y260 p0 r0 n"p0deg_014.tif"
+i w4024 h6024 f0 v36 y280 p0 r0 n"p0deg_015.tif"
+i w4024 h6024 f0 v36 y300 p0 r0 n"p0deg_016.tif"
+i w4024 h6024 f0 v36 y320 p0 r0 n"p0deg_017.tif"
+i w4024 h6024 f0 v36 y340 p0 r0 n"p0deg_018.tif"
+
+# Row 4: Ground (-37.5 deg pitch, 20 deg yaw steps) - 18 shots
+i w4024 h6024 f0 v36 y0 p-37.5 r0 n"m37p5deg_001.tif"
+i w4024 h6024 f0 v36 y20 p-37.5 r0 n"m37p5deg_002.tif"
+i w4024 h6024 f0 v36 y40 p-37.5 r0 n"m37p5deg_003.tif"
+i w4024 h6024 f0 v36 y60 p-37.5 r0 n"m37p5deg_004.tif"
+i w4024 h6024 f0 v36 y80 p-37.5 r0 n"m37p5deg_005.tif"
+i w4024 h6024 f0 v36 y100 p-37.5 r0 n"m37p5deg_006.tif"
+i w4024 h6024 f0 v36 y120 p-37.5 r0 n"m37p5deg_007.tif"
+i w4024 h6024 f0 v36 y140 p-37.5 r0 n"m37p5deg_008.tif"
+i w4024 h6024 f0 v36 y160 p-37.5 r0 n"m37p5deg_009.tif"
+i w4024 h6024 f0 v36 y180 p-37.5 r0 n"m37p5deg_010.tif"
+i w4024 h6024 f0 v36 y200 p-37.5 r0 n"m37p5deg_011.tif"
+i w4024 h6024 f0 v36 y220 p-37.5 r0 n"m37p5deg_012.tif"
+i w4024 h6024 f0 v36 y240 p-37.5 r0 n"m37p5deg_013.tif"
+i w4024 h6024 f0 v36 y260 p-37.5 r0 n"m37p5deg_014.tif"
+i w4024 h6024 f0 v36 y280 p-37.5 r0 n"m37p5deg_015.tif"
+i w4024 h6024 f0 v36 y300 p-37.5 r0 n"m37p5deg_016.tif"
+i w4024 h6024 f0 v36 y320 p-37.5 r0 n"m37p5deg_017.tif"
+i w4024 h6024 f0 v36 y340 p-37.5 r0 n"m37p5deg_018.tif"
+
+# Row 5: Lower Ground (-67.5 deg pitch, 40 deg yaw steps) - 9 shots
+i w4024 h6024 f0 v36 y0 p-67.5 r0 n"m67p5deg_001.tif"
+i w4024 h6024 f0 v36 y40 p-67.5 r0 n"m67p5deg_002.tif"
+i w4024 h6024 f0 v36 y80 p-67.5 r0 n"m67p5deg_003.tif"
+i w4024 h6024 f0 v36 y120 p-67.5 r0 n"m67p5deg_004.tif"
+i w4024 h6024 f0 v36 y160 p-67.5 r0 n"m67p5deg_005.tif"
+i w4024 h6024 f0 v36 y200 p-67.5 r0 n"m67p5deg_006.tif"
+i w4024 h6024 f0 v36 y240 p-67.5 r0 n"m67p5deg_007.tif"
+i w4024 h6024 f0 v36 y280 p-67.5 r0 n"m67p5deg_008.tif"
+i w4024 h6024 f0 v36 y320 p-67.5 r0 n"m67p5deg_009.tif"
+
+
+
+
+# specify variables that should be optimized
+v Ra0
+v Rb0
+v Rc0
+v Rd0
+v Re0
+v Vb0
+v Vc0
+v Vd0
+v Ra1
+v Rb1
+v Rc1
+v Rd1
+v Re1
+v Eev1
+v r1
+v p1
+v y1
+v Vb1
+v Vc1
+v Vd1
+v Ra2
+v Rb2
+v Rc2
+v Rd2
+v Re2
+v Eev2
+v r2
+v p2
+v y2
+v Vb2
+v Vc2
+v Vd2
+v Ra3
+v Rb3
+v Rc3
+v Rd3
+v Re3
+v Eev3
+v r3
+v p3
+v y3
+v Vb3
+v Vc3
+v Vd3
+v Ra4
+v Rb4
+v Rc4
+v Rd4
+v Re4
+v Eev4
+v r4
+v p4
+v y4
+v Vb4
+v Vc4
+v Vd4
+v Ra5
+v Rb5
+v Rc5
+v Rd5
+v Re5
+v Eev5
+v r5
+v p5
+v y5
+v Vb5
+v Vc5
+v Vd5
+v Ra6
+v Rb6
+v Rc6
+v Rd6
+v Re6
+v Eev6
+v r6
+v p6
+v y6
+v Vb6
+v Vc6
+v Vd6
+v Ra7
+v Rb7
+v Rc7
+v Rd7
+v Re7
+v Eev7
+v r7
+v p7
+v y7
+v Vb7
+v Vc7
+v Vd7
+v Ra8
+v Rb8
+v Rc8
+v Rd8
+v Re8
+v Eev8
+v r8
+v p8
+v y8
+v Vb8
+v Vc8
+v Vd8
+v Ra9
+v Rb9
+v Rc9
+v Rd9
+v Re9
+v Eev9
+v r9
+v p9
+v y9
+v Vb9
+v Vc9
+v Vd9
+v Ra10
+v Rb10
+v Rc10
+v Rd10
+v Re10
+v Eev10
+v r10
+v p10
+v y10
+v Vb10
+v Vc10
+v Vd10
+v Ra11
+v Rb11
+v Rc11
+v Rd11
+v Re11
+v Eev11
+v r11
+v p11
+v y11
+v Vb11
+v Vc11
+v Vd11
+v Ra12
+v Rb12
+v Rc12
+v Rd12
+v Re12
+v Eev12
+v r12
+v p12
+v y12
+v Vb12
+v Vc12
+v Vd12
+v Ra13
+v Rb13
+v Rc13
+v Rd13
+v Re13
+v Eev13
+v r13
+v p13
+v y13
+v Vb13
+v Vc13
+v Vd13
+v Ra14
+v Rb14
+v Rc14
+v Rd14
+v Re14
+v Eev14
+v r14
+v p14
+v y14
+v Vb14
+v Vc14
+v Vd14
+v Ra15
+v Rb15
+v Rc15
+v Rd15
+v Re15
+v Eev15
+v r15
+v p15
+v y15
+v Vb15
+v Vc15
+v Vd15
+v Ra16
+v Rb16
+v Rc16
+v Rd16
+v Re16
+v Eev16
+v r16
+v p16
+v y16
+v Vb16
+v Vc16
+v Vd16
+v Ra17
+v Rb17
+v Rc17
+v Rd17
+v Re17
+v Eev17
+v r17
+v p17
+v y17
+v Vb17
+v Vc17
+v Vd17
+v Ra18
+v Rb18
+v Rc18
+v Rd18
+v Re18
+v Eev18
+v r18
+v p18
+v y18
+v Vb18
+v Vc18
+v Vd18
+v Ra19
+v Rb19
+v Rc19
+v Rd19
+v Re19
+v Eev19
+v r19
+v p19
+v y19
+v Vb19
+v Vc19
+v Vd19
+v Ra20
+v Rb20
+v Rc20
+v Rd20
+v Re20
+v Eev20
+v r20
+v p20
+v y20
+v Vb20
+v Vc20
+v Vd20
+v Ra21
+v Rb21
+v Rc21
+v Rd21
+v Re21
+v Eev21
+v r21
+v p21
+v y21
+v Vb21
+v Vc21
+v Vd21
+v Ra22
+v Rb22
+v Rc22
+v Rd22
+v Re22
+v Eev22
+v r22
+v p22
+v y22
+v Vb22
+v Vc22
+v Vd22
+v Ra23
+v Rb23
+v Rc23
+v Rd23
+v Re23
+v Eev23
+v r23
+v p23
+v y23
+v Vb23
+v Vc23
+v Vd23
+v Ra24
+v Rb24
+v Rc24
+v Rd24
+v Re24
+v Eev24
+v r24
+v p24
+v y24
+v Vb24
+v Vc24
+v Vd24
+v Ra25
+v Rb25
+v Rc25
+v Rd25
+v Re25
+v Eev25
+v r25
+v p25
+v y25
+v Vb25
+v Vc25
+v Vd25
+v Ra26
+v Rb26
+v Rc26
+v Rd26
+v Re26
+v Eev26
+v r26
+v p26
+v y26
+v Vb26
+v Vc26
+v Vd26
+v Ra27
+v Rb27
+v Rc27
+v Rd27
+v Re27
+v Eev27
+v r27
+v p27
+v y27
+v Vb27
+v Vc27
+v Vd27
+v Ra28
+v Rb28
+v Rc28
+v Rd28
+v Re28
+v Eev28
+v r28
+v p28
+v y28
+v Vb28
+v Vc28
+v Vd28
+v Ra29
+v Rb29
+v Rc29
+v Rd29
+v Re29
+v Eev29
+v r29
+v p29
+v y29
+v Vb29
+v Vc29
+v Vd29
+v Ra30
+v Rb30
+v Rc30
+v Rd30
+v Re30
+v Eev30
+v r30
+v p30
+v y30
+v Vb30
+v Vc30
+v Vd30
+v Ra31
+v Rb31
+v Rc31
+v Rd31
+v Re31
+v Eev31
+v r31
+v p31
+v y31
+v Vb31
+v Vc31
+v Vd31
+v Ra32
+v Rb32
+v Rc32
+v Rd32
+v Re32
+v Eev32
+v r32
+v p32
+v y32
+v Vb32
+v Vc32
+v Vd32
+v Ra33
+v Rb33
+v Rc33
+v Rd33
+v Re33
+v Eev33
+v r33
+v p33
+v y33
+v Vb33
+v Vc33
+v Vd33
+v Ra34
+v Rb34
+v Rc34
+v Rd34
+v Re34
+v Eev34
+v r34
+v p34
+v y34
+v Vb34
+v Vc34
+v Vd34
+v Ra35
+v Rb35
+v Rc35
+v Rd35
+v Re35
+v Eev35
+v r35
+v p35
+v y35
+v Vb35
+v Vc35
+v Vd35
+v Ra36
+v Rb36
+v Rc36
+v Rd36
+v Re36
+v Eev36
+v r36
+v p36
+v y36
+v Vb36
+v Vc36
+v Vd36
+v Ra37
+v Rb37
+v Rc37
+v Rd37
+v Re37
+v Eev37
+v r37
+v p37
+v y37
+v Vb37
+v Vc37
+v Vd37
+v Ra38
+v Rb38
+v Rc38
+v Rd38
+v Re38
+v Eev38
+v r38
+v p38
+v y38
+v Vb38
+v Vc38
+v Vd38
+v Ra39
+v Rb39
+v Rc39
+v Rd39
+v Re39
+v Eev39
+v r39
+v p39
+v y39
+v Vb39
+v Vc39
+v Vd39
+v Ra40
+v Rb40
+v Rc40
+v Rd40
+v Re40
+v Eev40
+v r40
+v p40
+v y40
+v Vb40
+v Vc40
+v Vd40
+v Ra41
+v Rb41
+v Rc41
+v Rd41
+v Re41
+v Eev41
+v r41
+v p41
+v y41
+v Vb41
+v Vc41
+v Vd41
+v Ra42
+v Rb42
+v Rc42
+v Rd42
+v Re42
+v Eev42
+v r42
+v p42
+v y42
+v Vb42
+v Vc42
+v Vd42
+v Ra43
+v Rb43
+v Rc43
+v Rd43
+v Re43
+v Eev43
+v r43
+v p43
+v y43
+v Vb43
+v Vc43
+v Vd43
+v Ra44
+v Rb44
+v Rc44
+v Rd44
+v Re44
+v Eev44
+v r44
+v p44
+v y44
+v Vb44
+v Vc44
+v Vd44
+v Ra45
+v Rb45
+v Rc45
+v Rd45
+v Re45
+v Eev45
+v r45
+v p45
+v y45
+v Vb45
+v Vc45
+v Vd45
+v Ra46
+v Rb46
+v Rc46
+v Rd46
+v Re46
+v Eev46
+v r46
+v p46
+v y46
+v Vb46
+v Vc46
+v Vd46
+v Ra47
+v Rb47
+v Rc47
+v Rd47
+v Re47
+v Eev47
+v r47
+v p47
+v y47
+v Vb47
+v Vc47
+v Vd47
+v Ra48
+v Rb48
+v Rc48
+v Rd48
+v Re48
+v Eev48
+v r48
+v p48
+v y48
+v Vb48
+v Vc48
+v Vd48
+v Ra49
+v Rb49
+v Rc49
+v Rd49
+v Re49
+v Eev49
+v r49
+v p49
+v y49
+v Vb49
+v Vc49
+v Vd49
+v Ra50
+v Rb50
+v Rc50
+v Rd50
+v Re50
+v Eev50
+v r50
+v p50
+v y50
+v Vb50
+v Vc50
+v Vd50
+v Ra51
+v Rb51
+v Rc51
+v Rd51
+v Re51
+v Eev51
+v r51
+v p51
+v y51
+v Vb51
+v Vc51
+v Vd51
+v Ra52
+v Rb52
+v Rc52
+v Rd52
+v Re52
+v Eev52
+v r52
+v p52
+v y52
+v Vb52
+v Vc52
+v Vd52
+v Ra53
+v Rb53
+v Rc53
+v Rd53
+v Re53
+v Eev53
+v r53
+v p53
+v y53
+v Vb53
+v Vc53
+v Vd53
+v Ra54
+v Rb54
+v Rc54
+v Rd54
+v Re54
+v Eev54
+v r54
+v p54
+v y54
+v Vb54
+v Vc54
+v Vd54
+v Ra55
+v Rb55
+v Rc55
+v Rd55
+v Re55
+v Eev55
+v r55
+v p55
+v y55
+v Vb55
+v Vc55
+v Vd55
+v Ra56
+v Rb56
+v Rc56
+v Rd56
+v Re56
+v Eev56
+v r56
+v p56
+v y56
+v Vb56
+v Vc56
+v Vd56
+v Ra57
+v Rb57
+v Rc57
+v Rd57
+v Re57
+v Eev57
+v r57
+v p57
+v y57
+v Vb57
+v Vc57
+v Vd57
+v Ra58
+v Rb58
+v Rc58
+v Rd58
+v Re58
+v Eev58
+v r58
+v p58
+v y58
+v Vb58
+v Vc58
+v Vd58
+v Ra59
+v Rb59
+v Rc59
+v Rd59
+v Re59
+v Eev59
+v r59
+v p59
+v y59
+v Vb59
+v Vc59
+v Vd59
+v Ra60
+v Rb60
+v Rc60
+v Rd60
+v Re60
+v Eev60
+v r60
+v p60
+v y60
+v Vb60
+v Vc60
+v Vd60
+v Ra61
+v Rb61
+v Rc61
+v Rd61
+v Re61
+v Eev61
+v r61
+v p61
+v y61
+v Vb61
+v Vc61
+v Vd61
+v Ra62
+v Rb62
+v Rc62
+v Rd62
+v Re62
+v Eev62
+v r62
+v p62
+v y62
+v Vb62
+v Vc62
+v Vd62
+v Ra63
+v Rb63
+v Rc63
+v Rd63
+v Re63
+v Eev63
+v r63
+v p63
+v y63
+v Vb63
+v Vc63
+v Vd63
+v Ra64
+v Rb64
+v Rc64
+v Rd64
+v Re64
+v Eev64
+v r64
+v p64
+v y64
+v Vb64
+v Vc64
+v Vd64
+v Ra65
+v Rb65
+v Rc65
+v Rd65
+v Re65
+v Eev65
+v r65
+v p65
+v y65
+v Vb65
+v Vc65
+v Vd65
+v Ra66
+v Rb66
+v Rc66
+v Rd66
+v Re66
+v Eev66
+v r66
+v p66
+v y66
+v Vb66
+v Vc66
+v Vd66
+v Ra67
+v Rb67
+v Rc67
+v Rd67
+v Re67
+v Eev67
+v r67
+v p67
+v y67
+v Vb67
+v Vc67
+v Vd67
+v Ra68
+v Rb68
+v Rc68
+v Rd68
+v Re68
+v Eev68
+v r68
+v p68
+v y68
+v Vb68
+v Vc68
+v Vd68
+v Ra69
+v Rb69
+v Rc69
+v Rd69
+v Re69
+v Eev69
+v r69
+v p69
+v y69
+v Vb69
+v Vc69
+v Vd69
+v Ra70
+v Rb70
+v Rc70
+v Rd70
+v Re70
+v Eev70
+v r70
+v p70
+v y70
+v Vb70
+v Vc70
+v Vd70
+v Ra71
+v Rb71
+v Rc71
+v Rd71
+v Re71
+v Eev71
+v r71
+v p71
+v y71
+v Vb71
+v Vc71
+v Vd71
+v
+
+
+#hugin_optimizeReferenceImage 0
+#hugin_blender enblend
+#hugin_remapper nona
+#hugin_enblendOptions --preassemble --primary-seam-generator=nft --blend-colorspace=identity
+#hugin_enfuseOptions 
+#hugin_hdrmergeOptions -m avg -c
+#hugin_verdandiOptions 
+#hugin_edgeFillMode 0
+#hugin_edgeFillKeepInput false
+#hugin_outputLDRBlended true
+#hugin_outputLDRLayers false
+#hugin_outputLDRExposureRemapped false
+#hugin_outputLDRExposureLayers false
+#hugin_outputLDRExposureBlended false
+#hugin_outputLDRStacks false
+#hugin_outputLDRExposureLayersFused false
+#hugin_outputHDRBlended false
+#hugin_outputHDRLayers false
+#hugin_outputHDRStacks false
+#hugin_outputLayersCompression LZW
+#hugin_outputImageType tif
+#hugin_outputImageTypeCompression LZW
+#hugin_outputJPEGQuality 90
+#hugin_outputImageTypeHDR exr
+#hugin_outputImageTypeHDRCompression LZW
+#hugin_outputStacksMinOverlap 0.7
+#hugin_outputLayersExposureDiff 0.5
+#hugin_outputRangeCompression 0
+#hugin_optimizerMasterSwitch 1
+#hugin_optimizerPhotoMasterSwitch 21

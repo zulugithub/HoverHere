@@ -118,6 +118,11 @@ Assets/Helicopters_Available/Tron5p5/**/*.fbx
 Assets/Helicopters_Available/Tron5p5/**/*.wav
 Assets/Helicopters_Available/Tron5p5/**/*.jpg
 
+Assets/Helicopters_Available/RAH66_Comanche/**/*.obj
+Assets/Helicopters_Available/RAH66_Comanche/**/*.png
+Assets/Helicopters_Available/RAH66_Comanche/**/*.fbx
+Assets/Helicopters_Available/RAH66_Comanche/**/*.wav
+Assets/Helicopters_Available/RAH66_Comanche/**/*.jpg
 
 
 # Remove 
@@ -173,3 +178,7 @@ crashlytics-build.properties
 
 # Blender backups
 *.blend1
+
+
+
+*- Copy*
