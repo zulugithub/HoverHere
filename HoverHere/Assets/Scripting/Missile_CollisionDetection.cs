@@ -71,7 +71,7 @@ public class Missile_CollisionDetection : MonoBehaviour
 
         missile_body.gameObject.SetActive(false);
         missile_fire.gameObject.SetActive(false);
-        rigid_body.velocity = Vector3.zero;
+        rigid_body.linearVelocity = Vector3.zero;
 
         Destroy(missile,10);
 

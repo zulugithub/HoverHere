@@ -10,7 +10,7 @@ using Parameter;
 //using Unity.Mathematics;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
-
+using System.Text;
 
 namespace Rotor
 {
@@ -908,7 +908,10 @@ namespace Rotor
             out float debug_power_rotor_pa,
             out float debug_power_rotor_c,
             out float debug_strength_turbulence,
+            out float debug_use_vortex_ring_state,
             out float debug_strength_vortex_ring_state,
+            out float debug_strength_vortex_ring_Vz_scaled,
+            out float debug_strength_vortex_ring_Vx_scaled,
             out float debug_strength_ground_effect,
             out float debug_strength_flap_up
             )
@@ -1124,7 +1127,10 @@ namespace Rotor
             {
                 vortex_ring_state_stength[(int)rotor_type] = 0;
             }
+            debug_use_vortex_ring_state = 1.0f;
             debug_strength_vortex_ring_state = vortex_ring_state_stength[(int)rotor_type];
+            debug_strength_vortex_ring_Vz_scaled = 0;
+            debug_strength_vortex_ring_Vx_scaled = 0;
             // ##################################################################################
 
 
@@ -1233,7 +1239,7 @@ namespace Rotor
             Newton_Raphson(Rotor_Thrust_and_Induced_Velocity, par_rotor, par_rotor_tuning, rho_air, mass_total, omega_shaft, velo_rotor_hub_and_windLR,
                 Theta_col, flapping_a_s_LR, flapping_b_s_LR, out thrust, out v_i);
             
-            v_i *= 1.20000000000;
+            v_i *= 1.00000000000;
             thrust *= 1.00000000000;
 
             // torque
@@ -1454,13 +1460,315 @@ namespace Rotor
         }
         // ############################################################################
 
+        // ##################################################################################
+        // JOHNSON VRS MODEL - Data Structures and State
+        // ##################################################################################
+        public struct JohnsonVRS_Parameters
+        {
+            public float VzA;
+            public float VzB;
+            public float VxC;
+            public float VzD;
+            public float VzN;
+            public float VzX;
+            public float VzE;
+            public float VxM;
+            public float Vz_plus_v_N;
+            public float Vz_plus_v_X;
+            public float zeta;
+            public float f;
+            public float consistency_threshold;
+            public float magnitude_tolerance;
+            public float tau_rotor_revolutions;
+
+            public static JohnsonVRS_Parameters CreateDefault()
+            {
+                return new JohnsonVRS_Parameters
+                {
+                    // Baseline Boundary Velocities
+                    VzA = -1.5f,                   // Vertical descent velocity upper limit for the baseline inflow model.                    
+                    VzB = -2.1f,                   // Vertical descent velocity lower limit for the baseline inflow model.         
+                    VxC = 0.75f,                   // Horizontal forward velocity boundary where baseline inflow transitions 
+                    // These coordinates define the "VRS ring region" polynomial curve where flow instability occurs        
+                    VzD = -0.2f,                   // High-descent entry boundary where VRS effects begin.         
+                    VzN = -0.45f,                  // Vertical velocity at the point of minimum vortex core inflow.         
+                    VzX = -1.5f,                   // Vertical velocity at the point of maximum vortex core inflow.         
+                    VzE = -2.0f,                   // Deep-descent exit boundary where flow starts recovering to normal wind-mill brake state.          
+                    VxM = 0.95f,                   // Maximum forward horizontal velocity threshold beyond which forward speed outruns the vortex
+                    // Inflow & Shape Factors          
+                    Vz_plus_v_N = 0.85f,           // Total normalized net inflow value at the minimum point (N).                
+                    Vz_plus_v_X = 1.25f,           // Total normalized net inflow value at the maximum point (X).                  
+                    zeta = 0.5f,                   // Empirical scaling factor adjusting the core severity of the vortex induced velocity.         
+                    f = 1.0f,                      // Instability suppression factor used to smooth out numerical calculations at boundary edges      
+                    //  State Tracking & Filtering
+                    consistency_threshold = 0.8f,  // Demanded confidence metric before triggering a VRS state change.                         
+                    magnitude_tolerance = 0.3f,    // Noise margin allowed for transient sensor spikes in velocity data.                     
+                    tau_rotor_revolutions = 10.0f  // Time constant filter window measured in main rotor revolutions to account for flow development lag.                         
+                };
+            }
+        }
+
+        public class JohnsonVRS_State
+        {
+            public float v_johnson_previous = 0.0f;
+            public float dv_lag = 0.0f;
+            public float consistency_ratio = 0.0f;
+            public float use_VRS = 0.0f;
+            public float strength_VRS = 0.0f;
+            public float Vc_mean = 0.0f;
+            public float Vx_mean = 0.0f;
+        }
+
+        // Static instance persists across frames
+        private static JohnsonVRS_State vrs_state_persistent = new JohnsonVRS_State();
+
+        // ========================================================================
+        // JOHNSON VRS MODEL - Momentum Theory Baseline
+        // ========================================================================
+        static private float MomentumTheory(float Vz_scaled, float Vx_scaled, bool use_upper_branch = false)
+        {
+            if (Mathf.Abs(Vz_scaled) < 0.001f && Mathf.Abs(Vx_scaled) < 0.001f)
+            {
+                return 1.0f;
+            }
+
+            float discriminant = Vz_scaled * Vz_scaled + 4.0f;
+            if (discriminant < 0) return 0.0f;
+
+            float sqrt_disc = Mathf.Sqrt(discriminant);
+
+            if (use_upper_branch)
+            {
+                return 0.5f * (-Vz_scaled + sqrt_disc);
+            }
+            else
+            {
+                return 0.5f * (Vz_scaled + sqrt_disc); // (-Vz_scaled - sqrt_disc)
+            }
+        }
+
+        static private float MomentumTheory_Derivative(float Vz_scaled, float Vx_scaled, bool use_upper_branch = false)
+        {
+            float epsilon = 0.0001f;
+            float v1 = MomentumTheory(Vz_scaled - epsilon, Vx_scaled, use_upper_branch);
+            float v2 = MomentumTheory(Vz_scaled + epsilon, Vx_scaled, use_upper_branch);
+            return (v2 - v1) / (2.0f * epsilon);
+        }
+
+        static private float Johnson_Baseline(float Vz_scaled, float Vx_scaled, JohnsonVRS_Parameters par)
+        {
+            float Vx_ratio = Mathf.Abs(Vz_scaled) < 0.001f ? 0 : Vx_scaled / par.VxC;
+            float VzAID = par.VzA + 0.2f * Vx_ratio * Vx_ratio;
+            float VzBID = par.VzB + 0.2f * Vx_ratio * Vx_ratio;
+
+            if (Vx_ratio > 0.5f)
+            {
+                float factor = Mathf.Pow(2.0f * Vx_ratio - 1.0f, 3.0f);
+                VzBID = VzBID + 0.7f * (VzAID - VzBID) * factor;
+            }
+
+            if (Vz_scaled > VzBID && Vz_scaled < VzAID)
+            {
+                float v_A = MomentumTheory(VzAID, Vx_scaled, true);
+                float v_B = MomentumTheory(VzBID, Vx_scaled, false);
+                // Nutzen von SmoothStep statt Lerp verhindert harte Knicke an den Rändern VzAID und VzBID
+                float t = (Vz_scaled - VzBID) / (VzAID - VzBID);
+                return Mathf.Lerp(v_B, v_A, Mathf.SmoothStep(0.0f, 1.0f, t));
+            }
+            else if (Vz_scaled >= VzAID)
+            {
+                return MomentumTheory(Vz_scaled, Vx_scaled, true);
+            }
+            else
+            {
+                return MomentumTheory(Vz_scaled, Vx_scaled, false);
+            }
+        }
+
+        static private float Johnson_VRS_Correction(float Vz_scaled, float Vx_scaled, float v_baseline, JohnsonVRS_Parameters par, out float strength_VRS)
+        {
+            strength_VRS = 0.00f;
+        
+            // Außerhalb des VRS-Bereichs gibt es keine Korrektur
+            if (Vz_scaled >= 0.0f || Vx_scaled >= par.VxM)
+            {
+                return 0.0f;
+            }
+
+            float Vx_ratio = Vx_scaled / par.VxM;
+            float alpha_x = Mathf.Pow(1.0f - Vx_ratio * Vx_ratio, 0.2f);
+            float alpha_x_1_5 = Mathf.Pow(1.0f - Vx_ratio * Vx_ratio, 1.5f);
+
+            float VzDID = par.VzD;
+            float VzNID = 0.5f * (par.VzN + par.VzX) + 0.5f * (par.VzN - par.VzX) * alpha_x;
+            float VzXID = 0.5f * (par.VzN + par.VzX) - 0.5f * (par.VzN - par.VzX) * alpha_x_1_5;
+            float VzEID = par.VzE + (VzXID - par.VzX);
+
+            if (Vz_scaled <= VzEID || Vz_scaled >= VzDID)
+            {
+                return 0.0f;
+            }
+
+            float dv_delta = 0.0f;
+
+            // ========================================================================
+            // KORREKTUR: Berechne empirische Ziel-Induzierte-Geschwindigkeiten direkt gegen die Baseline
+            // ========================================================================
+            float v_base_N = Johnson_Baseline(VzNID, Vx_scaled, par);
+            float delta_N = (par.Vz_plus_v_N - VzNID) - v_base_N; // Exakte Differenz am Punkt N
+
+            float v_base_X = Johnson_Baseline(VzXID, Vx_scaled, par);
+            float delta_X = (par.Vz_plus_v_X - VzXID) - v_base_X; // Exakte Differenz am Punkt X
+            // ========================================================================
+
+            // Region: VzNID bis VzDID
+            if (Vz_scaled >= VzNID && Vz_scaled <= VzDID)
+            {
+                float denom = (VzNID - VzDID);
+                if (Mathf.Abs(denom) > 0.001f)
+                {
+                    float t = (Vz_scaled - VzDID) / denom;
+                    dv_delta = delta_N * Mathf.SmoothStep(0.0f, 1.0f, t);
+                    strength_VRS = Mathf.SmoothStep(0.0f, 1.0f, t);
+                }
+            }
+            // Region: VzXID bis VzNID
+            else if (Vz_scaled >= VzXID && Vz_scaled < VzNID)
+            {
+                float denom = VzNID - VzXID;
+                if (Mathf.Abs(denom) > 0.001f)
+                {
+                    float t = (Vz_scaled - VzXID) / denom;
+                    dv_delta = Mathf.Lerp(delta_X, delta_N, Mathf.SmoothStep(0.0f, 1.0f, t));
+                    strength_VRS = 1.0f;
+                }
+            }
+            // Region: VzEID bis VzXID
+            else if (Vz_scaled >= VzEID && Vz_scaled < VzXID)
+            {
+                float denom = VzXID - VzEID;
+                if (Mathf.Abs(denom) > 0.001f)
+                {
+                    float t = (Vz_scaled - VzEID) / denom;
+                    // KORREKTUR: Von 0.0f (bei VzEID) zu 1.0f (bei VzXID) interpolieren!
+                    dv_delta = delta_X * Mathf.SmoothStep(0.0f, 1.0f, t);
+                    strength_VRS = Mathf.SmoothStep(0.0f, 1.0f, t);
+                }
+            }
+
+            return dv_delta;
+        }
+
+        static public float Johnson_Table3_Algorithm(float Vz_scaled, float Vx_scaled, JohnsonVRS_Parameters par, out float strength_VRS)
+        {
+            strength_VRS = 0.00f;
+        
+            // Der harte Epsilon-Check entfällt hier komplett, da die Kurven nun stetig ineinander übergehen.
+            float v_baseline = Johnson_Baseline(Vz_scaled, Vx_scaled, par);
+            float v_vrs = Johnson_VRS_Correction(Vz_scaled, Vx_scaled, v_baseline, par, out strength_VRS);
+            
+            // KORREKTUR: zeta skaliert NUR den instabilen Korrekturterm (v_vrs), nicht die physikalische Baseline!
+            float v_final = v_baseline + (par.zeta * par.f * v_vrs);
+
+            return v_final;
+        }
 
 
+        // ========================================================================
+        // CONSISTENCY CHECK - Determine if rotor is in unified descent
+        // ========================================================================
+        static public float CheckConsistency_And_ComputeMeans(
+            Vector3[,] dr_LBO_LB_dt, 
+           float horizontal_speed_LR,
+            int r_n, int c_n,
+            float threshold,
+            out float Vc_mean,
+            out float Vx_magnitude_mean,
+            out int count_positive,
+            out int count_negative)
+        {
+            count_positive = 0;
+            count_negative = 0;
+            Vc_mean = 0.0f;
+            Vx_magnitude_mean = 0.0f;
 
+            for (int r = 0; r < r_n; r++)
+            {
+                for (int c = 0; c < c_n; c++)
+                {
+                    float Vc = dr_LBO_LB_dt[r, c].y;
+                    Vc_mean += Vc;
 
+                    // deadband so numerical near-zero axial velocities at/near hover do not flip
+                    // sign randomly and make the descent-coherence metric (and the VRS blend) chatter
+                    const float Vc_deadband = 0.05f; // [m/s]
+                    if (Vc > Vc_deadband) count_positive++;
+                    else if (Vc < -Vc_deadband) count_negative++;
 
+                    //float Vx_mag = Mathf.Abs(dr_LBO_LB_dt[r, c].x); // TODO here it expects the side velocity component from the side of the blade element 
+                    //Vx_magnitude_mean += Vx_mag;
+                }
+            }
 
+            int total = r_n * c_n;
+            if (total < 1) total = 1;
+            Vc_mean /= total;
+            //Vx_magnitude_mean /= total;
+            Vx_magnitude_mean = Mathf.Abs(horizontal_speed_LR); // Here we use the horizontal speed of the rotor hub as a proxy for the side velocity component, since the actual side velocity of each blade element is not directly available in this context. 
 
+            float consistency_ratio = (float)Mathf.Max(count_positive, count_negative) / total;
+            //float use_VRS = Mathf.SmoothStep(0.70f, 0.90f, consistency_ratio);
+            consistency_ratio = Mathf.InverseLerp(0.70f, 0.90f, consistency_ratio);
+            float use_VRS = Mathf.SmoothStep(0.0f, 1.0f, consistency_ratio);
+
+            return use_VRS;
+        }
+
+        // ========================================================================
+        // TIME LAG - First-order dynamics for VRS development
+        // ========================================================================
+        static public void ApplyTimeLag(
+            float v_johnson_current,
+            float v_johnson_previous,
+            float omega_mr,
+            float tau_rotor_revolutions,
+            float deltaTime,
+            ref float dv_lag_state,
+            out float v_johnson_lagged)
+        {
+            if (Mathf.Abs(omega_mr) < 0.1f)
+            {
+                v_johnson_lagged = v_johnson_current;
+                return;
+            }
+
+            float tau_seconds = tau_rotor_revolutions * (2.0f * Mathf.PI) / Mathf.Abs(omega_mr);
+            tau_seconds = Mathf.Clamp(tau_seconds, 0.05f, 5.0f);
+
+            float error = v_johnson_current - v_johnson_previous;
+            float dv_dot = (error - dv_lag_state) / tau_seconds;
+            dv_lag_state += dv_dot * deltaTime;
+            dv_lag_state = Mathf.Clamp(dv_lag_state, -10.0f, 10.0f);
+
+            v_johnson_lagged = v_johnson_previous + dv_lag_state;
+        }
+
+        // ========================================================================
+        // HOVER INDUCED VELOCITY - For velocity scaling
+        // ========================================================================
+        static public float ComputeHoverInducedVelocity(Vector3 F_thrust_O, stru_rotor par_rotor)
+        {
+            float rho_air = 1.27f;
+            float T = F_thrust_O.magnitude;
+            float A = Mathf.PI * par_rotor.R.val * par_rotor.R.val;
+
+            if (A < 0.01f) return 1.0f;
+
+            float v_h = Mathf.Sqrt(T / (2.0f * rho_air * A));
+            v_h = Mathf.Clamp(v_h, 0.5f, 50.0f);
+
+            return v_h;
+        }
 
 
 
@@ -1471,8 +1779,13 @@ namespace Rotor
         /// 
         /// </summary>
         // ##################################################################################
+        static bool flag_export_diagram = true; 
+        static bool is_testing = false; // Verhindert die unendliche Rekursion
+
         static public void Rotor_Disc_BEMT_Calculations(bool flag_calculate_only_stiffness_damping, 
-            ref double[] x_states, stru_rotor par_rotor, ref float[] beta, Vector3 velo_wind_O, 
+            ref double[] x_states, 
+            float mass_total, // [kg] par.transmitter_and_helicopter.helicopter.mass_total.val
+            stru_rotor par_rotor, ref float[] beta, Vector3 velo_wind_O, 
             ref Vector3 T_stiffLR_LH, ref Vector3 T_stiffLR_LD, ref Vector3 T_dampLR_LH, ref Vector3 T_dampLR_LD,
             ref Matrix4x4 A_OLDnorot, ref Vector3[,] r_LBO_O, ref Vector3[,] dr_LBO_O_dt, ref Vector3[,] dr_LBO_LB_dt,
             ref Vector3[,] F_LB_O_thrust, ref Vector3[,] F_LB_O_torque,
@@ -1487,15 +1800,25 @@ namespace Rotor
             out Vector3 debug_rotor_forceO, // left handed system
             out Vector3 debug_rotor_torqueO, // left handed system
             out float debug_strength_turbulence,
+            out float debug_use_vortex_ring_state,
             out float debug_strength_vortex_ring_state,
+            out float debug_strength_vortex_ring_Vz_scaled,
+            out float debug_strength_vortex_ring_Vx_scaled,
             out float debug_strength_ground_effect)
         {
 
+            if (flag_export_diagram) {
+                flag_export_diagram = false;  
+                is_testing = true;
+                ExportCompleteBEMTRotorTest();
+                ExportVRSAndBaselineDiagram(); 
+                is_testing = false;
+            }
 
             // ##################################################################################
             // rotor disc - rotor hub: stiffness
             // ##################################################################################
-        Quaternion rotation_LD; 
+            Quaternion rotation_LD; 
             rotation_LD.w = (float)x_states[31]; // [-] w
             rotation_LD.x = (float)x_states[32]; // [-] x
             rotation_LD.y = (float)x_states[33]; // [-] y
@@ -1551,7 +1874,7 @@ namespace Rotor
             // ##################################################################################
             // nonrotating frame on rotor disc, where the virtual blades are represented
             // ##################################################################################
-            Matrix4x4 A_OLR = A_LHO.transpose * A_B321_LRLH.transpose ;
+            Matrix4x4 A_OLR = A_LHO.transpose * A_B321_LRLH.transpose;
             Vector3 e_zLR_O = A_OLR * new Vector3(0, 0, -1);
 
             Vector3 e_yLD_O = A_LDO.transpose * new Vector3(0, 1, 0);
@@ -1578,9 +1901,15 @@ namespace Rotor
             dr_LHO_O_dt.x = (float)x_states[7]; // [m/sec] right handed system, velocity x in reference frame
             dr_LHO_O_dt.y = (float)x_states[8]; // [m/sec] right handed system, velocity y in reference frame
             dr_LHO_O_dt.z = (float)x_states[9]; // [m/sec] right handed system, velocity z in reference frame
-
-            
+    
             Vector3 r_LRLH_LH = par_rotor.posLH.vect3; // [m] parameter: rotor hub position from helicopter's center of mass in helicopter's local frame
+
+
+            // rotor disc - rotor hub: velocity
+            Vector3 v_PRO_O = velo_wind_O + dr_LHO_O_dt + (Vector3)(A_LHO.transpose * Helper.tilde_omega(w_LHO_LH) * r_LRLH_LH); // simplified, does not take tilting of rotor disc in account
+            Vector3 v_PRO_LR = A_OLR.transpose * v_PRO_O; // [m/sec] translational velocity expressed in rotor disc's local frame
+            float horizontal_speed_LR = Mathf.Sqrt(v_PRO_LR.x * v_PRO_LR.x + v_PRO_LR.z * v_PRO_LR.z); // [m/sec]
+
 
             int r_n = 4;  // radial steps - (polar coordiantes)
             int c_n = 10; // circumferencial steps - (polar coordiantes) - number of virtual blades
@@ -1614,18 +1943,19 @@ namespace Rotor
                     //dr_LBO_O_dt[r, c] = dr_LHO_O_dt + (Vector3)(
                     //    A_LHO.transpose * Helper.tilde_omega(w_LHO_LH) * r_LRLH_LH +
                     //    A_LDO.transpose * Helper.tilde_omega(w_LDO_LD) * A_LDLB *  r_LBP_LB);
-                    dr_LBO_O_dt[r, c] = velo_wind_O + dr_LHO_O_dt + (Vector3)(
-                        A_LHO.transpose * Helper.tilde_omega(w_LHO_LH) * r_LRLH_LH +
-                        A_OLDnorot * Helper.tilde_omega(A_OLDnorot.transpose * A_LDO.transpose * w_LDO_LD) * A_LDLB * r_LBP_LB);
+                    dr_LBO_O_dt[r, c] = 
+                        velo_wind_O + 
+                        dr_LHO_O_dt + 
+                        (Vector3)(A_LHO.transpose * Helper.tilde_omega(w_LHO_LH) * r_LRLH_LH +
+                                  A_OLDnorot      * Helper.tilde_omega(A_OLDnorot.transpose * A_LDO.transpose * w_LDO_LD) * A_LDLB * r_LBP_LB);
 
                     // virtual blade segment's velocity in blade segment's local coordinate frame
                     //dr_LBO_LB_dt[r, c] = (Vector3)(A_LDLB.transpose * A_LDO * dr_LBO_O_dt[r, c]);
                     dr_LBO_LB_dt[r, c] = (Vector3)(A_LDLB.transpose * A_OLDnorot.transpose * dr_LBO_O_dt[r, c]);
                     // float v_top = dr_LBO_LB_dt[r, c].y; // [m/sec] 
-                    //float v_front = dr_LBO_LB_dt[r, c].z; // [m/sec]
+                    // float v_front = dr_LBO_LB_dt[r, c].z; // [m/sec]
+                    // float v_radial = dr_LBO_LB_dt[r, c].x; // [m/sec] ???? 
 
-    //dr_LBO_O_dt[r, c] = A_OLDnorot * new Vector3(0, beta[c], 0); 
-    //dr_LBO_O_dt[r, c] *= 0.01f;
                 }
             }
             // ##################################################################################
@@ -1638,6 +1968,8 @@ namespace Rotor
             F_thrustsumLD_O = new Vector3(0, 0, 0);
             F_torquesumLD_LD = new Vector3(0, 0, 0);
             float V0, V2, Vc, Vi, Vi_sum = 0;
+            float Vi_area_sum = 0.0f;
+            float area_sum = 0.0f;
             bool finished;
             int sum;
             float phi = 0, alpha = 0;
@@ -1653,6 +1985,9 @@ float rho_air = 1.27f; // TODO  rho_air;
             //cl_alpha_NACA0012[0][angle_id]
             //cl_alpha_NACA0012[1][value_id]
 
+            float dr = segment_radial_length * 2.0f;
+            float dPsi = 2.0f * Mathf.PI / c_n;
+
             // factor for BEMT function
             float factor1 = 0.5f * rho_air * B * chord / c_n;
             const float delta = 0.001f;  // [m/s] for f'() in newton' method (limit "h" for difference quotient)
@@ -1660,6 +1995,78 @@ float rho_air = 1.27f; // TODO  rho_air;
             float sound_DtDr_max = 0; // for rotor audio
             float sound_cd = 0; // for rotor audio
 
+            // ##################################################################################
+            // JOHNSON VRS MODEL - Global VRS Computation
+            // ##################################################################################
+            float beta_mean = 0f;
+            for (int c = 0; c < c_n; c++) beta_mean += beta[c]; // [rad] blade angle from rotor mechanics system
+            beta_mean /= c_n;
+            float thrust_polarity = Mathf.Sign(beta_mean); // +1 normal, -1 inverted collective
+
+            JohnsonVRS_Parameters par_vrs = JohnsonVRS_Parameters.CreateDefault();
+            JohnsonVRS_State vrs_state = vrs_state_persistent;
+
+            // Step 1: Consistency check - determine if rotor is in unified descent
+            int count_positive, count_negative;
+            float use_VRS_smooth = CheckConsistency_And_ComputeMeans(
+                dr_LBO_LB_dt, horizontal_speed_LR, r_n, c_n,
+                par_vrs.consistency_threshold,
+                out vrs_state.Vc_mean,
+                out vrs_state.Vx_mean,
+                out count_positive,
+                out count_negative);
+            
+            vrs_state.consistency_ratio = (float)Mathf.Max(count_positive, count_negative) / (r_n * c_n);
+            vrs_state.use_VRS = use_VRS_smooth;
+
+            // Step 2: Hover induced velocity from the helicopter weight - a stable, NON-recursive
+            // reference for scaling the VRS window (deriving it from the previous thrust created a
+            // thrust<->v_h feedback loop that oscillated). For 0.1..5 kg RC this is ~0.5..2 m/s.
+            float v_h = ComputeHoverInducedVelocity(new Vector3(0, mass_total * 9.81f, 0), par_rotor); // [m/s]
+            
+            // Step 3: Scale velocities by hover induced velocity
+            float omega_mr = (float)x_states[19];
+            float Vz_scaled = (v_h > 0.1f) ? (thrust_polarity * vrs_state.Vc_mean / v_h) : 0.0f;
+            float Vx_scaled = (v_h > 0.1f) ? (                  vrs_state.Vx_mean / v_h) : 0.0f;   // unchanged — always a magnitude
+
+            // Step 4: Apply Johnson Table 3 Algorithm
+            float v_johnson_quasistatic = Johnson_Table3_Algorithm(Vz_scaled, Vx_scaled, par_vrs, out vrs_state.strength_VRS);
+            float v_johnson_unscaled = thrust_polarity * v_johnson_quasistatic * v_h;
+
+
+            // Step 5: Apply time lag for transient dynamics. Bypassed during CSV test sweeps so
+            // the exported curves show the pure quasi-static physics without carried-over state.
+            float v_johnson_lagged;
+            if (is_testing)
+            {
+                v_johnson_lagged = v_johnson_unscaled;
+                vrs_state.v_johnson_previous = v_johnson_unscaled;
+                vrs_state.dv_lag = 0.0f;
+            }
+            else
+            {
+                ApplyTimeLag(
+                    v_johnson_unscaled,
+                    vrs_state.v_johnson_previous,
+                    omega_mr,
+                    par_vrs.tau_rotor_revolutions,
+                    (float)dtime,
+                    ref vrs_state.dv_lag,
+                    out v_johnson_lagged);
+
+                vrs_state.v_johnson_previous = v_johnson_lagged;
+            }
+            
+            // Store back to persistent state
+            vrs_state_persistent = vrs_state;
+
+            // Debug output
+            debug_use_vortex_ring_state = vrs_state.use_VRS;
+            debug_strength_vortex_ring_state = vrs_state.strength_VRS; 
+            debug_strength_vortex_ring_Vz_scaled = Vz_scaled; 
+            debug_strength_vortex_ring_Vx_scaled = Vx_scaled; 
+
+            // ##################################################################################
 
             // loop over each blade segment element (Unity uses column major layout -> cache frienly access --> 1.) r, 2.) c )
             for (int r = 0; r < r_n; r++) // radial direction (rows)
@@ -1688,47 +2095,81 @@ float rho_air = 1.27f; // TODO  rho_air;
 
                     const float lim = 0.1f * Mathf.Deg2Rad; // [rad] for numerical reasons
                     float beta_ = beta[c]; // [rad] blade angle from rotor mechanics system
-                    float omega_mr = (float)x_states[19]; // [rad/sec] mainrotor rotational speed
-    beta_ = Helper.Step(Mathf.Abs(omega_mr), 100.00000f / 60f * 2f * Mathf.PI, 15f * Mathf.Deg2Rad, 200.00000f / 60f * 2f * Mathf.PI, beta_);
+                    float omega_mr_local = (float)x_states[19]; // [rad/sec] mainrotor rotational speed
+    beta_ = Helper.Step(Mathf.Abs(omega_mr_local), 100.00000f / 60f * 2f * Mathf.PI, 15f * Mathf.Deg2Rad, 200.00000f / 60f * 2f * Mathf.PI, beta_);
                     if (beta_ < lim && beta_ >= 0) beta_ = lim; // [rad]
                     if (beta_ > -lim && beta_ <= 0) beta_ = -lim; // [rad]
 
-                    Vc = dr_LBO_LB_dt[r, c].y * 1.200000000000000000000000000000000000f; // [m/s]; climbing speed
+                    Vc = dr_LBO_LB_dt[r, c].y; // [m/s]; climbing speed
                     //Vc =  Vi_LD_smoothdamp[r, c]; // [m/s]; climbing speed
                     V2 = dr_LBO_LB_dt[r, c].z; // [m/s]; rotational speed
-    //radius = 1f;  // [m]
-    //Vc = -10.0f; // [m/s]
-    //V2 = 104f * radius; // radius; // [m/s]
-    //beta_ = -5f * Mathf.Deg2Rad;
-                    Vi = -(Vc) + Mathf.Sign(beta_) * 0.003f; // guess initial value of induced velocity  <========= derived from extensive study of Vi-equation
+    
+                    // =========================================================
+                    // 1) Quadrant-synchronized scaled velocities. thrust_polarity maps the
+                    //    physical upwash of a descending disc to Vz_scaled < 0 for BOTH normal and
+                    //    inverted collective, matching the global Johnson convention (fixes the
+                    //    sign conflict that made the -2 deg collective sweep chatter the most).
+                    float blend_weight = vrs_state.use_VRS * vrs_state.strength_VRS;
 
-                    //float cl, cd, phi;
+                    float local_Vz_scaled = (v_h > 0.1f) ? (thrust_polarity * Vc / v_h) : 0.0f;
+                    float local_Vx_scaled = (v_h > 0.1f) ? (Mathf.Abs(V2) / v_h) : 0.0f;
+
+                    // 2) Stateless analytical bridge (Johnson baseline + VRS correction), valid
+                    //    everywhere. It replaces momentum theory inside the singular window and
+                    //    elsewhere serves as a history-free Newton start (no Vi_LD hysteresis).
+                    float v_baseline_scaled = Johnson_Baseline(local_Vz_scaled, local_Vx_scaled, par_vrs);
+                    float vrs_corr_scaled = Johnson_VRS_Correction(local_Vz_scaled, local_Vx_scaled, v_baseline_scaled, par_vrs, out _);
+                    float v_bridge_scaled = v_baseline_scaled + (par_vrs.zeta * par_vrs.f * vrs_corr_scaled);
+                    float Vi_bridge = thrust_polarity * v_bridge_scaled * v_h; // [m/s]
+
+                    // 4) Newton-Raphson on the singularity-free product residual, warm-started by
+                    //    continuation. Because V2 >> V0 the residual factor2*Vi*(Vi+Vc)=DtDr is very
+                    //    nearly quadratic and has a second, spurious root at |Vi| ~ |Vc|. After
+                    //    solving, in the normal working state keep whichever of the two roots (Vi or
+                    //    its conjugate -Vc-Vi, they sum to -Vc) is closest to the analytical estimate
+                    //    Vi_bridge - the physical small induced velocity. Deep windmill is left free.
+                    bool normal_working_state = local_Vz_scaled > -2.0f;
+
+                    Vi = (Vi_LD[r, c] != 0f) ? Vi_LD[r, c] : Vi_bridge;
                     while (!finished)
                     {
-
                         float Vi_error1 = Rotor_Disc_BEMT_Function(Vi      , Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
                         float Vi_error2 = Rotor_Disc_BEMT_Function(Vi+delta, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
 
-                        float fun_diff = (Vi_error2 - Vi_error1) / delta; // f' for Newton's method
-                        Vinew = Vi - Vi_error1 / fun_diff; // Newton's method
+                        float fun_diff = (Vi_error2 - Vi_error1) / delta;
+                        if (Mathf.Abs(fun_diff) < 0.0001f) fun_diff = Mathf.Sign(fun_diff) * 0.0001f;
 
-                        // check for convergence
-                        if (Mathf.Abs(Vinew - Vi) < 1.0e-4)
+                        Vinew = Vi - Vi_error1 / fun_diff;
+
+                        // under-relaxed, step-limited update: damping converges monotonically and
+                        // removes the residual staircase in steep climb/descent.
+                        const float newton_damping = 0.5f;
+                        float step = Mathf.Clamp((Vinew - Vi) * newton_damping, -1.0f, 1.0f);
+                        Vi += step;
+
+                        if (Mathf.Abs(step) < 1.0e-4f)
                             finished = true;
 
-                        Vi = Vinew;
-                        // check to see if iteration stuck
-                        if (sum++ > 30)
-                        {
-                            finished = true;
-//#if UNITY_EDITOR
-//                            UnityEngine.Debug.Log("x");
-//#endif
-                            // restore last induced velocity
-                            Vi = Vi_LD[r, c];
-                        }
+                        if (sum++ > 60)
+                            finished = true; // keep the last iterate: stateless and continuous
                     }
-                    ///////////////////////////////////////////////////////////////////
+
+                    // reject the spurious quadratic root: keep the one nearest the analytical estimate
+                    if (normal_working_state)
+                    {
+                        float conjugate = -Vc - Vi; // the other momentum-parabola root
+                        if (Mathf.Abs(conjugate - Vi_bridge) < Mathf.Abs(Vi - Vi_bridge))
+                            Vi = conjugate;
+                    }
+
+                    // 5) The multiplied-through residual is singularity-free, so the collective-
+                    //    dependent BEMT solution is used as-is. The empirical VRS thrust loss is added
+                    //    only where the whole disc is coherently in the vortex-ring descent band
+                    //    (blend_weight); Vi_bridge is weight-normalized and collective-independent, so
+                    //    it must NOT override BEMT at hover - it is only the cold-start guess above.
+                    Vi = Mathf.Lerp(Vi, v_johnson_lagged, blend_weight);
+                    // =========================================================
+
 
                     // get thrust and torque
                     Rotor_Disc_BEMT_Function( ((Vi + Vi_LD_smoothdamp_diff[r, c])) , Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
@@ -1747,8 +2188,10 @@ float rho_air = 1.27f; // TODO  rho_air;
                     Vi_LD[r, c] = Vi;
 
                     // sum up Vi for further processing ( ground effect... )
-                    Vi_sum += Vi;
-
+                    //Vi_sum += Vi;
+                    float dA = radius * dr * dPsi;
+                    Vi_area_sum += Vi * dA;
+                    area_sum += dA;
 
 
                     // resulting thrust and torque (sum) 
@@ -1768,10 +2211,20 @@ float rho_air = 1.27f; // TODO  rho_air;
                     ///////////////////////////////////////////////////////////////////
                     // Test inertia effect of air
                     ///////////////////////////////////////////////////////////////////
-                    Vi_LD_smoothdamp[r, c] = Mathf.SmoothDamp(Vi_LD_smoothdamp[r, c], Vi, ref Vi_LD_smoothdamp_velocity[r, c], 0.8000000000f, 10000, (float)dtime); // [m/sec]
-                    Vi_LD_smoothdamp_diff[r, c] = Vi_LD_smoothdamp[r, c] - Vi; // [m/sec]
+                    if (is_testing)
+                    {
+                        // Während des CSV-Exports überspringen wir die zeitliche Verzögerung,
+                        // damit wir die reine, wahre Physik-Kurve ohne Schleppfehler sehen!
+                        Vi_LD_smoothdamp[r, c] = Vi;
+                        Vi_LD_smoothdamp_diff[r, c] = 0f;
+                    }
+                    else
+                    {
+                        // Im echten Spiel bleibt die Trägheit voll aktiv
+                        Vi_LD_smoothdamp[r, c] = Mathf.SmoothDamp(Vi_LD_smoothdamp[r, c], Vi, ref Vi_LD_smoothdamp_velocity[r, c], 0.8000000000f, 10000, (float)dtime); // [m/sec]
+                        Vi_LD_smoothdamp_diff[r, c] = Vi_LD_smoothdamp[r, c] - Vi;
+                    }
                     ///////////////////////////////////////////////////////////////////
-
 
 
 
@@ -1802,15 +2255,12 @@ float rho_air = 1.27f; // TODO  rho_air;
                     //dr_LBO_O_dt[r, c] = A_OLDnorot * A_LDnorotLB * new Vector3(0, -Vi_LD_smoothdamp_diff[r,c], 0) * 0.1f;  // TODO rename dr_LBO_O_dt 
                     //dr_LBO_O_dt[r, c] = A_OLDnorot * A_LDnorotLB * new Vector3(0, -Helper.Step(Mathf.Abs(cd), 0.015f, 0.0f, 0.25f, 1.0f)*100, 0) * 0.1f;  // TODO rename dr_LBO_O_dt 
 
-
-                    //F_LB_O_thrust[r, c] = new Vector3(0, 0.1f, 0);
-                    //F_LB_O_torque[r, c] = new Vector3(0, 0.1f, 0.2f);
-                    //dr_LBO_O_dt[r, c] = new Vector3(0, -0.1f, 0);
                     ////////////////////////////////////////////////////////////////////////////
                     ///
                 }
             }
-            Vi_mean = Vi_sum / (r_n * c_n);
+            //Vi_mean = Vi_sum / (r_n * c_n);
+            Vi_mean = Vi_area_sum / area_sum;
 
 
             //
@@ -1826,129 +2276,7 @@ float rho_air = 1.27f; // TODO  rho_air;
             // ##################################################################################
 
 
-
-
-            debug_strength_turbulence = 0;
-            debug_strength_vortex_ring_state = 0;
-            /*
-            // ##################################################################################
-            // vortex ring state - BEMT
-            // http://www.dynamicflight.com/aerodynamics/settling_power/
-            // ##################################################################################
-            float strength_turbulence = 0;
-
-            float horizontal_speed_LR = Mathf.Sqrt(v_PRO_LR.x * v_PRO_LR.x + v_PRO_LR.z * v_PRO_LR.z); // [m/sec] 
-            float vertical_speed_LR = -v_PRO_LR.y * Mathf.Sign((float)v_i); // [m/sec] sign(v_i) --> determine speed and the correct direction
-
-            if (calculate_vortex_ring_state)
-            {
-                float force_reduction_factor = par_tuning.vortex_ring_state.force_reduction_factor.val; // [-] if vortex fully developed rotor thrust is reduced at this amount
-                float torque_reduction_factor = par_tuning.vortex_ring_state.torque_reduction_factor.val; // [-] if vortex fully developed rotor torque is reduced at this amount
-                const float critical_descent_angle = 60 * Mathf.Deg2Rad; // [rad]   ~65°
-                float radius_factor_light = 1.20f; // [-]
-                float radius_factor_severe = 0.80f; // [-] raidus x-times of the par_tuning.vortex_ring_state_v_horizontal.val value (the circle/elliptic area should so alrge, that it also goes into negative diagram-x-axis regions to cover descent angles of 90°)
-                float stength_rising_speed_factor = par_tuning.vortex_ring_state.stength_rising_speed_factor.val;  // [1/s] todo should depend on time, now depends on ODE-thread frequency
-                float light_turbulence_area_growth = 0.1f; // [-]
-
-
-                if (integrator_function_call_number == 0)
-                {
-                    // In rate of descent vs horizntal speed diagram we define the area, where from 
-                    // light to severe turbulence and thrust variation occures. A cosinus curve is 
-                    // used to create a smooth transition from areas without VRS to areas with VRS
-                    Vector2 vrs_center_in_diagram = new Vector2(Mathf.Abs(par_tuning.vortex_ring_state.v_vertical.val / Mathf.Tan(critical_descent_angle)), -Mathf.Abs(par_tuning.vortex_ring_state.v_vertical.val)); // [m/s] horizontal, vertical speed
-                    float vrs_radius_in_diagram_light = Mathf.Abs(vrs_center_in_diagram[0] * radius_factor_light); // [m/s]
-                    float vrs_radius_in_diagram_severe = Mathf.Abs(vrs_center_in_diagram[0] * radius_factor_severe); // [m/s]
-
-
-                    float delta_velocity_diagram_x = horizontal_speed_LR - vrs_center_in_diagram[0]; // [m/s]
-                    float delta_velocity_diagram_y = vertical_speed_LR - vrs_center_in_diagram[1]; // [m/s]
-                    float delta_distance_to_vrs_center = new Vector2(delta_velocity_diagram_x, delta_velocity_diagram_y).magnitude;
-
-                    // light turbulences - slow build up of vortex ring
-                    if (((delta_velocity_diagram_x < 0 &&
-                     delta_velocity_diagram_y < +vrs_radius_in_diagram_light &&
-                     delta_velocity_diagram_y > -vrs_radius_in_diagram_light) ||
-                    (delta_distance_to_vrs_center < vrs_radius_in_diagram_light)) && !flag_freewheeling)
-                    {
-                        // light turbulences - slow build up of vortex ring
-                        if (vortex_ring_state_stength[(int)rotor_type] < 0.5000000000)
-                            vortex_ring_state_stength[(int)rotor_type] += stength_rising_speed_factor * light_turbulence_area_growth;
-
-                        // severe turbulences - fast build up of vortex ring
-                        if (delta_distance_to_vrs_center < vrs_radius_in_diagram_severe)
-                            vortex_ring_state_stength[(int)rotor_type] += stength_rising_speed_factor * ((Mathf.Cos((delta_distance_to_vrs_center / vrs_radius_in_diagram_severe) * Mathf.PI) + 1f) * 0.5f * (1.0f - light_turbulence_area_growth));
-                    }
-                    else
-                    {
-                        vortex_ring_state_stength[(int)rotor_type] -= stength_rising_speed_factor * 0.500000000000f; // todo descent intensity ???
-                    }
-
-                    vortex_ring_state_stength[(int)rotor_type] = Mathf.Clamp(vortex_ring_state_stength[(int)rotor_type], 0, 1); // [0 ... 1]
-                }
-                force_at_heli_CH_O *= (1 - vortex_ring_state_stength[(int)rotor_type] * force_reduction_factor);
-                torque_at_heli_CH_LH *= (1 - vortex_ring_state_stength[(int)rotor_type] * torque_reduction_factor);
-
-                strength_turbulence = vortex_ring_state_stength[(int)rotor_type];
-            }
-            else
-            {
-                vortex_ring_state_stength[(int)rotor_type] = 0;
-            }
-            debug_strength_vortex_ring_state = vortex_ring_state_stength[(int)rotor_type];
-            // ##################################################################################
-
-
-
-            // ##################################################################################
-            // turbulence - BEMT
-            // ##################################################################################
-            if (calculate_turbulence)
-            {
-                // get the local translational speed
-                float translational_velocity_scalar_abs = v_PRO_LH.magnitude; // [m/sec] velo_LH
-                // rotation around y-axis (most often rotor shaft axis) has lower turbulence influence.
-                float rotational_velocity_scalar_abs = Mathf.Sqrt(1.0f * omega_LH.x * omega_LH.x + 0.2f * omega_LH.y * omega_LH.y + 1.0f * omega_LH.z * omega_LH.z); // [rad/sec]
-
-                // turbulence strength depends on rotational speed but also on translational speed:
-                // - if rotational speed is high turbulence is high
-                // - but if translational speed is high turbulence is low, even if rotational speed is high (rotor gets undisturbed air)
-                strength_turbulence += Helper.Step(rotational_velocity_scalar_abs, par_tuning.turbulence.rotational_velocity_limit.val / 2.0f, 0, par_tuning.turbulence.rotational_velocity_limit.val, 1) *
-                                       Helper.Step(translational_velocity_scalar_abs, par_tuning.turbulence.translational_velocity_limit.val / 2.0f, 1, par_tuning.turbulence.translational_velocity_limit.val, 0.25f); // [0...1]
-
-                strength_turbulence = Mathf.Clamp(strength_turbulence, 0, 1);
-
-                // turbulence is represented with random values
-                float turbulence_time_elapsed = time;
-                turbulence_time_elapsed %= 1f / par_tuning.turbulence.frequency.val; // [1/Hz] select the frequency of the turbulence
-                if (turbulence_time_elapsed < turbulence_time_elapsed_old[(int)rotor_type])
-                {
-                    turbulence_force_LH[(int)rotor_type] = new Vector3(
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.x,
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.y,
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.z);  // [N]
-                    turbulence_torque_LH_target[(int)rotor_type] = new Vector3(
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.x,
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.y,
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.z); // [Nm]
-                }
-                turbulence_time_elapsed_old[(int)rotor_type] = turbulence_time_elapsed;
-
-                Vector3 turbulence_torque_LH_velocity_ = turbulence_torque_LH_velocity[(int)rotor_type];
-                turbulence_torque_LH[(int)rotor_type] = Vector3.SmoothDamp(turbulence_torque_LH[(int)rotor_type], turbulence_torque_LH_target[(int)rotor_type], ref turbulence_torque_LH_velocity_, 0.3F, 1000, (float)dtime);
-
-                force_at_heli_CH_O += Helper.A_RL(q, turbulence_force_LH[(int)rotor_type]);
-                torque_at_heli_CH_LH += turbulence_torque_LH[(int)rotor_type];
-            }
-            else
-            {
-                vortex_ring_state_stength[(int)rotor_type] = 0;
-                turbulence_time_elapsed_old[(int)rotor_type] = 0;
-            }
-            debug_strength_turbulence = strength_turbulence;
-            // ##################################################################################
-            */
-            
+            debug_strength_turbulence = 0;         
 
             // ##################################################################################
             // ground effect - BEMT 
@@ -1959,8 +2287,7 @@ float rho_air = 1.27f; // TODO  rho_air;
                //r_LHO_O + (Vector3)(A_LHO.transpose * r_LRLH_LH);
 
                 Vector3 direction_rotor_O = A_LDO.transpose * new Vector3 (0,1,0); // rotor disc's normal vector expressed in inetrial system
-                Vector3 v_PRO_LR = (velo_wind_O + dr_LHO_O_dt + (Vector3)(A_LHO.transpose * Helper.tilde_omega(w_LHO_LH) * r_LRLH_LH)); // simplified, does not take tilting of rotor disc in account
-                float horizontal_speed_LD = Mathf.Sqrt(v_PRO_LR.x * v_PRO_LR.x + v_PRO_LR.z * v_PRO_LR.z); // [m/sec]
+                float horizontal_speed_LD = horizontal_speed_LR; // [m/s] simplified
 
                 // get the factor how perpendicular rotor axis is to surface-triangle and with the sign its direction  
                 float ground_effect_mainrotor_perpendicular_factor = Vector3.Dot(direction_rotor_O.normalized * Math.Sign(-Vi_mean), -ground_effect_mainrotor_triangle_normalR);
@@ -1986,56 +2313,11 @@ float rho_air = 1.27f; // TODO  rho_air;
             
 
 
-
-
             // ##################################################################################
             // Test forward speed increases lift
             // ##################################################################################
-            F_thrustsumLD_O *=  Helper.Step(horizontal_speed_LD, par_rotor.R.val * 1.0000000000000f, 0.75000000000000f, par_rotor.R.val*5.0000000000000f,  1.000000000f); // [m/s]
+            // F_thrustsumLD_O *=  Helper.Step(horizontal_speed_LD, par_rotor.R.val * 1.0000000000000f, 0.75000000000000f, par_rotor.R.val*5.0000000000000f,  1.000000000f); // [m/s]
             // ##################################################################################
-
-
-
-
-
-
-            //// tilting due to flapping of rotor disk
-            //Quaternion rotor_axis_orientation = Helper.ConvertRightHandedToLeftHandedQuaternion(Helper.S123toQuat(par_rotor.oriLH.vect3));
-
-            //Vector3 temp = helper.A_RT_BEMT(Quaternion qCO, Quaternion qTO, Vector3 anglesRC, Vector3 v3, out float tilting_angle, out Vector3 axis_vector);
-
-            //rotordisk_BEMT.transform.localRotation =
-            //    Quaternion.Euler(-flapping_b_s_LH * Mathf.Rad2Deg, 0f, flapping_a_s_LH * Mathf.Rad2Deg) *
-            //    rotor_axis_orientation; // Unity uses left handed Euler rotation, space fixed = extrinsic S312 (= intrinsic = body fixed B213)   
-
-
-
-
-
-
-
-
-            /* // TESTING //////////////////////////////////////////////////////
-            par_rotor.oriLH.vect3 = new Vector3( -1, 5, -4); // x y z 
-
-            // Unity uses left handed Euler rotation, space fixed = extrinsic S312 (= intrinsic = body fixed B213)  
-            Matrix4x4 A_B123_LR = 
-                Matrix4x4.Rotate(Quaternion.Euler(0, 0, par_rotor.oriLH.vect3.z)).transpose *                
-                Matrix4x4.Rotate(Quaternion.Euler(0, par_rotor.oriLH.vect3.y, 0)).transpose *                
-                Matrix4x4.Rotate(Quaternion.Euler(par_rotor.oriLH.vect3.x, 0, 0)).transpose;
-            Matrix4x4 A_B123_LR_test =
-                Matrix4x4.Rotate(Quaternion.Euler(par_rotor.oriLH.vect3.x, 0, 0) *
-                                 Quaternion.Euler(0, par_rotor.oriLH.vect3.y, 0) *
-                                 Quaternion.Euler(0, 0, par_rotor.oriLH.vect3.z)).transpose; 
-
-            Matrix4x4 z = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 5)).transpose;
-            Matrix4x4 y = Matrix4x4.Rotate(Quaternion.Euler(0, 4, 0)).transpose;
-            Matrix4x4 x = Matrix4x4.Rotate(Quaternion.Euler(10, 0, 0)).transpose;
-            Matrix4x4 A_B213_LR = z * x * y;
-            Matrix4x4 A_B213_LR_test = Matrix4x4.Rotate(Quaternion.Euler(10, 4, 5)).transpose; 
-
-            Matrix4x4 teeee = Matrix4x4.Rotate(Helper.B321toQuat(par_rotor.oriLH.vect3)); // A_RL
-            */
 
         }
 
@@ -2059,8 +2341,8 @@ float rho_air = 1.27f; // TODO  rho_air;
             //cd = (0.010f + 0.01f * cl * cl); // [-] drag coefficient
 
             // wrap angle in radians to -pi ...+pi° to stay in range of look up table
-            if (alpha >= +Mathf.PI) alpha = alpha - 2 * Mathf.PI;
-            if (alpha <= -Mathf.PI) alpha = alpha + 2 * Mathf.PI;
+            if (alpha >= +Mathf.PI) alpha -= 2 * Mathf.PI;
+            if (alpha <= -Mathf.PI) alpha += 2 * Mathf.PI;
             //cl = Helper.Interpolate(ref cl_alpha, alpha); // lift coefficient - linear interpolation -> leads to discontinous cruves -> newtons' method fails
             //cd = Helper.Interpolate(ref cd_alpha, alpha); // drag coefficient - linear interpolation -> leads to discontinous cruves -> newtons' method fails
 
@@ -2095,15 +2377,173 @@ float rho_air = 1.27f; // TODO  rho_air;
             //DtDr = 0.5f * rho_air * B * chord * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi)) / c_n;
             //DtDr = (0.5f * rho_air * B * chord / c_n) * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi));
             float DtDr = factor1 * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi));
-            //momentum check on induced velocity
-            //float tem1 = DtDr / (Mathf.PI   /   4.0f * radius * rho_air * Mathf.Abs(V0));
-            //if (Mathf.Abs(V0) < 0.01f) V0 = Mathf.Sign(V0)*0.01f; // [m/s] 
-            //V0 = Helper.Step(Mathf.Abs(V0), 0.0001f, 0.0001f, 0.0010f, V0);
-            float tem1 = DtDr / (factor2 * Mathf.Abs(V0));
 
-            return Vi - tem1;
+            // Blade-element / momentum balance in MULTIPLIED-THROUGH form:
+            //   factor2 * Vi * V0  ==  DtDr   (algebraically the classic Vi = DtDr/(factor2*V0),
+            // but with the 1/V0 division removed). The reciprocal form needed a regularization that
+            // was non-monotonic near V0 = 0 and therefore injected spurious extra roots the solver
+            // hopped between - the staircase and the unphysical Vi ~ -Vc branch in climb. This
+            // product form is singularity-free and keeps only the single physical root; the genuine
+            // VRS region (where momentum theory has no root) is handled by the Johnson bridge blend.
+            float residual = factor2 * Vi * V0 - DtDr; // [N]
+
+
+            return residual;
         }
         // ##################################################################################
+
+
+
+
+
+
+
+        static public void ExportVRSAndBaselineDiagram(string filename = "vrs_plot_data.csv")
+        {
+            // Nutze die Standard-Parameter deines Modells zu Testzwecken
+            JohnsonVRS_Parameters par = JohnsonVRS_Parameters.CreateDefault();
+            
+            // Verschiedene Vorwärtsgeschwindigkeiten (normiert durch v_h), um Kurvenscharen zu erzeugen
+            float[] test_Vx_scaled = new float[] { 0.0f, 0.3f, 0.6f };
+            
+            StringBuilder csvContent = new StringBuilder();
+            // Header-Zeile für die CSV-Datei
+            csvContent.AppendLine("Vz_scaled,Vx_scaled,Vi_baseline_scaled,Vi_final_scaled,VRS_Strength,Vi_ideal_momentum");
+
+            // Scanne die vertikale Sinkgeschwindigkeit normiert von -3.0 (sehr schneller Sinkflug) bis +1.0 (Steigflug)
+            int steps = 400;
+            float startVz = -3.0f;
+            float endVz = 1.0f;
+            float stepSize = (endVz - startVz) / steps;
+
+            for (int i = 0; i <= steps; i++)
+            {
+                float vz = startVz + (i * stepSize);
+
+                foreach (float vx in test_Vx_scaled)
+                {
+                    // 1. Berechne rein die mathematische Baseline-Kurve (Gapping Area)
+                    float v_baseline = Johnson_Baseline(vz, vx, par);
+
+                    // 2. Berechne den Gesamtwert inklusive optionalem VRS-Aufsatz
+                    float vrs_strength;
+                    float v_final = Johnson_Table3_Algorithm(vz, vx, par, out vrs_strength);
+
+                    // 3. Berechne die ideale Momentum Theory (obere/untere Branch je nach vz) als Referenzkontrolle
+                    bool upperBranch = (vz >= 0.0f);
+                    float v_ideal = MomentumTheory(vz, vx, upperBranch);
+
+                    // Zeile in den Stringbuilder schreiben (Kompagrenzung über InvariantCulture verhindert Komma-Konflikte)
+                    csvContent.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                        "{0:F4},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4}",
+                        vz, vx, v_baseline, v_final, vrs_strength, v_ideal));
+                }
+            }
+
+            // Speichern im Unity-Projekt-Hauptverzeichnis
+            string outputPath = Path.Combine(UnityEngine.Application.dataPath, "../" + filename);
+            File.WriteAllText(outputPath, csvContent.ToString());
+            UnityEngine.Debug.Log("VRS-Diagrammdaten erfolgreich exportiert nach: " + outputPath);
+        }
+
+
+        static public void ExportCompleteBEMTRotorTest(string filename = "bemt_rotor_test.csv")
+        {
+            // Mikado LOGO 600 SE: ~1.5 m rotor diameter (R = 0.75 m), ~4.5 kg, 2 blades.
+            stru_rotor par_rotor = new stru_rotor();
+            par_rotor.R = new stru_float { val = 0.75f };     // [m] rotor radius (1.5 m diameter)
+            par_rotor.c = new stru_float { val = 0.055f };    // [m] blade chord
+            par_rotor.b = new stru_int { val = 2 };           // [-] number of blades
+            par_rotor.posLH = new stru_Vector3 { vect3 = Vector3.zero };
+            par_rotor.oriLH = new stru_Vector3 { vect3 = Vector3.zero };
+
+            const float test_mass_total = 4.5f; // [kg] LOGO 600 SE all-up mass
+
+            float[] test_collective_deg = new float[] { -2.0f, 0.0f, 4.0f, 8.0f };
+            int r_n = 4; int c_n = 10;
+
+            StringBuilder csvContent = new StringBuilder();
+            csvContent.AppendLine("Collective_Deg,Vz_Absolute,Vi_Mean,Thrust_Z_O,Torque_Y_LD,Vz_scaled_dbg");
+
+            int steps = 500;
+            float startVz = -15.0f;
+            float endVz = 10.0f;
+            float stepSize = (endVz - startVz) / steps;
+
+            foreach (float coll_deg in test_collective_deg)
+            {
+                // Continuation sweep: keep the state arrays for a whole collective and warm-start
+                // each Vz from the previous one. This tracks a single, physically continuous inflow
+                // branch and yields smooth curves (cold-starting every point lets the solver land on
+                // different roots -> the step-like jumps). Points are independent between collectives.
+                float[] beta = new float[c_n];
+                float[,] Vi_LD = new float[r_n, c_n];
+                float[,] Vi_LD_smoothdamp = new float[r_n, c_n];
+                float[,] Vi_LD_smoothdamp_diff = new float[r_n, c_n];
+                float[,] Vi_LD_smoothdamp_velocity = new float[r_n, c_n];
+
+                float coll_rad = coll_deg * Mathf.Deg2Rad;
+                for (int c = 0; c < c_n; c++) beta[c] = coll_rad;
+
+                vrs_state_persistent = new JohnsonVRS_State();
+
+                float Vi_mean = 0f;
+                Vector3 F_thrustsumLD_O = Vector3.zero;
+                Vector3 F_torquesumLD_LD = Vector3.zero;
+                Vector3 F_thrustsumLD_LD_visual = Vector3.zero;
+                float dbg_vz_scaled = 0f; // diagnostic: global scaled vertical velocity
+
+                for (int i = 0; i <= steps; i++)
+                {
+                    float vz_absolute = startVz + (i * stepSize);
+
+                    // a few warm-started settling passes per Vz (state carries over -> continuation)
+                    for (int settling_step = 0; settling_step < 4; settling_step++)
+                    {
+                        double[] x_states = new double[50];
+                        x_states[0] = 0.0; x_states[1] = 0.0; x_states[2] = 0.0;
+                        x_states[7] = 0.0;
+                        x_states[8] = (double)vz_absolute;
+                        x_states[9] = 0.0;
+                        x_states[19] = 2500.0 / 60.0 * 2.0 * Mathf.PI;
+                        x_states[3] = 1.0; x_states[31] = 1.0;
+
+                        Vector3 T_stiffLH = Vector3.zero; Vector3 T_stiffLD = Vector3.zero;
+                        Vector3 T_dampLH = Vector3.zero; Vector3 T_dampLD = Vector3.zero;
+                        Matrix4x4 A_OLDnorot = Matrix4x4.identity;
+                        Vector3[,] r_LBO_O = new Vector3[r_n, c_n];
+                        Vector3[,] dr_LBO_O_dt = new Vector3[r_n, c_n];
+                        Vector3[,] dr_LBO_LB_dt = new Vector3[r_n, c_n];
+                        Vector3[,] F_LB_O_thrust = new Vector3[r_n, c_n];
+                        Vector3[,] F_LB_O_torque = new Vector3[r_n, c_n];
+
+                        Rotor_Disc_BEMT_Calculations(
+                            false, ref x_states, test_mass_total, par_rotor, ref beta, Vector3.zero,
+                            ref T_stiffLH, ref T_stiffLD, ref T_dampLH, ref T_dampLD,
+                            ref A_OLDnorot, ref r_LBO_O, ref dr_LBO_O_dt, ref dr_LBO_LB_dt,
+                            ref F_LB_O_thrust, ref F_LB_O_torque,
+                            ref F_thrustsumLD_O, ref F_torquesumLD_LD, ref F_thrustsumLD_LD_visual,
+                            ref Vi_LD, ref Vi_LD_smoothdamp, ref Vi_LD_smoothdamp_diff, ref Vi_LD_smoothdamp_velocity,
+                            ref Vi_mean, 0.01f, 10.0f, Vector3.up,
+                            out _, out _, out _, out _, out _, out _, out _, out _, out _, out _, out dbg_vz_scaled, out _, out _
+                        );
+                    }
+
+                    csvContent.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                        "{0:F2},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4}",
+                        coll_deg, vz_absolute, Vi_mean, F_thrustsumLD_O.y, F_torquesumLD_LD.y, dbg_vz_scaled));
+                }
+            }
+
+            string outputPath = Path.Combine(UnityEngine.Application.dataPath, "../" + filename);
+            File.WriteAllText(outputPath, csvContent.ToString());
+            UnityEngine.Debug.Log("Ganzheitlicher BEMT-Rotortest erfolgreich exportiert nach: " + outputPath);
+        }
+
+
+
+
+
 
 
 

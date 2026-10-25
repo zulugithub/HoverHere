@@ -3962,7 +3962,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
                 Rigidbody rb = go.transform.Find("Missile_HOT3").gameObject.GetComponent<Rigidbody>();
 
-                rb.velocity = Helper.ConvertRightHandedToLeftHandedVector(helicopter_ODE.Translational_Velocity_At_Local_Point_Expressed_In_Global_Frame_RightHanded(Helper.ConvertLeftHandedToRightHandedVector(Quaternion.Euler(0, 0, 0) * pylon_localposition)));
+                rb.linearVelocity = Helper.ConvertRightHandedToLeftHandedVector(helicopter_ODE.Translational_Velocity_At_Local_Point_Expressed_In_Global_Frame_RightHanded(Helper.ConvertLeftHandedToRightHandedVector(Quaternion.Euler(0, 0, 0) * pylon_localposition)));
                 rb.angularVelocity = Helper.ConvertRightHandedToLeftHandedVector(helicopter_ODE.Rotational_Velocity_Expressed_In_Global_Frame_RightHanded());
                 rb.angularVelocity = new Vector3(-rb.angularVelocity.x, -rb.angularVelocity.y, -rb.angularVelocity.z); // TODO Why??? maybe Lefthanded vs Righthanded velocity     ???
                 //rb.AddRelativeForce(Vector3.right * 5f, ForceMode.Force);

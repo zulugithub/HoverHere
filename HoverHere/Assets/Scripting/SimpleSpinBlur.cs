@@ -105,6 +105,7 @@ public class SimpleSpinBlur : MonoBehaviour
             //Quaternion q = Quaternion.Lerp(transform.parent.rotation * Quaternion.Euler(cyclic_angle, 0, 0), transform.parent.rotation * Quaternion.Euler(cyclic_angle, 270, 0), (float)i / (float)Samples);
             Quaternion q = transform.parent.rotation * Quaternion.Euler(-cyclic_angle, ((float)i / (float)Samples)*360f, 0);
             Graphics.DrawMesh(SSB_Mesh, transform.position, q, SSB_Materials[i], 0, null, advancedSettings.subMaterialIndex);
+            //Graphics.DrawMeshInstanced( ... )
         }
     }
 

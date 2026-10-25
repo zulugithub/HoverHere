@@ -157,19 +157,28 @@ namespace Helisimulator
         public float P_pr_pr, P_pr_i, P_pr_pa, P_pr_c; // propeller power calculation results
 
         public float turbulence_mr;
+        public float vortex_ring_use_mr;
         public float vortex_ring_state_mr;
+        public float vortex_ring_Vz_scaled_mr;
+        public float vortex_ring_Vx_scaled_mr;
         public float ground_effect_mr;
         public float flap_up_mr;
         //public float stall_mr;
 
         public float turbulence_tr;
+        public float vortex_ring_use_tr;
         public float vortex_ring_state_tr;
+        public float vortex_ring_Vz_scaled_tr;
+        public float vortex_ring_Vx_scaled_tr;
         public float ground_effect_tr;
         public float flap_up_tr;
         //public float stall_tr;
 
         public float turbulence_pr;
+        public float vortex_ring_use_pr;
         public float vortex_ring_state_pr;
+        public float vortex_ring_Vz_scaled_pr;
+        public float vortex_ring_Vx_scaled_pr;
         public float ground_effect_pr;
         public float flap_up_pr;
         //public float stall_pr;
@@ -1424,7 +1433,10 @@ namespace Helisimulator
                 out ODEDebug.P_mr_pa,
                 out ODEDebug.P_mr_c,
                 out ODEDebug.turbulence_mr,
+                out ODEDebug.vortex_ring_use_mr,
                 out ODEDebug.vortex_ring_state_mr,
+                out ODEDebug.vortex_ring_Vz_scaled_mr,
+                out ODEDebug.vortex_ring_Vx_scaled_mr,
                 out ODEDebug.ground_effect_mr,
                 out ODEDebug.flap_up_mr
                 );
@@ -1552,7 +1564,10 @@ namespace Helisimulator
                 out ODEDebug.P_tr_pa,
                 out ODEDebug.P_tr_c,
                 out ODEDebug.turbulence_tr,
+                out ODEDebug.vortex_ring_use_tr,
                 out ODEDebug.vortex_ring_state_tr,
+                out ODEDebug.vortex_ring_Vz_scaled_tr,
+                out ODEDebug.vortex_ring_Vx_scaled_tr,
                 out ODEDebug.ground_effect_tr,
                 out ODEDebug.flap_up_tr
                 );
@@ -1658,7 +1673,10 @@ namespace Helisimulator
                 out ODEDebug.P_pr_pa,
                 out ODEDebug.P_pr_c,
                 out ODEDebug.turbulence_pr,
+                out ODEDebug.vortex_ring_use_pr,
                 out ODEDebug.vortex_ring_state_pr,
+                out ODEDebug.vortex_ring_Vz_scaled_pr,
+                out ODEDebug.vortex_ring_Vx_scaled_pr,
                 out ODEDebug.ground_effect_pr,
                 out ODEDebug.flap_up_pr
                 );
@@ -3440,7 +3458,9 @@ float beta_tr = 0; // calculated blade angle not used yet
             if (Helicopter_Main.mainrotor_simplified0_or_BEMT1 == 1)
             {
                 Helicopter_Rotor_Physics.Rotor_Disc_BEMT_Calculations(false,
-                    ref x_states, (stru_rotor)par.transmitter_and_helicopter.helicopter.mainrotor, ref beta, velo_wind_O,
+                    ref x_states, 
+                    par.transmitter_and_helicopter.helicopter.mass_total.val,
+                    (stru_rotor)par.transmitter_and_helicopter.helicopter.mainrotor, ref beta, velo_wind_O,
                     ref T_stiffLR_CH, ref T_stiffLR_LD, ref T_dampLR_CH, ref T_dampLR_LD,
                     ref A_OLDnorot,
                     ref r_LBO_O, ref dr_LBO_O_dt, ref dr_LBO_LB_dt,
@@ -3456,7 +3476,10 @@ float beta_tr = 0; // calculated blade angle not used yet
                     out ODEDebug.mainrotor_forceO, // left handed system
                     out ODEDebug.mainrotor_torqueO, // left handed system
                     out ODEDebug.turbulence_mr,
+                    out ODEDebug.vortex_ring_use_mr,
                     out ODEDebug.vortex_ring_state_mr,
+                    out ODEDebug.vortex_ring_Vz_scaled_mr,
+                    out ODEDebug.vortex_ring_Vx_scaled_mr,
                     out ODEDebug.ground_effect_mr
                     );
 
@@ -3714,6 +3737,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                 ODEDebug.debug_text += " POWER:      P_pr_pr=" + Helper.FormatNumber(ODEDebug.P_pr_pr, "####.0") + "W   P_pr_i=" + Helper.FormatNumber(ODEDebug.P_pr_i, "####.0") + "W   P_pr_pa=" + Helper.FormatNumber(ODEDebug.P_pr_pa, "####.0") + "W   P_pr_c= " + Helper.FormatNumber(ODEDebug.P_pr_c, "####.0") + "W" + "\n";
                 ODEDebug.debug_text += " DRAG:       force_fuselageO.x=" + Helper.FormatNumber(force_fuselageO.x, "0.0") + "N" + "   force_fuselageO.y=" + Helper.FormatNumber(force_fuselageO.y, "0.0") + "N" + "   force_fuselageO.z=" + Helper.FormatNumber(force_fuselageO.z, "0.0") + "N" + "\n";
                 ODEDebug.debug_text += " MAINROTOR:  omega_mr=" + Helper.FormatNumber(omega_mr * Helper.RadPerSec_to_Rpm, "####") + "rpm" + "   thrust_mr=" + Helper.FormatNumber(thrust_mr, "###.00") + "N" + "   torque_mr=" + Helper.FormatNumber(torque_mr, "###.00") + "Nm" + "   Theta_col_mr=" + Helper.FormatNumber(Theta_col_mr * Helper.Rad_to_Deg, "##.00") + "deg   v_i_mr=" + Helper.FormatNumber(v_i_mr, "##.00") + "m/s" + "     tau_mr=" + Helper.FormatNumber(debug_tau_mr, "0.000") + "s" + "     flag_freewheeling=" + (flag_freewheeling ? "YES" : "NO") + "\n";
+                ODEDebug.debug_text += " VRS_MAIN:   use_VRS=" + Helper.FormatNumber(ODEDebug.vortex_ring_use_mr, "0.00") + " strength_VRS=" + Helper.FormatNumber(ODEDebug.vortex_ring_state_mr, "0.00")  + " Vz_scaled=" + Helper.FormatNumber(ODEDebug.vortex_ring_Vz_scaled_mr, "0.00")  + " Vx_scaled=" + Helper.FormatNumber(ODEDebug.vortex_ring_Vx_scaled_mr, "0.00") + "  Vi_blended=" + Helper.FormatNumber(v_i_mr, "##.00") + "m/s" + "\n";
                 ODEDebug.debug_text += " TAILROTOR:  omega_tr=" + Helper.FormatNumber(omega_tr * Helper.RadPerSec_to_Rpm, "####") + "rpm" + "   thrust_tr=" + Helper.FormatNumber(thrust_tr, "###.00") + "N" + "   torque_tr=" + Helper.FormatNumber(torque_tr, "###.00") + "Nm" + "   Theta_col_tr=" + Helper.FormatNumber(Theta_col_tr * Helper.Rad_to_Deg, "##.00") + "deg" + "   delta_col_tr=" + Helper.FormatNumber(delta_col_tr, "##.00") + "   v_i_tr=" + Helper.FormatNumber(v_i_tr, "##.00") + "m/s" + "\n";
                 ODEDebug.debug_text += " PROPELLER:  omega_pr=" + Helper.FormatNumber(omega_pr * Helper.RadPerSec_to_Rpm, "####") + "rpm" + "   thrust_pr=" + Helper.FormatNumber(thrust_pr, "###.00") + "N" + "   torque_pr=" + Helper.FormatNumber(torque_pr, "###.00") + "Nm" + "   delta_col_pr=" + Helper.FormatNumber(delta_col_pr, "##.00") + "   v_i_pr=" + Helper.FormatNumber(v_i_pr, "##.00") + "m/s" + "\n";
                 ODEDebug.debug_text += " FLAPPING:   flapping_a_s_L= " + Helper.FormatNumber(flapping_a_s_mr_LR * Mathf.Rad2Deg, "0.00") + "deg     flapping_b_s_L=" + Helper.FormatNumber(flapping_b_s_mr_LR * Mathf.Rad2Deg, "0.00") + "deg" + "\n";
