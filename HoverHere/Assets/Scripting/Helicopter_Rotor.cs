@@ -1480,6 +1480,8 @@ namespace Rotor
             public float consistency_threshold;
             public float magnitude_tolerance;
             public float tau_rotor_revolutions;
+            public float transition_min_width;
+            public float transition_blend;
 
             public static JohnsonVRS_Parameters CreateDefault()
             {
@@ -1503,7 +1505,10 @@ namespace Rotor
                     //  State Tracking & Filtering
                     consistency_threshold = 0.8f,  // Demanded confidence metric before triggering a VRS state change.                         
                     magnitude_tolerance = 0.3f,    // Noise margin allowed for transient sensor spikes in velocity data.                     
-                    tau_rotor_revolutions = 10.0f  // Time constant filter window measured in main rotor revolutions to account for flow development lag.                         
+                    tau_rotor_revolutions = 10.0f,  // Time constant filter window measured in main rotor revolutions to account for flow development lag.
+                    // Baseline A/B transition zone
+                    transition_min_width = 0.4f,    // [-] Smallest width (normalized Vz) of the A/B blend zone. Keeps the zone from collapsing into a step where boundary B crosses A (Vx/vh ~ 0.8).
+                    transition_blend = 0.1f         // [-] Width of the smooth (C1) onset of that minimum.                         
                 };
             }
         }
@@ -1555,27 +1560,45 @@ namespace Rotor
             return (v2 - v1) / (2.0f * epsilon);
         }
 
+        // C1-continuous max(x, floor): identity above floor + blend, constant below floor - blend
+        static private float Smooth_Floor(float x, float floor, float blend)
+        {
+            if (x <= floor - blend) return floor;
+            if (x >= floor + blend) return x;
+            float d = x - floor + blend;
+            return floor + d * d / (4.0f * blend);
+        }
+
         static private float Johnson_Baseline(float Vz_scaled, float Vx_scaled, JohnsonVRS_Parameters par)
         {
-            float Vx_ratio = Mathf.Abs(Vz_scaled) < 0.001f ? 0 : Vx_scaled / par.VxC;
+            // clamped so the A/B boundaries cannot run away at high forward speed
+            float Vx_ratio = Mathf.Min(1.2f, Vx_scaled / par.VxC);
             float VzAID = par.VzA + 0.2f * Vx_ratio * Vx_ratio;
             float VzBID = par.VzB + 0.2f * Vx_ratio * Vx_ratio;
 
             if (Vx_ratio > 0.5f)
             {
-                float factor = Mathf.Pow(2.0f * Vx_ratio - 1.0f, 3.0f);
+                float factor = Mathf.Min(3.0f, Mathf.Pow(2.0f * Vx_ratio - 1.0f, 3.0f));
                 VzBID = VzBID + 0.7f * (VzAID - VzBID) * factor;
             }
 
-            if (Vz_scaled > VzBID && Vz_scaled < VzAID)
+            // Boundary B crosses A and re-opens near Vx/vh = 0.8: order them and keep a minimum blend width, otherwise the zone collapses into a step
+            float Vz_min = Mathf.Min(VzBID, VzAID);
+            float Vz_max = Mathf.Max(VzBID, VzAID);
+            float centre = 0.5f * (Vz_min + Vz_max);
+            float width = Smooth_Floor(Vz_max - Vz_min, par.transition_min_width, par.transition_blend);
+            Vz_min = centre - 0.5f * width;
+            Vz_max = centre + 0.5f * width;
+
+            if (Vz_scaled > Vz_min && Vz_scaled < Vz_max)
             {
-                float v_A = MomentumTheory(VzAID, Vx_scaled, true);
-                float v_B = MomentumTheory(VzBID, Vx_scaled, false);
-                // Nutzen von SmoothStep statt Lerp verhindert harte Knicke an den Rändern VzAID und VzBID
-                float t = (Vz_scaled - VzBID) / (VzAID - VzBID);
+                float v_A = MomentumTheory(Vz_max, Vx_scaled, true);
+                float v_B = MomentumTheory(Vz_min, Vx_scaled, false);
+                // Nutzen von SmoothStep statt Lerp verhindert harte Knicke an den Rändern der Übergangszone
+                float t = (Vz_scaled - Vz_min) / (Vz_max - Vz_min);
                 return Mathf.Lerp(v_B, v_A, Mathf.SmoothStep(0.0f, 1.0f, t));
             }
-            else if (Vz_scaled >= VzAID)
+            else if (Vz_scaled >= Vz_max)
             {
                 return MomentumTheory(Vz_scaled, Vx_scaled, true);
             }
@@ -1656,7 +1679,10 @@ namespace Rotor
                 }
             }
 
-            return dv_delta;
+            // Fade the correction out as forward speed approaches VxM instead of cutting it off (hard jump at VxM)
+            float vrs_gate = Helper.Step(Vx_scaled, 0.70f * par.VxM, 1.0f, par.VxM, 0.0f);
+            strength_VRS *= vrs_gate;
+            return dv_delta * vrs_gate;
         }
 
         static public float Johnson_Table3_Algorithm(float Vz_scaled, float Vx_scaled, JohnsonVRS_Parameters par, out float strength_VRS)
@@ -1781,6 +1807,12 @@ namespace Rotor
         // ##################################################################################
         static bool flag_export_diagram = true; 
         static bool is_testing = false; // Verhindert die unendliche Rekursion
+        static float debug_bemt_max_residual;
+        static int debug_bemt_nonconverged_elements;
+        static float debug_bemt_fallback_weight_max;
+        static float debug_vrs_blend_weight;
+        static float debug_vrs_target;
+        static float[] debug_vi_radial_mean = new float[4];
 
         static public void Rotor_Disc_BEMT_Calculations(bool flag_calculate_only_stiffness_damping, 
             ref double[] x_states, 
@@ -1970,6 +2002,17 @@ namespace Rotor
             float V0, V2, Vc, Vi, Vi_sum = 0;
             float Vi_area_sum = 0.0f;
             float area_sum = 0.0f;
+            float[] Vi_area_sum_radial = is_testing ? new float[r_n] : null;
+            float[] area_sum_radial = is_testing ? new float[r_n] : null;
+            if (is_testing)
+            {
+                debug_bemt_max_residual = 0.0f;
+                debug_bemt_nonconverged_elements = 0;
+                debug_bemt_fallback_weight_max = 0.0f;
+                debug_vrs_blend_weight = 0.0f;
+                debug_vrs_target = 0.0f;
+                Array.Clear(debug_vi_radial_mean, 0, debug_vi_radial_mean.Length);
+            }
             bool finished;
             int sum;
             float phi = 0, alpha = 0;
@@ -2002,6 +2045,8 @@ float rho_air = 1.27f; // TODO  rho_air;
             for (int c = 0; c < c_n; c++) beta_mean += beta[c]; // [rad] blade angle from rotor mechanics system
             beta_mean /= c_n;
             float thrust_polarity = Mathf.Sign(beta_mean); // +1 normal, -1 inverted collective
+            if (thrust_polarity == 0f)
+                thrust_polarity = 1f; // zero collective is clamped to positive minimum pitch below
 
             JohnsonVRS_Parameters par_vrs = JohnsonVRS_Parameters.CreateDefault();
             JohnsonVRS_State vrs_state = vrs_state_persistent;
@@ -2018,6 +2063,10 @@ float rho_air = 1.27f; // TODO  rho_air;
             
             vrs_state.consistency_ratio = (float)Mathf.Max(count_positive, count_negative) / (r_n * c_n);
             vrs_state.use_VRS = use_VRS_smooth;
+
+            // Exactly zero collective has no thrust direction: take the one that makes the flow a descent (point-symmetric about the origin)
+            if (beta_mean == 0f && vrs_state.Vc_mean != 0f)
+                thrust_polarity = -Mathf.Sign(vrs_state.Vc_mean);
 
             // Step 2: Hover induced velocity from the helicopter weight - a stable, NON-recursive
             // reference for scaling the VRS window (deriving it from the previous thrust created a
@@ -2059,6 +2108,15 @@ float rho_air = 1.27f; // TODO  rho_air;
             
             // Store back to persistent state
             vrs_state_persistent = vrs_state;
+            if (is_testing)
+            {
+                debug_vrs_blend_weight = 0.0f;
+                debug_vrs_target = v_johnson_lagged;
+            }
+
+            // Johnson inflow is blended in smoothly over the whole descent (none at Vz/vh = 0, full at Vz/vh <= -2),
+            // gated by how coherent the descent is across the disc
+            float descent_blend_weight = Helper.Step(Vz_scaled, -2.0f, 1.0f, 0.0f, 0.0f) * vrs_state.use_VRS;
 
             // Debug output
             debug_use_vortex_ring_state = vrs_state.use_VRS;
@@ -2075,7 +2133,7 @@ float rho_air = 1.27f; // TODO  rho_air;
                 Vector3 r_LBP_LB = new Vector3(radius, 0, 0); // [m] 
 
                 // factor for BEMT function
-                float factor2 = (Mathf.PI * 4.0f) * radius * rho_air;  // TODO "pi*4" or "pi/4" ???????????????
+                float factor2 = (Mathf.PI * 4.0f) * radius * rho_air / c_n;
 
                 // loop over each angular sector
                 for (int c = 0; c < c_n; c++) // circumferential direction (columns)
@@ -2105,69 +2163,108 @@ float rho_air = 1.27f; // TODO  rho_air;
                     V2 = dr_LBO_LB_dt[r, c].z; // [m/s]; rotational speed
     
                     // =========================================================
-                    // 1) Quadrant-synchronized scaled velocities. thrust_polarity maps the
+                    // 1) Quadrant-synchronized scaled velocity. thrust_polarity maps the
                     //    physical upwash of a descending disc to Vz_scaled < 0 for BOTH normal and
                     //    inverted collective, matching the global Johnson convention (fixes the
                     //    sign conflict that made the -2 deg collective sweep chatter the most).
-                    float blend_weight = vrs_state.use_VRS * vrs_state.strength_VRS;
-
                     float local_Vz_scaled = (v_h > 0.1f) ? (thrust_polarity * Vc / v_h) : 0.0f;
-                    float local_Vx_scaled = (v_h > 0.1f) ? (Mathf.Abs(V2) / v_h) : 0.0f;
 
-                    // 2) Stateless analytical bridge (Johnson baseline + VRS correction), valid
-                    //    everywhere. It replaces momentum theory inside the singular window and
-                    //    elsewhere serves as a history-free Newton start (no Vi_LD hysteresis).
-                    float v_baseline_scaled = Johnson_Baseline(local_Vz_scaled, local_Vx_scaled, par_vrs);
-                    float vrs_corr_scaled = Johnson_VRS_Correction(local_Vz_scaled, local_Vx_scaled, v_baseline_scaled, par_vrs, out _);
-                    float v_bridge_scaled = v_baseline_scaled + (par_vrs.zeta * par_vrs.f * vrs_corr_scaled);
-                    float Vi_bridge = thrust_polarity * v_bridge_scaled * v_h; // [m/s]
+                    // 2) Newton start: the last raw BEMT solution of this element. Starting from the Johnson-blended
+                    //    output instead leaves part of the elements stuck on a flat part of the residual near V0 = 0.
+                    //    Only a cold start uses the stateless analytical bridge (Johnson baseline + VRS correction).
+                    bool has_previous_solution = Vi_LD[r, c] != 0f;
+                    if (has_previous_solution)
+                    {
+                        Vi = Vi_LD[r, c];
+                    }
+                    else
+                    {
+                        float local_Vx_scaled = (v_h > 0.1f) ? (horizontal_speed_LR / v_h) : 0.0f;
+                        float v_baseline_scaled = Johnson_Baseline(local_Vz_scaled, local_Vx_scaled, par_vrs);
+                        float vrs_corr_scaled = Johnson_VRS_Correction(local_Vz_scaled, local_Vx_scaled, v_baseline_scaled, par_vrs, out _);
+                        float v_bridge_scaled = v_baseline_scaled + (par_vrs.zeta * par_vrs.f * vrs_corr_scaled);
+                        Vi = thrust_polarity * v_bridge_scaled * v_h; // [m/s]
+                    }
 
-                    // 4) Newton-Raphson on the singularity-free product residual, warm-started by
-                    //    continuation. Because V2 >> V0 the residual factor2*Vi*(Vi+Vc)=DtDr is very
-                    //    nearly quadratic and has a second, spurious root at |Vi| ~ |Vc|. After
-                    //    solving, in the normal working state keep whichever of the two roots (Vi or
-                    //    its conjugate -Vc-Vi, they sum to -Vc) is closest to the analytical estimate
-                    //    Vi_bridge - the physical small induced velocity. Deep windmill is left free.
-                    bool normal_working_state = local_Vz_scaled > -2.0f;
-
-                    Vi = (Vi_LD[r, c] != 0f) ? Vi_LD[r, c] : Vi_bridge;
+                    // 3) Solve the singularity-free product residual from that start value.
+                    if (local_Vz_scaled < -2.0f && Vi * thrust_polarity > 0.0f)
+                        Vi = 0.0f;
+                    float best_Vi = Vi;
+                    float best_residual = float.PositiveInfinity;
                     while (!finished)
                     {
-                        float Vi_error1 = Rotor_Disc_BEMT_Function(Vi      , Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
-                        float Vi_error2 = Rotor_Disc_BEMT_Function(Vi+delta, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                        float residual = Rotor_Disc_BEMT_Function(Vi, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                        if (Mathf.Abs(residual) < best_residual)
+                        {
+                            best_residual = Mathf.Abs(residual);
+                            best_Vi = Vi;
+                        }
 
-                        float fun_diff = (Vi_error2 - Vi_error1) / delta;
-                        if (Mathf.Abs(fun_diff) < 0.0001f) fun_diff = Mathf.Sign(fun_diff) * 0.0001f;
+                        if (Mathf.Abs(residual) <= 0.001f)
+                        {
+                            finished = true;
+                            break;
+                        }
 
-                        Vinew = Vi - Vi_error1 / fun_diff;
+                        float residual_plus = Rotor_Disc_BEMT_Function(Vi + delta, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                        float residual_minus = Rotor_Disc_BEMT_Function(Vi - delta, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                        float fun_diff = (residual_plus - residual_minus) / (2.0f * delta);
 
-                        // under-relaxed, step-limited update: damping converges monotonically and
-                        // removes the residual staircase in steep climb/descent.
+                        if (Mathf.Abs(fun_diff) < 0.0001f || float.IsNaN(fun_diff) || float.IsInfinity(fun_diff))
+                            break;
+
+                        Vinew = Vi - residual / fun_diff;
                         const float newton_damping = 0.5f;
                         float step = Mathf.Clamp((Vinew - Vi) * newton_damping, -1.0f, 1.0f);
+                        if (Mathf.Abs(step) < 1.0e-5f || float.IsNaN(step) || float.IsInfinity(step))
+                            break;
+
                         Vi += step;
 
-                        if (Mathf.Abs(step) < 1.0e-4f)
-                            finished = true;
-
-                        if (sum++ > 60)
-                            finished = true; // keep the last iterate: stateless and continuous
+                        if (sum++ >= 60)
+                            break;
                     }
 
-                    // reject the spurious quadratic root: keep the one nearest the analytical estimate
-                    if (normal_working_state)
+                    float final_residual = Rotor_Disc_BEMT_Function(Vi, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                    if (Mathf.Abs(final_residual) < best_residual)
                     {
-                        float conjugate = -Vc - Vi; // the other momentum-parabola root
-                        if (Mathf.Abs(conjugate - Vi_bridge) < Mathf.Abs(Vi - Vi_bridge))
-                            Vi = conjugate;
+                        best_residual = Mathf.Abs(final_residual);
+                        best_Vi = Vi;
+                    }
+                    Vi = best_Vi;
+                    if (is_testing)
+                    {
+                        float selected_residual = Rotor_Disc_BEMT_Function(Vi, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                        if (!float.IsNaN(selected_residual) && !float.IsInfinity(selected_residual))
+                        {
+                            debug_bemt_max_residual = Mathf.Max(debug_bemt_max_residual, Mathf.Abs(selected_residual));
+                            if (Mathf.Abs(selected_residual) > 0.001f)
+                                debug_bemt_nonconverged_elements++;
+                        }
                     }
 
-                    // 5) The multiplied-through residual is singularity-free, so the collective-
-                    //    dependent BEMT solution is used as-is. The empirical VRS thrust loss is added
-                    //    only where the whole disc is coherently in the vortex-ring descent band
-                    //    (blend_weight); Vi_bridge is weight-normalized and collective-independent, so
-                    //    it must NOT override BEMT at hover - it is only the cold-start guess above.
-                    Vi = Mathf.Lerp(Vi, v_johnson_lagged, blend_weight);
+                        // Elements the solver could not converge fall back to the Johnson inflow
+                        float residual_fallback_weight = Mathf.InverseLerp(0.5f, 5.0f, best_residual);
+                        if (is_testing)
+                            debug_bemt_fallback_weight_max = Mathf.Max(debug_bemt_fallback_weight_max, residual_fallback_weight);
+                        // raw BEMT solution: next Newton start (kept free of the Johnson blend) and basis of the load gate below
+                        float Vi_bemt = Vi;
+                    Rotor_Disc_BEMT_Function(Vi_bemt, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
+                    float bemt_v0 = Vi_bemt + Vc;
+                    float bemt_speed_squared = bemt_v0 * bemt_v0 + V2 * V2;
+                    float bemt_element_thrust = factor1 * bemt_speed_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi)) * 0.8f * dr;
+                    float aligned_element_thrust = Mathf.Max(0.0f, bemt_element_thrust * thrust_polarity);
+                    float load_blend_weight = Mathf.InverseLerp(0.05f, 0.5f, aligned_element_thrust);
+                    float applied_vrs_blend_weight = Mathf.Clamp01(descent_blend_weight * load_blend_weight + residual_fallback_weight);
+                    if (is_testing)
+                        debug_vrs_blend_weight = Mathf.Max(debug_vrs_blend_weight, applied_vrs_blend_weight);
+
+                    // 4) The multiplied-through residual is singularity-free, so the collective-
+                    //    dependent BEMT solution is used as-is at hover and in climb. In descent the Johnson
+                    //    inflow is blended in smoothly (descent_blend_weight), scaled down for elements that
+                    //    carry little thrust (load_blend_weight - the inflow target is collective-independent
+                    //    and must not drive an unloaded blade), plus the fallback for unconverged elements.
+                    Vi = Mathf.Lerp(Vi_bemt, v_johnson_lagged, applied_vrs_blend_weight);
                     // =========================================================
 
 
@@ -2185,13 +2282,18 @@ float rho_air = 1.27f; // TODO  rho_air;
 
 
                     // store induced velocity
-                    Vi_LD[r, c] = Vi;
+                    Vi_LD[r, c] = Vi_bemt;
 
                     // sum up Vi for further processing ( ground effect... )
                     //Vi_sum += Vi;
                     float dA = radius * dr * dPsi;
                     Vi_area_sum += Vi * dA;
                     area_sum += dA;
+                    if (is_testing)
+                    {
+                        Vi_area_sum_radial[r] += Vi * dA;
+                        area_sum_radial[r] += dA;
+                    }
 
 
                     // resulting thrust and torque (sum) 
@@ -2261,6 +2363,11 @@ float rho_air = 1.27f; // TODO  rho_air;
             }
             //Vi_mean = Vi_sum / (r_n * c_n);
             Vi_mean = Vi_area_sum / area_sum;
+            if (is_testing)
+            {
+                for (int r = 0; r < r_n; r++)
+                    debug_vi_radial_mean[r] = Vi_area_sum_radial[r] / area_sum_radial[r];
+            }
 
 
             //
@@ -2331,7 +2438,7 @@ float rho_air = 1.27f; // TODO  rho_air;
         static public float Rotor_Disc_BEMT_Function(float Vi, float Vc, float V2, float beta, float factor1, float factor2, 
             ref float [,] cl_alpha, ref float[,] cd_alpha,  ref float cl, ref float cd, ref float phi, ref float alpha)
         {
-            V2 = Mathf.Sign(V2) * Helper.Step(Mathf.Abs(V2), 0.01f, 0.01f, 0.10f, Mathf.Abs(V2));
+            V2 = Helper.Step(Mathf.Abs(V2), 0.01f, 0.01f, 0.10f, Mathf.Abs(V2));
 
             float V0 = Vi + Vc; // [m/s]
             phi = Mathf.Atan2(V0, V2); // [rad]
@@ -2379,13 +2486,15 @@ float rho_air = 1.27f; // TODO  rho_air;
             float DtDr = factor1 * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi));
 
             // Blade-element / momentum balance in MULTIPLIED-THROUGH form:
-            //   factor2 * Vi * V0  ==  DtDr   (algebraically the classic Vi = DtDr/(factor2*V0),
+            //   factor2 * Vi * |V0|  ==  DtDr   (algebraically the classic Vi = DtDr/(factor2*|V0|),
             // but with the 1/V0 division removed). The reciprocal form needed a regularization that
             // was non-monotonic near V0 = 0 and therefore injected spurious extra roots the solver
             // hopped between - the staircase and the unphysical Vi ~ -Vc branch in climb. This
             // product form is singularity-free and keeps only the single physical root; the genuine
             // VRS region (where momentum theory has no root) is handled by the Johnson bridge blend.
-            float residual = factor2 * Vi * V0 - DtDr; // [N]
+            // |V0|: the momentum thrust has the sign of Vi for either flow direction through the disc, so
+            // descent (V0 < 0) and negative collective keep a root with the sign of the blade thrust.
+            float residual = factor2 * Vi * Mathf.Abs(V0) - DtDr; // [N]
 
 
             return residual;
@@ -2404,7 +2513,7 @@ float rho_air = 1.27f; // TODO  rho_air;
             JohnsonVRS_Parameters par = JohnsonVRS_Parameters.CreateDefault();
             
             // Verschiedene Vorwärtsgeschwindigkeiten (normiert durch v_h), um Kurvenscharen zu erzeugen
-            float[] test_Vx_scaled = new float[] { 0.0f, 0.3f, 0.6f };
+            float[] test_Vx_scaled = new float[] { 0.0f, 0.3f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f };
             
             StringBuilder csvContent = new StringBuilder();
             // Header-Zeile für die CSV-Datei
@@ -2463,7 +2572,7 @@ float rho_air = 1.27f; // TODO  rho_air;
             int r_n = 4; int c_n = 10;
 
             StringBuilder csvContent = new StringBuilder();
-            csvContent.AppendLine("Collective_Deg,Vz_Absolute,Vi_Mean,Thrust_Z_O,Torque_Y_LD,Vz_scaled_dbg");
+            csvContent.AppendLine("Collective_Deg,Vz_Absolute,Vi_Mean,Thrust_Z_O,Torque_Y_LD,Vz_scaled_dbg,Vi_Radial_0,Vi_Radial_1,Vi_Radial_2,Vi_Radial_3,BEMT_MaxResidual_N,BEMT_NonconvergedElements,BEMT_FallbackWeight_Max,VRS_Blend_Weight,VRS_Target_Vi");
 
             int steps = 500;
             float startVz = -15.0f;
@@ -2492,10 +2601,26 @@ float rho_air = 1.27f; // TODO  rho_air;
                 Vector3 F_torquesumLD_LD = Vector3.zero;
                 Vector3 F_thrustsumLD_LD_visual = Vector3.zero;
                 float dbg_vz_scaled = 0f; // diagnostic: global scaled vertical velocity
+                string[] collective_rows = new string[steps + 1];
+                int negative_steps = Mathf.RoundToInt(-startVz / stepSize);
 
-                for (int i = 0; i <= steps; i++)
+                // Start at hover and continue outward on both sides. The climb sweep is reset
+                // at hover so it cannot inherit a descent-only windmill solution branch.
+                for (int sweep_step = 0; sweep_step <= steps; sweep_step++)
                 {
-                    float vz_absolute = startVz + (i * stepSize);
+                    if (sweep_step == negative_steps + 1)
+                    {
+                        Array.Clear(Vi_LD, 0, Vi_LD.Length);
+                        Array.Clear(Vi_LD_smoothdamp, 0, Vi_LD_smoothdamp.Length);
+                        Array.Clear(Vi_LD_smoothdamp_diff, 0, Vi_LD_smoothdamp_diff.Length);
+                        Array.Clear(Vi_LD_smoothdamp_velocity, 0, Vi_LD_smoothdamp_velocity.Length);
+                        vrs_state_persistent = new JohnsonVRS_State();
+                    }
+
+                    float vz_absolute = sweep_step <= negative_steps
+                        ? -sweep_step * stepSize
+                        : (sweep_step - negative_steps) * stepSize;
+                    int output_index = Mathf.RoundToInt((vz_absolute - startVz) / stepSize);
 
                     // a few warm-started settling passes per Vz (state carries over -> continuation)
                     for (int settling_step = 0; settling_step < 4; settling_step++)
@@ -2529,10 +2654,16 @@ float rho_air = 1.27f; // TODO  rho_air;
                         );
                     }
 
-                    csvContent.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                        "{0:F2},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4}",
-                        coll_deg, vz_absolute, Vi_mean, F_thrustsumLD_O.y, F_torquesumLD_LD.y, dbg_vz_scaled));
+                    collective_rows[output_index] = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                        "{0:F2},{1:F4},{2:F4},{3:F4},{4:F4},{5:F4},{6:F4},{7:F4},{8:F4},{9:F4},{10:F6},{11},{12:F4},{13:F4},{14:F4}",
+                        coll_deg, vz_absolute, Vi_mean, F_thrustsumLD_O.y, F_torquesumLD_LD.y, dbg_vz_scaled,
+                        debug_vi_radial_mean[0], debug_vi_radial_mean[1], debug_vi_radial_mean[2], debug_vi_radial_mean[3],
+                        debug_bemt_max_residual, debug_bemt_nonconverged_elements, debug_bemt_fallback_weight_max,
+                        debug_vrs_blend_weight, debug_vrs_target);
                 }
+
+                foreach (string row in collective_rows)
+                    csvContent.AppendLine(row);
             }
 
             string outputPath = Path.Combine(UnityEngine.Application.dataPath, "../" + filename);

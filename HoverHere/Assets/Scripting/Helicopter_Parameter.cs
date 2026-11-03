@@ -1624,7 +1624,7 @@ namespace Parameter
             c.comment = "";
             c.unit = "m";
 
-            J.val = 0.092146f;
+            J.val = 0.060000f; // 0.092146f
             J.min = 0.00100f;
             J.max = 1.00000f;
             J.hint = "Rotor inertia w.r.t. main rotor's rotation axis";
@@ -3494,7 +3494,7 @@ namespace Parameter
             initial_roll_angle = new stru_float(); /// [-] initial roll angle after reset
             initial_pitch_angle = new stru_float(); /// [-] initial pitch angle after reset
 
-            K_a.vect3 = new Vector3 { x = 240, y = 270, z = 300 }; // bank 1 2 3
+            K_a.vect3 = new Vector3 { x = 240, y = 270, z = 320 }; // bank 1 2 3
             //K_a.min = 0.01f;
             //K_a.max = 100f;
             K_a.hint = "Flybarless maximum rotation velocity. (Should be smaller, than what heli can perform, othervise stick range will be not fully used)";
@@ -3508,14 +3508,14 @@ namespace Parameter
             K_I.comment = "";
             K_I.unit = "1/sec";
 
-            K_p.vect3 = new Vector3 { x = 0.60f, y = 0.60f, z = 0.60f }; // bank 1 2 3
+            K_p.vect3 = new Vector3 { x = 0.1f, y = 0.1f, z = 0.1f }; // bank 1 2 3
             //K_p.min = 0.01f;
             //K_p.max = 10f;
             K_p.hint = "Flybarless proportional gain";
             K_p.comment = "";
             K_p.unit = "-";
 
-            K_d.vect3 = new Vector3 { x = 0.0003f, y = 0.0003f, z = 0.0003f }; // bank 1 2 3
+            K_d.vect3 = new Vector3 { x = 0.1f, y = 0.1f, z = 0.1f }; // bank 1 2 3
             //K_d.min = 0.00001f;
             //K_d.max = 100f;
             K_d.hint = "Flybarless differential gain";
