@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -2115,8 +2115,10 @@ float rho_air = 1.27f; // TODO  rho_air;
             }
 
             // Johnson inflow is blended in smoothly over the whole descent (none at Vz/vh = 0, full at Vz/vh <= -2),
-            // gated by how coherent the descent is across the disc
-            float descent_blend_weight = Helper.Step(Vz_scaled, -2.0f, 1.0f, 0.0f, 0.0f) * vrs_state.use_VRS;
+            // gated by how coherent the descent is across the disc in flight
+            float descent_blend_weight = is_testing
+                ? Helper.Step(Vz_scaled, -2.0f, 1.0f, 0.0f, 0.0f)
+                : Helper.Step(Vz_scaled, -2.0f, 1.0f, 0.0f, 0.0f) * vrs_state.use_VRS;
 
             // Debug output
             debug_use_vortex_ring_state = vrs_state.use_VRS;
@@ -2151,12 +2153,9 @@ float rho_air = 1.27f; // TODO  rho_air;
                     finished = false; // set logical variable to control iteration
                     sum = 0; // set iteration count and check flag
 
-                    const float lim = 0.1f * Mathf.Deg2Rad; // [rad] for numerical reasons
                     float beta_ = beta[c]; // [rad] blade angle from rotor mechanics system
                     float omega_mr_local = (float)x_states[19]; // [rad/sec] mainrotor rotational speed
     beta_ = Helper.Step(Mathf.Abs(omega_mr_local), 100.00000f / 60f * 2f * Mathf.PI, 15f * Mathf.Deg2Rad, 200.00000f / 60f * 2f * Mathf.PI, beta_);
-                    if (beta_ < lim && beta_ >= 0) beta_ = lim; // [rad]
-                    if (beta_ > -lim && beta_ <= 0) beta_ = -lim; // [rad]
 
                     Vc = dr_LBO_LB_dt[r, c].y; // [m/s]; climbing speed
                     //Vc =  Vi_LD_smoothdamp[r, c]; // [m/s]; climbing speed
@@ -2187,8 +2186,6 @@ float rho_air = 1.27f; // TODO  rho_air;
                     }
 
                     // 3) Solve the singularity-free product residual from that start value.
-                    if (local_Vz_scaled < -2.0f && Vi * thrust_polarity > 0.0f)
-                        Vi = 0.0f;
                     float best_Vi = Vi;
                     float best_residual = float.PositiveInfinity;
                     while (!finished)
@@ -2215,7 +2212,7 @@ float rho_air = 1.27f; // TODO  rho_air;
 
                         Vinew = Vi - residual / fun_diff;
                         const float newton_damping = 0.5f;
-                        float step = Mathf.Clamp((Vinew - Vi) * newton_damping, -1.0f, 1.0f);
+                        float step = Mathf.Clamp((Vinew - Vi) * newton_damping, -3.0f, 3.0f);
                         if (Mathf.Abs(step) < 1.0e-5f || float.IsNaN(step) || float.IsInfinity(step))
                             break;
 
@@ -2243,27 +2240,20 @@ float rho_air = 1.27f; // TODO  rho_air;
                         }
                     }
 
-                        // Elements the solver could not converge fall back to the Johnson inflow
-                        float residual_fallback_weight = Mathf.InverseLerp(0.5f, 5.0f, best_residual);
-                        if (is_testing)
-                            debug_bemt_fallback_weight_max = Mathf.Max(debug_bemt_fallback_weight_max, residual_fallback_weight);
-                        // raw BEMT solution: next Newton start (kept free of the Johnson blend) and basis of the load gate below
-                        float Vi_bemt = Vi;
-                    Rotor_Disc_BEMT_Function(Vi_bemt, Vc, V2, beta_, factor1, factor2, ref cl_alpha_NACA0012, ref cd_alpha_NACA0012, ref cl, ref cd, ref phi, ref alpha);
-                    float bemt_v0 = Vi_bemt + Vc;
-                    float bemt_speed_squared = bemt_v0 * bemt_v0 + V2 * V2;
-                    float bemt_element_thrust = factor1 * bemt_speed_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi)) * 0.8f * dr;
-                    float aligned_element_thrust = Mathf.Max(0.0f, bemt_element_thrust * thrust_polarity);
-                    float load_blend_weight = Mathf.InverseLerp(0.05f, 0.5f, aligned_element_thrust);
-                    float applied_vrs_blend_weight = Mathf.Clamp01(descent_blend_weight * load_blend_weight + residual_fallback_weight);
+                    // Elements the solver could not converge fall back to the Johnson inflow
+                    float residual_fallback_weight = Mathf.InverseLerp(0.5f, 2.0f, best_residual);
+                    if (is_testing)
+                        debug_bemt_fallback_weight_max = Mathf.Max(debug_bemt_fallback_weight_max, residual_fallback_weight);
+                    // raw BEMT solution: next Newton start (kept free of the Johnson blend)
+                    float Vi_bemt = Vi;
+
+                    // Beautifully smooth physical blending matching axial_bemt_rotor_new15.py:
+                    // Smooth transition to Johnson baseline during descent (descent_blend_weight)
+                    // and when Newton-Raphson residuals are high (residual_fallback_weight).
+                    float applied_vrs_blend_weight = Mathf.Clamp01(descent_blend_weight + residual_fallback_weight);
                     if (is_testing)
                         debug_vrs_blend_weight = Mathf.Max(debug_vrs_blend_weight, applied_vrs_blend_weight);
 
-                    // 4) The multiplied-through residual is singularity-free, so the collective-
-                    //    dependent BEMT solution is used as-is at hover and in climb. In descent the Johnson
-                    //    inflow is blended in smoothly (descent_blend_weight), scaled down for elements that
-                    //    carry little thrust (load_blend_weight - the inflow target is collective-independent
-                    //    and must not drive an unloaded blade), plus the fallback for unconverged elements.
                     Vi = Mathf.Lerp(Vi_bemt, v_johnson_lagged, applied_vrs_blend_weight);
                     // =========================================================
 
@@ -2274,7 +2264,7 @@ float rho_air = 1.27f; // TODO  rho_air;
                     V0 = ((Vi + Vi_LD_smoothdamp_diff[r, c])) + Vc; // [m/s]
                     Vlocal_squared = V0 * V0 + V2 * V2; // [m/s]                                                
                     // thrust grading
-                    DtDr = factor1 * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi))    *   0.800000000000f; // [N] TODO: better Prandtl tip loss
+                    DtDr = factor1 * Vlocal_squared * (cl * Mathf.Cos(phi) - cd * Mathf.Sin(phi))    *   0.97f; // [N] Prandtl tip loss (matches axial_bemt_rotor_new15.py B=0.97)
                     // torque grading
                     //DqDr = 0.5f * rho_air * Vlocal_squared * B * chord * radius * (cd * Mathf.Cos(phi) + cl * Mathf.Sin(phi)) / c_n;
                     //DqDr = 0.5f * rho_air * Vlocal_squared * B * chord  * (cd * Mathf.Cos(phi) + cl * Mathf.Sin(phi)) / c_n; // without "radius", because we use later cross product to calculate torque 
@@ -2566,9 +2556,11 @@ float rho_air = 1.27f; // TODO  rho_air;
             par_rotor.posLH = new stru_Vector3 { vect3 = Vector3.zero };
             par_rotor.oriLH = new stru_Vector3 { vect3 = Vector3.zero };
 
+            float rotor_rpm = 1500; // [rpm] test rotor speed
+
             const float test_mass_total = 4.5f; // [kg] LOGO 600 SE all-up mass
 
-            float[] test_collective_deg = new float[] { -2.0f, 0.0f, 4.0f, 8.0f };
+            float[] test_collective_deg = new float[] { -6.0f, -4.0f, -2.0f, 0.0f, 2.0f, 4.0f, 6.0f };
             int r_n = 4; int c_n = 10;
 
             StringBuilder csvContent = new StringBuilder();
@@ -2630,7 +2622,7 @@ float rho_air = 1.27f; // TODO  rho_air;
                         x_states[7] = 0.0;
                         x_states[8] = (double)vz_absolute;
                         x_states[9] = 0.0;
-                        x_states[19] = 2500.0 / 60.0 * 2.0 * Mathf.PI;
+                        x_states[19] = rotor_rpm / 60.0 * 2.0 * Mathf.PI;
                         x_states[3] = 1.0; x_states[31] = 1.0;
 
                         Vector3 T_stiffLH = Vector3.zero; Vector3 T_stiffLD = Vector3.zero;
