@@ -1,0 +1,62 @@
+# Reference values written by tools/csharp_reference (golden). Do not edit.
+# kind: scenery
+# columns: path <TAB> value [<TAB> value ...]; lists of vec3: all components flattened
+@input
+gravity	9.81
+camera_height	1.9
+ambient_sound_volume	50
+initial_position/position	-3.5	0	6
+initial_position/orientation	0	230	0
+weather/rho_air	1.27
+weather/temperature	20
+weather/wind_direction	0
+weather/wind_speed	0
+weather/wind_speed_vertical	0
+animals/number_of_bird_flocks	3
+animals/number_of_insect_flocks	0
+animals/bird_flock/number_of_animals	2
+animals/bird_flock/area_size	300
+animals/bird_flock/area_height_min	25
+animals/bird_flock/area_height_max	55
+animals/bird_flock/animal_scale_variation	25
+animals/bird_flock/animal_animation_speed	200
+animals/bird_flock/animal_speed_min	3
+animals/bird_flock/animal_speed_max	20
+animals/bird_flock/animal_rotation_speed	0.5
+animals/bird_flock/animal_neighbour_distance	75
+animals/bird_flock/target_update_value	20
+animals/bird_flock/apply_rules_value	7
+animals/bird_flock/avoid_animal_distance	25
+animals/bird_flock/avoid_helicopter_distance	30
+animals/bird_flock/show_flock_target	0
+animals/insect_flock/number_of_animals	25
+animals/insect_flock/area_size	2.5
+animals/insect_flock/area_height_min	1.25
+animals/insect_flock/area_height_max	2.5
+animals/insect_flock/animal_scale_variation	25
+animals/insect_flock/animal_animation_speed	1000
+animals/insect_flock/animal_speed_min	0.3
+animals/insect_flock/animal_speed_max	0.6
+animals/insect_flock/animal_rotation_speed	1
+animals/insect_flock/animal_neighbour_distance	0.6
+animals/insect_flock/target_update_value	20
+animals/insect_flock/apply_rules_value	10
+animals/insect_flock/avoid_animal_distance	0.4
+animals/insect_flock/avoid_helicopter_distance	4
+animals/insect_flock/show_flock_target	0
+lighting/sun_position	-23	4	12
+lighting/sun_intensity	1
+lighting/sun_shadow_strength	0.6
+lighting/sun_bloom_intensity	2
+lighting/sun_bloom_blinded_by_sun_intensity	18
+lighting/ambient_light_color	0.95	0.99	0.95
+lighting/ambient_light_intensity	0.8
+skybox/skybox_tint_color	0.98	1	1.06
+skybox/skybox_exposure	0.5
+skybox/skybox_flipping_horizontally	1
+skybox/skybox_rotation	0
+ground/bump_height	0.007
+ground/bump_density_scale	7
+xr/canvas_position	0	3.3	6
+xr/canvas_rotation	-5	10	0
+@calculated

@@ -1,0 +1,41 @@
+# Unit table of the parameter schema (single source of truth, read by schema/tools/generate_params.py).
+#
+# Parameters are stored in the unit given in the schema ("user units", as in the XML parameter files).
+# to_si() converts them with   si_value = factor * value + offset.
+# "aliases" are the spellings used by Helicopter_Parameter.cs; the schema itself only uses the canonical names.
+schema_version: 1
+units:
+  "-":          {dimension: dimensionless, si: "-", factor: 1, aliases: ["[0...1]"]}
+  "%":          {dimension: ratio, si: "-", factor: 0.01}
+  kg:           {dimension: mass, si: kg, factor: 1}
+  m:            {dimension: length, si: m, factor: 1, aliases: ["[m]"]}
+  "m^2":        {dimension: area, si: "m^2", factor: 1}
+  "kg/m^3":     {dimension: density, si: "kg/m^3", factor: 1}
+  "kg m^2":     {dimension: moment_of_inertia, si: "kg m^2", factor: 1, aliases: ["kg*m^2"]}
+  s:            {dimension: time, si: s, factor: 1, aliases: [sec]}
+  Hz:           {dimension: frequency, si: "1/s", factor: 1}
+  "1/s":        {dimension: frequency, si: "1/s", factor: 1, aliases: ["1/sec"]}
+  "m/s":        {dimension: velocity, si: "m/s", factor: 1, aliases: ["m/sec"]}
+  "m/s^2":      {dimension: acceleration, si: "m/s^2", factor: 1}
+  N:            {dimension: force, si: N, factor: 1}
+  Nm:           {dimension: torque, si: Nm, factor: 1}
+  "N/m":        {dimension: stiffness, si: "N/m", factor: 1}
+  "N s/m":      {dimension: damping, si: "N s/m", factor: 1, aliases: ["N*(m/s)"]}
+  "Nm/rad":     {dimension: rotational_stiffness, si: "Nm/rad", factor: 1}
+  "Nm/(rad/s)": {dimension: rotational_damping, si: "Nm/(rad/s)", factor: 1, aliases: ["Nm/(rad/sec)"]}
+  rad:          {dimension: angle, si: rad, factor: 1}
+  deg:          {dimension: angle, si: rad, factor: 0.017453292519943295}
+  "rad/s":      {dimension: angular_velocity, si: "rad/s", factor: 1, aliases: ["rad/sec"]}
+  "deg/s":      {dimension: angular_velocity, si: "rad/s", factor: 0.017453292519943295, aliases: ["deg/sec"]}
+  rpm:          {dimension: angular_velocity, si: "rad/s", factor: 0.10471975511965977}
+  "1/rad":      {dimension: lift_curve_slope, si: "1/rad", factor: 1, aliases: ["rad^-1"]}
+  "rad/m":      {dimension: angle_per_length, si: "rad/m", factor: 1}
+  "1/m":        {dimension: wavenumber, si: "1/m", factor: 1}
+  V:            {dimension: voltage, si: V, factor: 1, aliases: [Volt]}
+  A:            {dimension: current, si: A, factor: 1}
+  ohm:          {dimension: resistance, si: ohm, factor: 1, aliases: [Ohm]}
+  mAh:          {dimension: charge, si: "A s", factor: 3.6}
+  "rpm/V":      {dimension: motor_speed_constant, si: "rad/s/V", factor: 0.10471975511965977, aliases: ["rpm/Volt"]}
+  "V/(rad/s)":  {dimension: back_emf_constant, si: "V/(rad/s)", factor: 1, aliases: ["Volt/(rad/sec)"]}
+  "Nm/A":       {dimension: torque_constant, si: "Nm/A", factor: 1}
+  degC:         {dimension: temperature, si: K, factor: 1, offset: 273.15, aliases: ["°C"]}

@@ -1,0 +1,80 @@
+# Linkage geometry of the rotor mechanics (kinematics chapters 3 and 4), written by the Blender add-on
+# HelperFiles/Blender/io_export_helicopter_rotor_mechanics.
+#
+# Plain XmlSerializer layout of stru_mainrotor_mechanics / stru_tailrotor_mechanics (Helicopter_Mainrotor_Mechanics.cs,
+# Helicopter_Tailrotor_Mechanics.cs): vectors as <x><y><z>, 3x3 matrices as nine <float> in row-major order, arrays as a wrapper
+# element holding <stru_...> items. Only the `parameter` blocks are geometry; the `calculated` blocks and state_in/state_out of
+# the C# classes are runtime values of the kinematic solver. The files are complete (no default overlay): every element is required.
+# Notation as in the documentation: r_XY_F is the vector from Y to X written in frame F, A_OLx the matrix that maps frame Lx to the
+# rotor frame O (y: shaft axis), l_XY the length |XY|. All lengths in m.
+schema_version: 1
+
+documents:
+  mainrotor_mechanics: {root_element: stru_mainrotor_mechanics, encoding: plain}
+  tailrotor_mechanics: {root_element: stru_tailrotor_mechanics, encoding: plain}
+
+mainrotor_mechanics:
+  _root: true
+  _struct: MainrotorMechanics
+  _document: mainrotor_mechanics
+  blades_count: {type: int, unit: "-", default: 2, min: 2, max: 6, required: true, doc: "Number of rotor blades"}
+  r_KO_O: {type: vec3, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to K in O"}
+  limb_stationary:
+    _struct: MainrotorLimbStationary
+    _array: {count: 3, item_xml: stru_limb_stationary}
+    A_OLAi: {type: mat3, xml: parameter/A_OLAi, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Servo frame LA_i to O (z: servo shaft axis, y: servo arm direction), row-major"}
+    r_AiO_O: {type: vec3, xml: parameter/r_AiO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to A_i in O"}
+    r_BiAi_LAi: {type: vec3, xml: parameter/r_BiAi_LAi, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from A_i to B_i in LA_i"}
+    r_CiK_LK: {type: vec3, xml: parameter/r_CiK_LK, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from K to C_i in LK"}
+    l_BiAi: {type: real, xml: parameter/l_BiAi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of A_i B_i"}
+    l_CiBi: {type: real, xml: parameter/l_CiBi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of B_i C_i"}
+  limb_rotating:
+    _struct: MainrotorLimbRotating
+    _array: {count: 2, item_xml: stru_limb_rotating}
+    r_DiJ_LJ: {type: vec3, xml: parameter/r_DiJ_LJ, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from J to D_i in LJ"}
+    r_EiO_O: {type: vec3, xml: parameter/r_EiO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to E_i in O"}
+    l_DiJ: {type: real, xml: parameter/l_DiJ, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of J D_i"}
+    l_EiDi: {type: real, xml: parameter/l_EiDi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of D_i E_i"}
+    l_EiO: {type: real, xml: parameter/l_EiO, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of O E_i"}
+  driver_rotating:
+    _struct: MainrotorDriverRotating
+    _array: {count: 2, item_xml: stru_driver_rotating}
+    r_FiO_O: {type: vec3, xml: parameter/r_FiO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to F_i in O"}
+    l_GiFi: {type: real, xml: parameter/l_GiFi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of F_i G_i"}
+    l_HiGi: {type: real, xml: parameter/l_HiGi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of G_i H_i"}
+    l_HiJ: {type: real, xml: parameter/l_HiJ, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of J H_i"}
+
+tailrotor_mechanics:
+  _root: true
+  _struct: TailrotorMechanics
+  _document: tailrotor_mechanics
+  blades_count: {type: int, unit: "-", default: 2, min: 2, max: 16, required: true, doc: "Number of rotor blades"}
+  limb_stationary:
+    _struct: TailrotorLimbStationary
+    A_OLA: {type: mat3, xml: parameter/A_OLA, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Servo frame LA to O (z: servo shaft axis, y: servo arm direction), row-major"}
+    r_AO_O: {type: vec3, xml: parameter/r_AO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to A in O"}
+    r_BA_LA: {type: vec3, xml: parameter/r_BA_LA, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from A to B in LA"}
+    A_OLD: {type: mat3, xml: parameter/A_OLD, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Lever frame LD to O (z: lever rotation axis), row-major"}
+    r_DO_O: {type: vec3, xml: parameter/r_DO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to D in O"}
+    r_CD_LD: {type: vec3, xml: parameter/r_CD_LD, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from D to C in LD"}
+    r_ED_LD: {type: vec3, xml: parameter/r_ED_LD, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from D to E in LD"}
+    A_OLK: {type: mat3, xml: parameter/A_OLK, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Sleeve frame LK to O (z: shaft rotation axis), row-major"}
+    r_KO_O: {type: vec3, xml: parameter/r_KO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to K in O"}
+    l_BA: {type: real, xml: parameter/l_BA, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of A B"}
+    l_CB: {type: real, xml: parameter/l_CB, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of B C"}
+    l_CD: {type: real, xml: parameter/l_CD, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of D C"}
+    l_ED: {type: real, xml: parameter/l_ED, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of D E"}
+  limb_rotating:
+    _struct: TailrotorLimbRotating
+    _array: {count: 2, item_xml: stru_limb_rotating}
+    A_OLJ: {type: mat3, xml: parameter/A_OLJ, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Pitch plate frame LJ to O, row-major"}
+    r_JO_O: {type: vec3, xml: parameter/r_JO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to J in O"}
+    r_GiJ_LJ: {type: vec3, xml: parameter/r_GiJ_LJ, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from J to G_i in LJ"}
+    A_OLGi: {type: mat3, xml: parameter/A_OLGi, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Hinge frame LG_i to O, row-major"}
+    r_GiO_O: {type: vec3, xml: parameter/r_GiO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to G_i in O"}
+    r_HiO_O: {type: vec3, xml: parameter/r_HiO_O, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to H_i in O"}
+    A_OLBi: {type: mat3, xml: parameter/A_OLBi, unit: "-", default: identity, min: -1.01, max: 1.01, required: true, doc: "Blade frame LB_i to O, row-major"}
+    r_IiO_Bi: {type: vec3, xml: parameter/r_IiO_Bi, unit: "m", default: [0, 0, 0], min: -5, max: 5, required: true, doc: "Vector from O to I_i in LB_i"}
+    l_GiJ: {type: real, xml: parameter/l_GiJ, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of J G_i"}
+    l_HiGi: {type: real, xml: parameter/l_HiGi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of G_i H_i"}
+    l_HiIi: {type: real, xml: parameter/l_HiIi, unit: "m", default: 0, min: 0, max: 5, required: true, doc: "Length of H_i I_i"}

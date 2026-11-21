@@ -1,0 +1,259 @@
+# Reference values written by tools/csharp_reference (golden). Do not edit.
+# kind: heli
+# columns: path <TAB> value [<TAB> value ...]; lists of vec3: all components flattened
+@input
+transmitter/countdown_minutes	6
+transmitter/countdown_volume	70
+transmitter/stick_roll/clearance	0.03	0.03	0.03
+transmitter/stick_roll/expo	20	20	20
+transmitter/stick_roll/dualrate	100	100	100
+transmitter/stick_pitch/clearance	0.03	0.03	0.03
+transmitter/stick_pitch/expo	20	20	20
+transmitter/stick_pitch/dualrate	100	100	100
+transmitter/stick_yaw/clearance	0.03	0.03	0.03
+transmitter/stick_yaw/expo	20	20	20
+transmitter/stick_yaw/dualrate	100	100	100
+transmitter/stick_collective/clearance	0.03	0.03	0.03
+transmitter/stick_collective/expo	20	20	20
+transmitter/stick_collective/dualrate	100	100	100
+transmitter/switch0/type	1
+transmitter/switch1/type	1
+helicopter/rotor_systems_configuration	0
+helicopter/mass_total	4.51
+helicopter/Jxx_Jyy_Jzz	0.045	0.2765	0.3106
+helicopter/Jxy_Jxz_Jyz	0.015	0.025	0.0001
+helicopter/sound_volume	100
+helicopter/mainrotor_sound_recorded_rpm	1280
+helicopter/tailrotor_sound_recorded_rpm	6500
+helicopter/motor_sound_recorded_rpm	1280
+helicopter/stall_sound_recorded_rpm	1160
+helicopter/reference_to_masscentrum/position	0	0.275	0
+helicopter/reference_to_masscentrum/orientation	0	0	-3
+helicopter/gyro/K_a	550	600	650
+helicopter/gyro/K_I	2	2	2
+helicopter/gyro/K_p	0.19	0.22	0.25
+helicopter/gyro/K_d	0.01	0.01	0.01
+helicopter/gyro/direct_feadtrough_gyroscope	0
+helicopter/flybarless/K_a	300	310	330
+helicopter/flybarless/K_I	2.3	2.3	2.3
+helicopter/flybarless/K_p	0.08	0.08	0.08
+helicopter/flybarless/K_d	0.01	0.01	0.01
+helicopter/flybarless/direct_feadtrough_flybarless	0
+helicopter/flybarless/initial_roll_angle	-0
+helicopter/flybarless/initial_pitch_angle	0
+helicopter/servo_damping/servo_col_mr_time_constant	0.025
+helicopter/servo_damping/servo_lat_mr_time_constant	0.025
+helicopter/servo_damping/servo_lon_mr_time_constant	0.025
+helicopter/servo_damping/servo_col_tr_time_constant	0.015
+helicopter/servo_damping/servo_lat_tr_time_constant	0.025
+helicopter/servo_damping/servo_lon_tr_time_constant	0.025
+helicopter/governor/target_rpm	1800	2000	2400
+helicopter/governor/Kp	0.01
+helicopter/governor/Ki	0.1
+helicopter/governor/saturation_max	0
+helicopter/governor/saturation_min	0
+helicopter/governor/soft_start_factor	0.3
+helicopter/governor/engine_restart_time	5
+helicopter/governor/engine_restart_factor	1
+helicopter/brushless/R_a	0.038
+helicopter/brushless/B_M	4.5E-05
+helicopter/brushless/ns	560
+helicopter/brushless/Ke	0
+helicopter/brushless/Kt	0
+helicopter/brushless/k	0
+helicopter/brushless/J	8E-05
+helicopter/accumulator/voltage_per_cell	3.7
+helicopter/accumulator/cell_count	12
+helicopter/accumulator/Ri	0.004
+helicopter/accumulator/I_max	120
+helicopter/accumulator/capacity	5000
+helicopter/accumulator/voltage	0
+helicopter/transmission/invert_mainrotor_rotation_direction	1
+helicopter/transmission/invert_motor2maingear_transmission	1
+helicopter/transmission/invert_mainrotor2tailrotor_transmission	0
+helicopter/transmission/invert_mainrotor2propeller_transmission	0
+helicopter/transmission/i_gear_motor	15
+helicopter/transmission/i_gear_maingear	106
+helicopter/transmission/i_gear_mainrotor	42
+helicopter/transmission/i_gear_tailrotor	9
+helicopter/transmission/i_gear_propeller	9
+helicopter/transmission/k_freewheel	10
+helicopter/transmission/d_freewheel	0.001
+helicopter/transmission/J_mg	0.0002
+helicopter/transmission/J_momg_mo	0
+helicopter/transmission/J_mrtrpr_mr	0
+helicopter/transmission/n_mo2mr	0
+helicopter/transmission/n_mr2tr	0
+helicopter/transmission/n_mo2tr	0
+helicopter/transmission/n_mr2pr	0
+helicopter/transmission/n_mo2pr	0
+helicopter/mainrotor/rotor_exists	1
+helicopter/mainrotor/b	2
+helicopter/mainrotor/R	0.775
+helicopter/mainrotor/C_l_alpha	4
+helicopter/mainrotor/c	0.058
+helicopter/mainrotor/J	0.06
+helicopter/mainrotor/C_D0	0.016
+helicopter/mainrotor/K_col	12
+helicopter/mainrotor/Theta_col_0	0
+helicopter/mainrotor/posLH	0	0.182387	0
+helicopter/mainrotor/oriLH	0	0	0
+helicopter/mainrotor/dirLH	0	0	0
+helicopter/flapping/hub_stiffness_mr	120
+helicopter/flapping/A_lon	10
+helicopter/flapping/B_lat	10
+helicopter/flapping/A_b_s	5
+helicopter/flapping/B_a_s	5
+helicopter/flapping/A_a_r	0.015
+helicopter/flapping/B_a_r	0.015
+helicopter/flapping/e	0.07
+helicopter/flapping/I_flapping	0.03487
+helicopter/tailrotor/rotor_exists	1
+helicopter/tailrotor/b	2
+helicopter/tailrotor/R	0.138
+helicopter/tailrotor/C_l_alpha	6.5
+helicopter/tailrotor/c	0.03
+helicopter/tailrotor/J	0.000115
+helicopter/tailrotor/C_D0	0.05
+helicopter/tailrotor/K_col	23
+helicopter/tailrotor/Theta_col_0	-7.5
+helicopter/tailrotor/posLH	-0.9005973	-0.01054892	0.053341445
+helicopter/tailrotor/oriLH	90	0	0
+helicopter/tailrotor/dirLH	0	0	0
+helicopter/propeller/rotor_exists	0
+helicopter/propeller/b	3
+helicopter/propeller/R	0.3
+helicopter/propeller/C_l_alpha	5
+helicopter/propeller/c	0.06
+helicopter/propeller/J	0.0003
+helicopter/propeller/C_D0	0.016
+helicopter/propeller/K_col	20
+helicopter/propeller/Theta_col_0	0
+helicopter/propeller/posLH	-1.9517	0	0
+helicopter/propeller/oriLH	0	0	270
+helicopter/propeller/dirLH	0	0	0
+helicopter/booster/booster_exists	0
+helicopter/booster/booster_symmetric	1
+helicopter/booster/thrust	200
+helicopter/booster/posLH	0	0	0
+helicopter/booster/oriLH	0	0	270
+helicopter/booster/dirLH	0	0	0
+helicopter/fuselage/S_fxyz	0.02	0.08	0.09
+helicopter/fuselage/downwash_factor_mainrotor	0.5
+helicopter/fuselage/downwash_factor_tailrotor	0
+helicopter/horizontal_fin/wing_exists	1
+helicopter/horizontal_fin/horizontal0_or_vertical1	0
+helicopter/horizontal_fin/area	0.05
+helicopter/horizontal_fin/drag_coeff	1
+helicopter/horizontal_fin/C_l_alpha	5.5
+helicopter/horizontal_fin/alpha_stall	20
+helicopter/horizontal_fin/downwash_factor_mainrotor	0.2
+helicopter/horizontal_fin/downwash_factor_tailrotor	0
+helicopter/horizontal_fin/downwash_factor_propeller	0
+helicopter/horizontal_fin/posLH	-0.66	-0.01	0
+helicopter/vertical_fin/wing_exists	1
+helicopter/vertical_fin/horizontal0_or_vertical1	1
+helicopter/vertical_fin/area	0.0075000003
+helicopter/vertical_fin/drag_coeff	1
+helicopter/vertical_fin/C_l_alpha	6
+helicopter/vertical_fin/alpha_stall	20
+helicopter/vertical_fin/downwash_factor_mainrotor	0
+helicopter/vertical_fin/downwash_factor_tailrotor	0.5
+helicopter/vertical_fin/downwash_factor_propeller	0
+helicopter/vertical_fin/posLH	-0.9	-0.01	-0.03
+helicopter/horizontal_wing_left/wing_exists	0
+helicopter/horizontal_wing_left/horizontal0_or_vertical1	0
+helicopter/horizontal_wing_left/area	0.0050000004
+helicopter/horizontal_wing_left/drag_coeff	1
+helicopter/horizontal_wing_left/C_l_alpha	5.5
+helicopter/horizontal_wing_left/alpha_stall	20
+helicopter/horizontal_wing_left/downwash_factor_mainrotor	0.2
+helicopter/horizontal_wing_left/downwash_factor_tailrotor	0
+helicopter/horizontal_wing_left/downwash_factor_propeller	0
+helicopter/horizontal_wing_left/posLH	-0.66	-0.01	0
+helicopter/horizontal_wing_right/wing_exists	0
+helicopter/horizontal_wing_right/horizontal0_or_vertical1	0
+helicopter/horizontal_wing_right/area	0.0050000004
+helicopter/horizontal_wing_right/drag_coeff	1
+helicopter/horizontal_wing_right/C_l_alpha	5.5
+helicopter/horizontal_wing_right/alpha_stall	20
+helicopter/horizontal_wing_right/downwash_factor_mainrotor	0.2
+helicopter/horizontal_wing_right/downwash_factor_tailrotor	0
+helicopter/horizontal_wing_right/downwash_factor_propeller	0
+helicopter/horizontal_wing_right/posLH	-0.66	-0.01	0
+helicopter/collision/friction_coeff	0.3
+helicopter/collision/friction_coeff_forward	0.25
+helicopter/collision/friction_coeff_sideward	0.35
+helicopter/collision/friction_coeff_steering	0.01
+helicopter/collision/stiffness_factor	4000
+helicopter/collision/damping_factor	100
+helicopter/collision/positions_left_type	0
+helicopter/collision/positions_right_type	0
+helicopter/collision/positions_steering_center_type	0
+helicopter/collision/positions_steering_left_type	0
+helicopter/collision/positions_steering_right_type	0
+helicopter/collision/positions_left_rised_offset	0	0.035	0.095
+helicopter/collision/positions_right_rised_offset	0	0.035	-0.095
+helicopter/collision/positions_steering_center_rised_offset	0	0	0
+helicopter/collision/positions_steering_left_rised_offset	0	0	0
+helicopter/collision/positions_steering_right_rised_offset	0	0	0
+helicopter/collision/positions_usual	
+helicopter/collision/positions_left	
+helicopter/collision/positions_right	
+helicopter/collision/positions_steering_center	
+helicopter/collision/positions_steering_left	
+helicopter/collision/positions_steering_right	
+helicopter/collision/collision_force_max	500
+helicopter/visual_effects/mainrotor_idle_deformation	2
+helicopter/visual_effects/mainrotor_running_deformation	0.02
+helicopter/visual_effects/mainrotor_blur_transparency	1
+helicopter/visual_effects/mainrotor_blur_n_blades	360
+helicopter/visual_effects/mainrotor_blur_rpm_factor	1
+helicopter/visual_effects/tailrotor_blur_transparency	1
+helicopter/visual_effects/tailrotor_blur_n_blades	120
+helicopter/visual_effects/tailrotor_blur_rpm_factor	1
+helicopter/visual_effects/propeller_blur_transparency	1
+helicopter/visual_effects/propeller_blur_n_blades	120
+helicopter/visual_effects/propeller_blur_rpm_factor	1
+helicopter/visual_effects/landing_gear_or_skids_deflection_stiffness	100
+helicopter/visual_effects/landing_gear_main_radius	0
+helicopter/visual_effects/landing_gear_main_transition_time_gear	0.7
+helicopter/visual_effects/landing_gear_main_transition_time_bay	0.2
+helicopter/visual_effects/landing_gear_main_mechanism_tilted_forward	25
+helicopter/visual_effects/debug_force_arrow_scale	0.05
+helicopter/visual_effects/debug_torque_arrow_scale	0.5
+helicopter/visual_effects/vortex_ring_visualize	0
+tuning/vortex_ring_state/v_vertical	-2.5
+tuning/vortex_ring_state/force_reduction_factor	0.45
+tuning/vortex_ring_state/torque_reduction_factor	0.35
+tuning/vortex_ring_state/stength_rising_speed_factor	0.015
+tuning/turbulence/rotational_velocity_limit	4
+tuning/turbulence/translational_velocity_limit	10
+tuning/turbulence/frequency	5
+tuning/turbulence/force_strength	2	12	2
+tuning/turbulence/torque_strength	50	2	50
+tuning/startup_rotating_unbalance/mass	0.02
+tuning/startup_rotating_unbalance/turn_off_rpm	250
+tuning/rotor_tuning/mainrotor_tuning/inflow_factor	1.2
+tuning/rotor_tuning/mainrotor_tuning/inflow_offset	2
+tuning/rotor_tuning/tailrotor_tuning/inflow_factor	1
+tuning/rotor_tuning/tailrotor_tuning/inflow_offset	2
+tuning/rotor_tuning/propeller_tuning/inflow_factor	1
+tuning/rotor_tuning/propeller_tuning/inflow_offset	2
+@calculated
+helicopter/governor/saturation_max	44.4
+helicopter/brushless/Ke	0.017052315
+helicopter/brushless/Kt	0.017052315
+helicopter/brushless/k	0.017052315
+helicopter/accumulator/voltage	44.4
+helicopter/transmission/J_momg_mo	8.400498E-05
+helicopter/transmission/J_mrtrpr_mr	0.06250444
+helicopter/transmission/n_mo2mr	7.0666666
+helicopter/transmission/n_mr2tr	-0.21428572
+helicopter/transmission/n_mo2tr	-1.5142857
+helicopter/transmission/n_mr2pr	-0.21428572
+helicopter/transmission/n_mo2pr	-1.5142857
+helicopter/mainrotor/dirLH	0	1	0
+helicopter/tailrotor/dirLH	0	-4.371139E-08	1
+helicopter/propeller/dirLH	1	1.1924881E-08	0
+helicopter/booster/dirLH	1	1.1924881E-08	0

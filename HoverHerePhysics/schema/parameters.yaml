@@ -1,0 +1,319 @@
+# Single source of truth for the physics relevant parameters of the HoverHere helicopter simulator.
+#
+# Bootstrapped from Helicopter_Parameter.cs (tools/csharp_reference/seed_to_yaml.py), maintained by hand since.
+# Consumers: schema/tools/generate_params.py -> C++ structs, descriptors, SI compile, C# structs, XML loader tables.
+#
+# Leaf keys:   type (real|int|bool|enum|vec3|bank3|vec3_list), unit (schema/units.yaml), default, min, max, doc,
+#              options (enum), max_count (vec3_list), calculated (derived value, never read from files), formula (calculated),
+#              xml (element name in the parameter files if it differs from the key).
+# Group keys:  _type (shared struct type from `types`), _document, _csharp, _xml (top level groups only).
+# Bounds are sanity limits (value is physically plausible), wide enough for all shipped helicopter files; they are not
+# meant as UI slider ranges. Where they differ from Helicopter_Parameter.cs the C# value is noted in a comment.
+schema_version: 1
+
+model:
+  root_struct: ModelParams
+
+# XML documents the parameters are read from (root element of the file and element layout).
+documents:
+  heli: {root_element: stru_transmitter_and_helicopter, encoding: parameter}
+  scenery: {root_element: stru_scenery, encoding: parameter}
+  simulation: {root_element: stru_simulation, encoding: parameter}
+
+# Elements of the Unity parameter files that are no physics parameters (not loaded, not reported as unknown).
+unity_only:
+  heli:
+    - "transmitter"
+    - "helicopter/name"
+    - "helicopter/visual_effects/mainrotor_idle_deformation"
+    - "helicopter/visual_effects/mainrotor_running_deformation"
+    - "helicopter/visual_effects/mainrotor_blur_transparency"
+    - "helicopter/visual_effects/mainrotor_blur_n_blades"
+    - "helicopter/visual_effects/mainrotor_blur_rpm_factor"
+    - "helicopter/visual_effects/tailrotor_blur_transparency"
+    - "helicopter/visual_effects/tailrotor_blur_n_blades"
+    - "helicopter/visual_effects/tailrotor_blur_rpm_factor"
+    - "helicopter/visual_effects/propeller_blur_transparency"
+    - "helicopter/visual_effects/propeller_blur_n_blades"
+    - "helicopter/visual_effects/propeller_blur_rpm_factor"
+    - "helicopter/visual_effects/landing_gear_or_skids_deflection_stiffness"
+    - "helicopter/visual_effects/debug_force_arrow_scale"
+    - "helicopter/visual_effects/debug_torque_arrow_scale"
+    - "helicopter/visual_effects/vortex_ring_visualize"
+  scenery:
+    - "camera_height"
+    - "ambient_sound_volume"
+    - "initial_position"
+    - "animals"
+    - "lighting"
+    - "skybox"
+    - "xr"
+  simulation:
+    - "various/sceneries_file_location"
+    - "various/refreshRate_VR"
+    - "audio"
+    - "camera"
+    - "gameplay"
+    - "graphic_settings"
+    - "graphic_quality"
+    - "graphic_quality_VR"
+
+types:
+  Rotor:
+    rotor_exists: {type: bool, default: true, doc: "Rotor exists"}
+    b: {type: int, unit: "-", default: 2, min: 2, max: 6, doc: "Number of blades"}
+    R: {type: real, unit: "m", default: 0.775, min: 0.01, max: 3, doc: "Blade radius"}
+    C_l_alpha: {type: real, unit: "1/rad", default: 4, min: 0.01, max: 10, doc: "Lift curve slope of the blades"}
+    c: {type: real, unit: "m", default: 0.058, min: 0.005, max: 0.5, doc: "Chord length of the blades"}  # C# max 0.1
+    J: {type: real, unit: "kg m^2", default: 0.06, min: 0.001, max: 50, doc: "Rotor inertia w.r.t. the rotor's rotation axis"}  # C# max 1
+    C_D0: {type: real, unit: "-", default: 0.016, min: 0.005, max: 0.05, doc: "Profile drag coefficient of the blades"}
+    K_col: {type: real, unit: "deg", default: 12, min: 0.01, max: 30, doc: "Ratio of collective pitch angle to collective pitch servo deflection"}  # C# max 10, default 12
+    Theta_col_0: {type: real, unit: "deg", default: 0, min: -13, max: 13, doc: "Offset angle of the collective blade pitch"}
+    posLH: {type: vec3, unit: "m", default: [0, 0.182387, 0], doc: "Rotor position relative to the center of gravity in the helicopter's local coordinate system"}
+    oriLH: {type: vec3, unit: "deg", default: [0, 0, 0], doc: "Rotor coordinate system orientation relative to the helicopter's local coordinate system (right handed, S123 or B321)"}
+    dirLH: {type: vec3, unit: "-", default: [0, 0, 0], calculated: true, formula: "A_RL_S123(oriLH * pi/180, (0, 1, 0))", doc: "Rotor y-axis (shaft) direction unit vector in the helicopter's local coordinate system"}
+  Wing:
+    wing_exists: {type: bool, default: true, doc: "Wing exists"}
+    horizontal0_or_vertical1: {type: bool, default: false, doc: "Wing orientation (false: horizontal, true: vertical)"}
+    area: {type: real, unit: "m^2", default: 0.05, min: 0, max: 1, doc: "Effective cross section area (of a planar surface)"}
+    drag_coeff: {type: real, unit: "-", default: 1, min: 0.02, max: 1.2, doc: "Drag coefficient (of a planar surface)"}
+    C_l_alpha: {type: real, unit: "1/rad", default: 5.5, min: 0.1, max: 10, doc: "Wing lift curve slope"}
+    alpha_stall: {type: real, unit: "deg", default: 20, min: 5, max: 45, doc: "Critical angle of attack in stall"}
+    downwash_factor_mainrotor: {type: real, unit: "-", default: 0.2, min: 0, max: 1, doc: "Wing is hit by the mainrotor downwash"}
+    downwash_factor_tailrotor: {type: real, unit: "-", default: 0, min: 0, max: 1, doc: "Wing is hit by the tailrotor downwash"}
+    downwash_factor_propeller: {type: real, unit: "-", default: 0, min: 0, max: 1, doc: "Wing is hit by the propeller downwash"}
+    posLH: {type: vec3, unit: "m", default: [-0.66, -0.01, 0], doc: "Wing position relative to the center of gravity in the helicopter's local coordinate system"}
+  RotorInflowTuning:
+    inflow_factor: {type: real, unit: "-", default: 1.2, min: 0.5, max: 3, doc: "Multiplies the inflow velocity"}
+    inflow_offset: {type: real, unit: "m/s", default: 2, min: 0, max: 3, doc: "Adds an inflow velocity offset"}
+
+simulation:
+  _document: simulation
+  _csharp: simulation
+  _xml: ""
+  physics:
+    timescale: {type: real, unit: "-", default: 1, min: 0.1, max: 3, doc: "Timescale factor"}
+  various:
+    V_h: {type: real, unit: "m/s", default: 0.09, min: 0.001, max: 1, doc: "Friction to stiction transition velocity"}
+    U_max: {type: real, unit: "m", default: 0.02, min: 0.001, max: 0.1, doc: "Stiction model's maximal distance to the anchor point"}
+    stiction_factor: {type: real, unit: "-", default: 1, min: 0.001, max: 10, doc: "Static friction as x-times the sliding friction"}
+
+scenery:
+  _document: scenery
+  _csharp: scenery
+  _xml: ""
+  gravity: {type: real, unit: "m/s^2", default: 9.81, min: 0, max: 30, doc: "Acceleration of gravity"}  # C# min 20, max 0 (swapped)
+  weather:
+    rho_air: {type: real, unit: "kg/m^3", default: 1.27, min: 0.5, max: 2, doc: "Air density"}
+    temperature: {type: real, unit: "degC", default: 20, min: -60, max: 60, doc: "Air temperature"}  # C# min 40, max 0 (swapped)
+    wind_direction: {type: real, unit: "deg", default: 0, min: 0, max: 360, doc: "Wind direction"}  # C# min 360, max 0 (swapped)
+    wind_speed: {type: real, unit: "m/s", default: 0, min: 0, max: 100, doc: "Wind speed in horizontal direction"}  # C# min 100, max 0 (swapped)
+    wind_speed_vertical: {type: real, unit: "m/s", default: 0, min: -100, max: 100, doc: "Wind speed in vertical direction (positive: upwards)"}  # C# min 100, max 0 (swapped)
+  ground:
+    bump_height: {type: real, unit: "m", default: 0.007, min: 0, max: 0.5, doc: "Bump height of the ground"}  # C# min 0.1, max 0 (swapped)
+    bump_density_scale: {type: real, unit: "1/m", default: 7, min: 0.1, max: 100, doc: "Bump density of the ground"}  # C# min 0.1, max 0 (swapped)
+
+helicopter:
+  _document: heli
+  _csharp: transmitter_and_helicopter/helicopter
+  _xml: "helicopter"
+  rotor_systems_configuration: {type: enum, default: 0, options: ["Single main rotor", "Tandem rotor"], doc: "Rotor system type"}
+  mass_total: {type: real, unit: "kg", default: 3.6, min: 0.1, max: 100, doc: "Total mass of the helicopter"}
+  Jxx_Jyy_Jzz: {type: vec3, unit: "kg m^2", default: [0.0373, 0.2637, 0.2916], doc: "Moment of inertia of the helicopter (diagonal elements; forward, up, right)"}
+  Jxy_Jxz_Jyz: {type: vec3, unit: "kg m^2", default: [0.006, 0.005, 0.001], doc: "Moment of inertia of the helicopter (off-diagonal elements)"}
+  sound_volume: {type: real, unit: "%", default: 100, min: 0, max: 100, doc: "Helicopter's audio volume"}
+  mainrotor_sound_recorded_rpm: {type: real, unit: "rpm", default: 1160, min: 0, max: 10000, doc: "Mainrotor rpm of the recorded audio file"}
+  tailrotor_sound_recorded_rpm: {type: real, unit: "rpm", default: 6500, min: 0, max: 10000, doc: "Tailrotor rpm of the recorded audio file"}
+  motor_sound_recorded_rpm: {type: real, unit: "rpm", default: 1000, min: 0, max: 10000, doc: "Brushless motor rpm of the recorded audio file"}
+  stall_sound_recorded_rpm: {type: real, unit: "rpm", default: 1160, min: 0, max: 10000, doc: "Rotor stall rpm of the recorded audio file"}
+  reference_to_masscentrum:
+    position: {type: vec3, unit: "m", default: [0, 0.275, 0], doc: "Reference point of the model to the center of mass in the helicopter's local coordinate system (right handed)"}
+    orientation: {type: vec3, unit: "deg", default: [0, 0, -3], doc: "Center of mass coordinate system orientation relative to the initial frame (right handed, extrinsic z-y-x, B321 or S123)"}
+  gyro:
+    K_a: {type: bank3, unit: "deg/s", default: [430, 480, 500], doc: "Tailrotor maximum rotation velocity (per flight bank)"}
+    K_I: {type: bank3, unit: "1/s", default: [2, 2, 2], doc: "Tailrotor integral gain, heading hold (per flight bank)"}
+    K_p: {type: bank3, unit: "-", default: [0.2, 0.2, 0.2], doc: "Tailrotor proportional gain (per flight bank)"}
+    K_d: {type: bank3, unit: "-", default: [0.0001, 0.0001, 0.0001], doc: "Tailrotor differential gain (per flight bank)"}
+    direct_feedthrough_gyroscope: {type: bool, xml: direct_feadtrough_gyroscope, default: false, doc: "Turn off the gyro (stick commands go straight to the servo)"}
+  flybarless:
+    K_a: {type: bank3, unit: "deg/s", default: [240, 270, 320], doc: "Flybarless maximum rotation velocity (should be smaller than what the helicopter can perform, otherwise the stick range is not fully used; per flight bank)"}
+    K_I: {type: bank3, unit: "1/s", default: [2.5, 2.5, 2.5], doc: "Flybarless integral gain (per flight bank)"}
+    K_p: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless proportional gain (per flight bank)"}
+    K_d: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless differential gain (per flight bank)"}
+    direct_feedthrough_flybarless: {type: bool, xml: direct_feadtrough_flybarless, default: false, doc: "Turn off the flybarless controller (stick commands go straight to the servos)"}
+    initial_roll_angle: {type: real, unit: "deg", default: 0, min: -10, max: 10, doc: "Initial roll angle after reset"}
+    initial_pitch_angle: {type: real, unit: "deg", default: 0, min: -10, max: 10, doc: "Initial pitch angle after reset"}
+  servo_damping:
+    servo_col_mr_time_constant: {type: real, unit: "s", default: 0.025, min: 0.01, max: 1, doc: "PT1 time constant of the mainrotor collective servo"}
+    servo_lat_mr_time_constant: {type: real, unit: "s", default: 0.025, min: 0.01, max: 1, doc: "PT1 time constant of the mainrotor lateral (roll) servo"}
+    servo_lon_mr_time_constant: {type: real, unit: "s", default: 0.025, min: 0.01, max: 1, doc: "PT1 time constant of the mainrotor longitudinal (pitch) servo"}
+    servo_col_tr_time_constant: {type: real, unit: "s", default: 0.015, min: 0.01, max: 1, doc: "PT1 time constant of the tailrotor collective (yaw) servo"}
+    servo_lat_tr_time_constant: {type: real, unit: "s", default: 0.025, min: 0.01, max: 1, doc: "PT1 time constant of the tailrotor lateral servo"}
+    servo_lon_tr_time_constant: {type: real, unit: "s", default: 0.025, min: 0.01, max: 1, doc: "PT1 time constant of the tailrotor longitudinal servo"}
+  governor:
+    target_rpm: {type: bank3, unit: "rpm", default: [1160, 1450, 1550], doc: "Target rotational speed of the mainrotor (per flight bank)"}
+    Kp: {type: real, unit: "-", default: 0.001, min: 0.001, max: 10, doc: "Speed controller proportional gain"}
+    Ki: {type: real, unit: "-", default: 0.1, min: 0.01, max: 10, doc: "Speed controller integral gain"}
+    saturation_max: {type: real, unit: "V", default: 0, calculated: true, formula: "accumulator.voltage", doc: "Maximum voltage at the governor output"}
+    saturation_min: {type: real, unit: "V", default: 0, min: 0, max: 100, doc: "Minimum voltage at the governor output"}  # C# min 0, max 0
+    soft_start_factor: {type: real, unit: "-", default: 0.25, min: 0.001, max: 10, doc: "Governor soft start factor"}
+    engine_restart_time: {type: real, unit: "s", default: 5, min: 0.01, max: 10, doc: "Within this time after a motor stop the motor starts up rapidly"}
+    engine_restart_factor: {type: real, unit: "-", default: 1, min: 0.01, max: 10, doc: "Factor to restart the motor fast and accelerate to full speed"}
+  brushless:
+    R_a: {type: real, unit: "ohm", default: 0.038, min: 0.001, max: 0.2, doc: "Electrical resistance of motor, connector and controller"}
+    B_M: {type: real, unit: "Nm/(rad/s)", default: 4.5e-05, min: 1.0e-07, max: 0.001, doc: "Rotational friction"}  # C# min 1e-06, max 1e-04
+    ns: {type: real, unit: "rpm/V", default: 560, min: 1, max: 5000, doc: "Ideal specific no load speed (motor Kv)"}  # C# max 200, default 560
+    Ke: {type: real, unit: "V/(rad/s)", default: 0, calculated: true, formula: "1 / (ns * pi / 30)", doc: "Back-emf factor, the reciprocal of the motor Kv constant"}
+    Kt: {type: real, unit: "Nm/A", default: 0, calculated: true, formula: "1 / (ns * pi / 30)", doc: "Torque constant"}
+    k: {type: real, unit: "V/(rad/s)", default: 0, calculated: true, formula: "1 / (ns * pi / 30)", doc: "Motor constant, k = Ke = Kt"}
+    J: {type: real, unit: "kg m^2", default: 8.0e-05, min: 1.0e-06, max: 0.05, doc: "Motor inertia w.r.t. the motor hub"}  # C# max 1e-03
+  accumulator:
+    voltage_per_cell: {type: real, unit: "V", default: 3.7, min: 2, max: 4.5, doc: "Nominal voltage of a single cell"}
+    cell_count: {type: int, unit: "-", default: 6, min: 1, max: 14, doc: "Number of cells"}
+    Ri: {type: real, unit: "ohm", default: 0.004, min: 0.0001, max: 0.05, doc: "Inner resistance"}
+    I_max: {type: real, unit: "A", default: 120, min: 0, max: 250, doc: "Maximal current"}
+    capacity: {type: real, unit: "mAh", default: 5000, min: 100, max: 10000, doc: "Capacity"}
+    voltage: {type: real, unit: "V", default: 0, calculated: true, formula: "voltage_per_cell * cell_count", doc: "Nominal voltage of the accumulator"}
+  transmission:
+    invert_mainrotor_rotation_direction: {type: bool, default: true, doc: "Invert the mainrotor rotational direction"}
+    invert_motor2maingear_transmission: {type: bool, default: true, doc: "Invert the maingear rotational direction"}
+    invert_mainrotor2tailrotor_transmission: {type: bool, default: false, doc: "Invert the tailrotor rotational direction"}
+    invert_mainrotor2propeller_transmission: {type: bool, default: false, doc: "Invert the propeller rotational direction"}
+    i_gear_motor: {type: int, unit: "-", default: 15, min: 5, max: 50, doc: "Motor gear teeth count"}
+    i_gear_maingear: {type: int, unit: "-", default: 106, min: 10, max: 200, doc: "Maingear teeth count (meshing with the motor)"}
+    i_gear_mainrotor: {type: int, unit: "-", default: 42, min: 10, max: 200, doc: "Mainrotor gear teeth count (meshing with the tailrotor and propeller drive)"}
+    i_gear_tailrotor: {type: int, unit: "-", default: 9, min: 1, max: 100, doc: "Tailrotor gear teeth count (meshing with the mainrotor)"}  # C# min 5, max 50
+    i_gear_propeller: {type: int, unit: "-", default: 9, min: 1, max: 100, doc: "Propeller gear teeth count (meshing with the mainrotor)"}  # C# min 5, max 50
+    k_freewheel: {type: real, unit: "Nm/rad", default: 10, min: 0, max: 10000, doc: "Freewheel (between maingear and mainrotor) rotational stiffness"}  # C# min 0, max 0
+    d_freewheel: {type: real, unit: "Nm/(rad/s)", default: 0.001, min: 0, max: 1000, doc: "Freewheel (between maingear and mainrotor) rotational damping"}  # C# min 0, max 0
+    J_mg: {type: real, unit: "kg m^2", default: 0.0002, min: 0, max: 0.1, doc: "Maingear inertia w.r.t. the maingear"}  # C# min 0, max 0
+    J_momg_mo: {type: real, unit: "kg m^2", default: 0, calculated: true, formula: "brushless.J + J_mg / n_mo2mr^2", doc: "Motor and maingear inertia w.r.t. the motor"}
+    J_mrtrpr_mr: {type: real, unit: "kg m^2", default: 0, calculated: true, formula: "mainrotor.J + tailrotor.J / n_mr2tr^2 (if the tailrotor exists) + propeller.J / n_mr2pr^2 (if the propeller exists)", doc: "Mainrotor, tailrotor and propeller inertia w.r.t. the mainrotor"}
+    n_mo2mr: {type: real, unit: "-", default: 0, calculated: true, formula: "-(invert_motor2maingear_transmission ? -1 : 1) * i_gear_maingear / i_gear_motor", doc: "Gear ratio motor to mainrotor"}
+    n_mr2tr: {type: real, unit: "-", default: 0, calculated: true, formula: "-(invert_mainrotor2tailrotor_transmission ? -1 : 1) * i_gear_tailrotor / i_gear_mainrotor", doc: "Gear ratio mainrotor to tailrotor"}
+    n_mo2tr: {type: real, unit: "-", default: 0, calculated: true, formula: "n_mr2tr * n_mo2mr", doc: "Gear ratio motor to tailrotor"}
+    n_mr2pr: {type: real, unit: "-", default: 0, calculated: true, formula: "-(invert_mainrotor2propeller_transmission ? -1 : 1) * i_gear_propeller / i_gear_mainrotor", doc: "Gear ratio mainrotor to propeller"}
+    n_mo2pr: {type: real, unit: "-", default: 0, calculated: true, formula: "n_mr2pr * n_mo2mr", doc: "Gear ratio motor to propeller"}
+  mainrotor:
+    _type: Rotor
+  flapping:
+    hub_stiffness_mr: {type: real, unit: "Nm/rad", default: 120, min: 0.001, max: 10000, doc: "Hub stiffness in the rotor head (O-ring)"}  # C# max 1000
+    A_lon: {type: real, unit: "deg", default: 10, min: 0.001, max: 100, doc: "Linkage gain ratio of the cyclic pitch (a_s) to the longitudinal stick"}  # C# max 1, default 10
+    B_lat: {type: real, unit: "deg", default: 10, min: 0.001, max: 100, doc: "Linkage gain ratio of the cyclic pitch (b_s) to the lateral stick"}  # C# max 1, default 10
+    A_b_s: {type: real, unit: "1/s", default: 5, min: 0, max: 100, doc: "Coupling effect from b_s to a_s"}
+    B_a_s: {type: real, unit: "1/s", default: 5, min: 0, max: 100, doc: "Coupling effect from a_s to b_s"}
+    A_a_r: {type: real, unit: "rad/m", default: 0.015, min: 0, max: 100, doc: "Fast forward flight (large advance ratio) tilts the rotor disc nose up"}
+    B_a_r: {type: real, unit: "rad/m", default: 0.015, min: 0, max: 100, doc: "Fast sideward flight (large advance ratio) tilts the rotor disc side up"}
+    e: {type: real, unit: "m", default: 0.07, min: 0.001, max: 1, doc: "Effective hinge offset of the mainrotor blade"}  # C# min 0.01, max 0.2
+    I_flapping: {type: real, unit: "kg m^2", default: 0.03487, min: 0.0001, max: 20, doc: "Inertia of one rotor blade w.r.t. its effective hinge offset axis"}  # C# min 0.001, max 1
+  tailrotor:
+    _type: Rotor
+    b: {max: 16}  # C# max 6
+    R: {default: 0.138, max: 3}  # C# max 0.5
+    C_l_alpha: {default: 6.5}
+    c: {default: 0.03}
+    J: {default: 0.000115, min: 1.0e-05, max: 50}  # C# max 1e-03
+    C_D0: {default: 0.05}
+    K_col: {default: 23, min: -30, max: 30}
+    Theta_col_0: {default: -7.5, min: -20, max: 20}
+    posLH: {default: [-0.9005973, -0.01054892, 0.053341445]}
+    oriLH: {default: [90, 0, 0]}
+  propeller:
+    _type: Rotor
+    rotor_exists: {default: false, doc: "Pusher propeller exists (AH56 Cheyenne)"}
+    b: {default: 3, min: 0, max: 8}  # zero when the propeller does not exist
+    R: {default: 0.3, min: 0, max: 1}
+    C_l_alpha: {default: 5, min: 0}
+    c: {default: 0.06, min: 0}
+    J: {default: 0.0003, min: 0, max: 0.05}
+    C_D0: {min: 0}
+    K_col: {default: 20, min: 0}  # C# max 10, default 20
+    Theta_col_0: {min: -15, max: 15}
+    posLH: {default: [-1.9517, 0, 0]}
+    oriLH: {default: [0, 0, 270]}
+  booster:
+    booster_exists: {type: bool, default: false, doc: "Booster exists (Airwolf)"}
+    booster_symmetric: {type: bool, default: true, doc: "Create two boosters"}
+    thrust: {type: real, unit: "N", default: 200, min: 0, max: 1000, doc: "Thrust"}
+    posLH: {type: vec3, unit: "m", default: [0, 0, 0], doc: "Booster position relative to the center of gravity in the helicopter's local coordinate system"}
+    oriLH: {type: vec3, unit: "deg", default: [0, 0, 270], doc: "Booster coordinate system orientation relative to the helicopter's local coordinate system (right handed, B123)"}
+    dirLH: {type: vec3, unit: "-", default: [0, 0, 0], calculated: true, formula: "A_RL_S123(oriLH * pi/180, (0, 1, 0))", doc: "Booster thrust axis (y-axis) direction unit vector in the helicopter's local coordinate system"}
+  fuselage:
+    S_fxyz: {type: vec3, unit: "m^2", default: [0.02, 0.08, 0.09], doc: "Effective drag area along the body axes (front, vertical, side)"}
+    downwash_factor_mainrotor: {type: real, unit: "-", default: 0.5, min: 0, max: 1, doc: "Fuselage is hit by the mainrotor downwash"}
+    downwash_factor_tailrotor: {type: real, unit: "-", default: 0, min: 0, max: 1, doc: "Fuselage is hit by the tailrotor downwash (tandem rotor helicopters)"}
+  horizontal_fin:
+    _type: Wing
+  vertical_fin:
+    _type: Wing
+    horizontal0_or_vertical1: {default: true}
+    area: {default: 0.0075}
+    C_l_alpha: {default: 6}
+    downwash_factor_mainrotor: {default: 0}
+    downwash_factor_tailrotor: {default: 0.5}
+    posLH: {default: [-0.9, -0.01, -0.03]}
+  horizontal_wing_left:
+    _type: Wing
+    wing_exists: {default: false}
+    area: {default: 0.005}
+  horizontal_wing_right:
+    _type: Wing
+    wing_exists: {default: false}
+    area: {default: 0.005}
+  collision:
+    friction_coeff: {type: real, unit: "-", default: 0.3, min: 0.01, max: 0.8, doc: "Friction coefficient between ground and helicopter"}
+    friction_coeff_forward: {type: real, unit: "-", default: 0.25, min: 0.01, max: 0.8, doc: "Friction coefficient in the helicopter's forward direction"}
+    friction_coeff_sideward: {type: real, unit: "-", default: 0.35, min: 0.01, max: 0.8, doc: "Friction coefficient in the helicopter's sideward direction"}
+    friction_coeff_steering: {type: real, unit: "-", default: 0.01, min: 0.01, max: 0.8, doc: "Friction coefficient of the steering gear"}
+    stiffness_factor: {type: real, unit: "N/m", default: 4000, min: 20, max: 100000, doc: "Contact stiffness"}
+    damping_factor: {type: real, unit: "N s/m", default: 100, min: 20, max: 1000, doc: "Contact damping"}
+    positions_left_type: {type: enum, default: 0, options: ["Skids", "Gear"], doc: "Contact type of the left landing gear"}
+    positions_right_type: {type: enum, default: 0, options: ["Skids", "Gear"], doc: "Contact type of the right landing gear"}
+    positions_steering_center_type: {type: enum, default: 0, options: ["Skids", "Gear"], doc: "Contact type of the center steering gear"}
+    positions_steering_left_type: {type: enum, default: 0, options: ["Skids", "Gear"], doc: "Contact type of the left steering gear"}
+    positions_steering_right_type: {type: enum, default: 0, options: ["Skids", "Gear"], doc: "Contact type of the right steering gear"}
+    positions_left_rised_offset: {type: vec3, unit: "m", default: [0, 0.035, 0.095], doc: "Offset of the left gear contact points when the gear is raised"}
+    positions_right_rised_offset: {type: vec3, unit: "m", default: [0, 0.035, -0.095], doc: "Offset of the right gear contact points when the gear is raised"}
+    positions_steering_center_rised_offset: {type: vec3, unit: "m", default: [0, 0, 0], doc: "Offset of the center steering gear contact points when the gear is raised"}
+    positions_steering_left_rised_offset: {type: vec3, unit: "m", default: [0, 0, 0], doc: "Offset of the left steering gear contact points when the gear is raised"}
+    positions_steering_right_rised_offset: {type: vec3, unit: "m", default: [0, 0, 0], doc: "Offset of the right steering gear contact points when the gear is raised"}
+    positions_usual: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the fuselage with the ground"}
+    positions_left: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the left landing gear or skid"}
+    positions_right: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the right landing gear or skid"}
+    positions_steering_center: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the center steering gear or support"}
+    positions_steering_left: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the left steering gear or support"}
+    positions_steering_right: {type: vec3_list, unit: "m", default: [], max_count: 8, doc: "Contact points of the right steering gear or support"}
+    collision_force_max: {type: real, unit: "N", default: 500, min: 1, max: 10000, doc: "A contact force above this value crashes the helicopter"}
+  visual_effects:
+    landing_gear_main_radius: {type: real, unit: "m", default: 0, min: 0, max: 1, doc: "Radius of the main landing gear wheels (0: skids)"}  # C# min 0.001, default 0
+    landing_gear_main_transition_time_gear: {type: real, unit: "s", default: 0.7, min: 0, max: 10, doc: "Transition time for raising/lowering the gear (only collision detection, the animation duration is not affected)"}
+    landing_gear_main_transition_time_bay: {type: real, unit: "s", default: 0.2, min: -10, max: 10, doc: "Transition time for closing/opening the gear bay doors, added to the gear time; may be negative to shorten the total time (only collision detection)"}  # C# min 0
+    landing_gear_main_mechanism_tilted_forward: {type: real, unit: "deg", default: 25, min: -90, max: 90, doc: "Forward tilt (relative to vertical) of the gear mechanism when lowered"}
+
+tuning:
+  _document: heli
+  _csharp: transmitter_and_helicopter/tuning
+  _xml: "tuning"
+  vortex_ring_state:
+    v_vertical: {type: real, unit: "m/s", default: -2.5, min: -20, max: 0, doc: "Local vertical velocity where the vortex ring state grows at most"}
+    force_reduction_factor: {type: real, unit: "-", default: 0.45, min: 0.1, max: 1, doc: "Thrust reduction in the fully developed vortex ring state (larger value: worse)"}
+    torque_reduction_factor: {type: real, unit: "-", default: 0.35, min: 0.1, max: 1, doc: "Torque reduction in the fully developed vortex ring state (larger value: worse)"}
+    strength_rising_speed_factor: {type: real, xml: stength_rising_speed_factor, unit: "-", default: 0.015, min: 0.001, max: 1, doc: "How fast the vortex develops and decays"}  # C# min 0.1, default 0.015
+  turbulence:
+    rotational_velocity_limit: {type: real, unit: "rad/s", default: 4, min: 0.01, max: 20, doc: "Rotational velocity below which the turbulence is increased"}
+    translational_velocity_limit: {type: real, unit: "m/s", default: 10, min: 0.01, max: 20, doc: "Translational velocity above which the turbulence is reduced, even if the rotation speed is high"}
+    frequency: {type: real, unit: "Hz", default: 5, min: 0.01, max: 100, doc: "Turbulence frequency"}
+    force_strength: {type: vec3, unit: "N", default: [2, 12, 2], doc: "Turbulence force amplitude per body axis"}
+    torque_strength: {type: vec3, unit: "Nm", default: [50, 2, 50], doc: "Turbulence torque amplitude per body axis"}
+  startup_rotating_unbalance:
+    mass: {type: real, unit: "kg", default: 0.02, min: 0.001, max: 100, doc: "Unbalance mass of the startup vibration (radius 0.1 m)"}  # C# min 0.01
+    turn_off_rpm: {type: real, unit: "rpm", default: 250, min: 0.01, max: 1000, doc: "Above this shaft speed the unbalance disappears"}
+  rotor_tuning:
+    mainrotor_tuning:
+      _type: RotorInflowTuning
+    tailrotor_tuning:
+      _type: RotorInflowTuning
+      inflow_factor: {default: 1}
+    propeller_tuning:
+      _type: RotorInflowTuning
+      inflow_factor: {default: 1}

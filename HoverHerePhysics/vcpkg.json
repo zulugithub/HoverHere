@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "hoverhere-physics",
+  "version": "0.1.0",
+  "builtin-baseline": "3c0b120f8b7e361602005ec2a469ca06ea66e7ee",
+  "dependencies": [
+    "boost-qvm"
+  ]
+}

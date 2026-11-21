@@ -647,8 +647,8 @@ namespace Parameter
             xr = new stru_xr(); 
 
             gravity.val = 9.81f;
-            gravity.max = 0.00f;
-            gravity.min = 20.0f;
+            gravity.max = 30f;
+            gravity.min = 0f;
             gravity.hint = "Gravity";
             gravity.comment = "";
             gravity.unit = "m/s^2";
@@ -701,29 +701,29 @@ namespace Parameter
             rho_air.unit = "kg/m^3";
 
             temperature.val = 20.0f;
-            temperature.max = 0.00f;
-            temperature.min = 40.0f;
+            temperature.max = 60f;
+            temperature.min = -60f;
             temperature.hint = "Air temperature";
             temperature.comment = "";
             temperature.unit = "°C";
 
             wind_direction.val = 0f;
-            wind_direction.max = 0f;
-            wind_direction.min = 360f;
+            wind_direction.max = 360f;
+            wind_direction.min = 0f;
             wind_direction.hint = "Wind direction";
             wind_direction.comment = "";
             wind_direction.unit = "deg";
 
             wind_speed.val = 0f;
-            wind_speed.max = 0f;
-            wind_speed.min = 100f;
+            wind_speed.max = 100f;
+            wind_speed.min = 0f;
             wind_speed.hint = "Wind speed in horizontal direction";
             wind_speed.comment = "";
             wind_speed.unit = "m/sec";
 
             wind_speed_vertical.val = 0f;
-            wind_speed_vertical.max = 0f;
-            wind_speed_vertical.min = 100f;
+            wind_speed_vertical.max = 100f;
+            wind_speed_vertical.min = -100f;
             wind_speed_vertical.hint = "Wind speed in vertical direction";
             wind_speed_vertical.comment = "";
             wind_speed_vertical.unit = "m/sec";
@@ -1190,14 +1190,14 @@ namespace Parameter
             bump_density_scale = new stru_float();
 
             bump_height.val = 0.007f;
-            bump_height.max = 0.000f;
-            bump_height.min = 0.100f;
+            bump_height.max = 0.5f;
+            bump_height.min = 0f;
             bump_height.hint = "Bump height of ground.";
             bump_height.comment = "";
             bump_height.unit = "m";
 
             bump_density_scale.val = 7.00f;
-            bump_density_scale.max = 0.00f;
+            bump_density_scale.max = 100f;
             bump_density_scale.min = 0.10f;
             bump_density_scale.hint = "Bump density factor of ground.";
             bump_density_scale.comment = "";
@@ -1619,14 +1619,14 @@ namespace Parameter
 
             c.val = 0.058f;
             c.min = 0.005f;
-            c.max = 0.100f;
+            c.max = 0.5f;
             c.hint = "Chord length of the main rotor blade";
             c.comment = "";
             c.unit = "m";
 
             J.val = 0.060000f; // 0.092146f
             J.min = 0.00100f;
-            J.max = 1.00000f;
+            J.max = 50f;
             J.hint = "Rotor inertia w.r.t. main rotor's rotation axis";
             J.comment = "";
             J.unit = "kg*m^2";
@@ -1640,7 +1640,7 @@ namespace Parameter
 
             K_col.val = 12f;
             K_col.min = 0.01f;
-            K_col.max = 10.0f;
+            K_col.max = 30f;
             K_col.hint = "Ratio of mainrotor blade collective pitch angle to collective pitch servo deflection";
             K_col.comment = "";
             K_col.unit = "deg";
@@ -1699,14 +1699,14 @@ namespace Parameter
 
             b.val = 2;
             b.min = 2;
-            b.max = 6;
+            b.max = 16;
             b.hint = "Number of tail rotor blades";
             b.comment = "";
             b.unit = "-";
 
             R.val = 0.138f;
             R.min = 0.01f;
-            R.max = 0.50f;
+            R.max = 3f;
             R.hint = "Tail rotor blade radius";
             R.comment = "";
             R.unit = "m";
@@ -1720,14 +1720,14 @@ namespace Parameter
 
             c.val = 0.03f;
             c.min = 0.005f;
-            c.max = 0.100f;
+            c.max = 0.5f;
             c.hint = "Chord length of the tail rotor blades";
             c.comment = "";
             c.unit = "m";
 
             J.val = 0.000115f;
             J.min = 0.000010f;
-            J.max = 0.001000f;
+            J.max = 50f;
             J.hint = "Rotor inertia w.r.t. tail rotor's rotation axis";
             J.comment = "";
             J.unit = "kg*m^2";
@@ -1807,42 +1807,42 @@ namespace Parameter
 
 
             b.val = 3;
-            b.min = 2;
-            b.max = 6;
+            b.min = 0;
+            b.max = 8;
             b.hint = "Number of propeller blades";
             b.comment = "";
             b.unit = "-";
 
             R.val = 0.30f;
-            R.min = 0.01f;
-            R.max = 0.50f;
+            R.min = 0f;
+            R.max = 1f;
             R.hint = "Propeller blade radius";
             R.comment = "";
             R.unit = "m";
 
             C_l_alpha.val = 5.00f;
-            C_l_alpha.min = 0.01f;
+            C_l_alpha.min = 0f;
             C_l_alpha.max = 10.0f;
             C_l_alpha.hint = "Lift curve slope of the propeller blades";
             C_l_alpha.comment = "";
             C_l_alpha.unit = "rad^-1";
 
             c.val = 0.060f;
-            c.min = 0.005f;
-            c.max = 0.100f;
+            c.min = 0f;
+            c.max = 0.5f;
             c.hint = "Chord length of the propeller blades";
             c.comment = "";
             c.unit = "m";
 
             J.val = 0.000300f; 
-            J.min = 0.000010f;
-            J.max = 0.001000f;
+            J.min = 0f;
+            J.max = 0.05f;
             J.hint = "Propeller's inertia w.r.t. propeller's rotation axis";
             J.comment = "";
             J.unit = "kg*m^2";
 
             C_D0.val = 0.016f;
-            C_D0.min = 0.005f;
+            C_D0.min = 0f;
             C_D0.max = 0.050f;
             C_D0.hint = "Drag coefficient of propeller blade";
             C_D0.comment = "";
@@ -1856,8 +1856,8 @@ namespace Parameter
             //e.unit = "m";
 
             K_col.val = 20f;
-            K_col.min = 0.01f;
-            K_col.max = 10.0f;
+            K_col.min = 0f;
+            K_col.max = 30f;
             K_col.hint = "Ratio of propeller blade collective pitch angle to collective pitch servo deflection";
             K_col.comment = "";
             K_col.unit = "deg";
@@ -1980,15 +1980,15 @@ namespace Parameter
             I_flapping = new stru_float();
 
             e.val = 0.07f;
-            e.min = 0.01f;
-            e.max = 0.20f;
+            e.min = 0.001f;
+            e.max = 1f;
             e.hint = "Effective hinge offset of mainrotor blade";
             e.comment = "";
             e.unit = "m";
 
             I_flapping.val = 0.03487f; // 0.055 kg*m^2  
-            I_flapping.min = 0.00100f;
-            I_flapping.max = 1.00000f;
+            I_flapping.min = 0.0001f;
+            I_flapping.max = 20f;
             I_flapping.hint = "One rotorblade's inertia w.r.t. rotorblade's effective hinge offset axis";
             I_flapping.comment = "";
             I_flapping.unit = "kg*m^2";
@@ -1996,7 +1996,7 @@ namespace Parameter
 
             hub_stiffness_mr.val = 120f;
             hub_stiffness_mr.min = 0.001f;
-            hub_stiffness_mr.max = 1000f;
+            hub_stiffness_mr.max = 10000f;
             hub_stiffness_mr.hint = "Hub stiffness in rotor head. (O-ring)";
             hub_stiffness_mr.comment = "";
             hub_stiffness_mr.unit = "Nm/rad";
@@ -2004,14 +2004,14 @@ namespace Parameter
 
             A_lon.val = 10f; // 0.2
             A_lon.min = 0.001f;
-            A_lon.max = 1f;
+            A_lon.max = 100f;
             A_lon.hint = "Linkage gain ratio of θcyc,as to δlon";
             A_lon.comment = "";
             A_lon.unit = "deg";
 
             B_lat.val = 10f; // 0.2
             B_lat.min = 0.001f;
-            B_lat.max = 1f;
+            B_lat.max = 100f;
             B_lat.hint = "Linkage gain ratio of θcyc,bs to δlat";
             B_lat.comment = "";
             B_lat.unit = "deg";
@@ -2091,7 +2091,7 @@ namespace Parameter
             torque_reduction_factor.unit = "-";
 
             stength_rising_speed_factor.val = 0.015f;
-            stength_rising_speed_factor.min = 0.1f;
+            stength_rising_speed_factor.min = 0.001f;
             stength_rising_speed_factor.max = 1f;
             stength_rising_speed_factor.hint = "How fast the vortex develops and decays.";
             stength_rising_speed_factor.comment = "";
@@ -2176,7 +2176,7 @@ namespace Parameter
             turn_off_rpm = new stru_float();
 
             mass.val = 0.020f;
-            mass.min = 0.01f;
+            mass.min = 0.001f;
             mass.max = 100f;
             mass.hint = "Startup rotationg unbalance mass (r=0.1m)";
             mass.comment = "";
@@ -2336,7 +2336,7 @@ namespace Parameter
         public stru_float B_M { get; set; } // [Nm/(rad/sec)] rotational friction
         public stru_float ns { get; set; }// [rpm/Volt] ideal specific no load speed            560KV  / (60 / (2 * Mathf.PI)); // [rpm/Volt] --> (rad/sec)/Volt
         [XmlIgnore]
-        public stru_float Ke { get; set; } // [Volt/(rad/sec)]  back-emf factor , The motor Kv constant is the reciprocal of the back-emf constant: K_v = \frac{1}{K_e}
+        public stru_float Ke { get; set; } // [Volt/(rad/sec)]  back-emf factor , The motor Kv constant is the reciprocal of the back-emf constant: K_v = \\frac{1}{K_e}
         [XmlIgnore]
         public stru_float Kt { get; set; } // [Nm/A]  torque constant   
         [XmlIgnore]
@@ -2363,15 +2363,15 @@ namespace Parameter
             R_a.unit = "ohm";
 
             B_M.val = 4.5E-05f;
-            B_M.min = 1.0E-06f;
-            B_M.max = 1.0E-04f;
+            B_M.min = 1e-07f;
+            B_M.max = 0.001f;
             B_M.hint = "Rotational friction";
             B_M.comment = "";
             B_M.unit = "Nm/(rad/sec)";
 
             ns.val = 560.0f;    // 560ns[rpm/Volt] == 560kV[rpm/Volt] ==>   560[rpm/Volt] * pi/30 --> 58.6430[(rad/sec)/Volt] 
             ns.min = 1.0f;
-            ns.max = 200f;
+            ns.max = 5000f;
             ns.hint = "Ideal specific no load speed";
             ns.comment = "";
             ns.unit = "rpm/Volt";
@@ -2381,8 +2381,8 @@ namespace Parameter
             Ke.min = 0f;
             Ke.max = 0f;
             Ke.hint = "Back-emf factor";
-            Ke.comment = "The motor Kv constant is the reciprocal of the back-emf constant: K_v = \frac{1}{K_e}";
-            Ke.unit = "rpm/Volt";
+            Ke.comment = "The motor Kv constant is the reciprocal of the back-emf constant: K_v = \\frac{1}{K_e}";
+            Ke.unit = "Volt/(rad/sec)";
 
             Kt.calculated = true; // see Update_Calculated_Parameter()
             Kt.val = 0f;
@@ -2402,7 +2402,7 @@ namespace Parameter
 
             J.val = 8E-05f;
             J.min = 1E-06f;
-            J.max = 1E-03f;
+            J.max = 0.05f;
             J.hint = "Motor inertia w.r.t. motor hub";
             J.comment = "";
             J.unit = "kg*m^2";
@@ -2473,7 +2473,7 @@ namespace Parameter
 
             saturation_min.val = 0f;
             saturation_min.min = 0f;
-            saturation_min.max = 0f;
+            saturation_min.max = 100f;
             saturation_min.hint = "Minimum voltage at governor output";
             saturation_min.comment = "";
             saturation_min.unit = "Volt";
@@ -2693,36 +2693,36 @@ namespace Parameter
             //i_gear_mainrotor2propeller.unit = "-";
 
             i_gear_tailrotor.val = 9;
-            i_gear_tailrotor.min = 5;
-            i_gear_tailrotor.max = 50;
+            i_gear_tailrotor.min = 1;
+            i_gear_tailrotor.max = 100;
             i_gear_tailrotor.hint = "Tailrotor's gear teeth count - to mainrotor";
             i_gear_tailrotor.comment = "";
             i_gear_tailrotor.unit = "-";
 
             i_gear_propeller.val = 9;
-            i_gear_propeller.min = 5;
-            i_gear_propeller.max = 50;
+            i_gear_propeller.min = 1;
+            i_gear_propeller.max = 100;
             i_gear_propeller.hint = "Propeller's gear teeth count - to mainrotor";
             i_gear_propeller.comment = "";
             i_gear_propeller.unit = "-";
 
             k_freewheel.val = 10f; // very weak stiffness for numerical "stability"
             k_freewheel.min = 0;
-            k_freewheel.max = 0;
+            k_freewheel.max = 10000f;
             k_freewheel.hint = "Freewheel (between maingear and mainrotor) rotational stiffness";
             k_freewheel.comment = "";
             k_freewheel.unit = "Nm/rad";
 
             d_freewheel.val = 0.001f; // damping for numerical "stability"
             d_freewheel.min = 0;
-            d_freewheel.max = 0;
+            d_freewheel.max = 1000f;
             d_freewheel.hint = "Freewheel (between maingear and mainrotor) rotational damping";
             d_freewheel.comment = "";
             d_freewheel.unit = "Nm/(rad/sec)";
 
             J_mg.val = 0.000200f; 
             J_mg.min = 0;
-            J_mg.max = 0;
+            J_mg.max = 0.1f;
             J_mg.hint = "Maingear inertia w.r.t. maingear";
             J_mg.comment = "";
             J_mg.unit = "kg*m^2";
@@ -2902,31 +2902,31 @@ namespace Parameter
 
 
             positions_left_type.val = 0;
-            positions_left_type.str = new List<string> { "Skids", "Grear" };
+            positions_left_type.str = new List<string> { "Skids", "Gear" };
             positions_left_type.hint = "Contact type";
             positions_left_type.comment = "";
             positions_left_type.unit = "";
 
             positions_right_type.val = 0;
-            positions_right_type.str = new List<string> { "Skids", "Grear" };
+            positions_right_type.str = new List<string> { "Skids", "Gear" };
             positions_right_type.hint = "Contact type";
             positions_right_type.comment = "";
             positions_right_type.unit = "";
 
             positions_steering_center_type.val = 0;
-            positions_steering_center_type.str = new List<string> { "Skids", "Grear" };
+            positions_steering_center_type.str = new List<string> { "Skids", "Gear" };
             positions_steering_center_type.hint = "Contact type";
             positions_steering_center_type.comment = "";
             positions_steering_center_type.unit = "";
 
             positions_steering_left_type.val = 0;
-            positions_steering_left_type.str = new List<string> { "Skids", "Grear" };
+            positions_steering_left_type.str = new List<string> { "Skids", "Gear" };
             positions_steering_left_type.hint = "Contact type";
             positions_steering_left_type.comment = "";
             positions_steering_left_type.unit = "";
 
             positions_steering_right_type.val = 0;
-            positions_steering_right_type.str = new List<string> { "Skids", "Grear" };
+            positions_steering_right_type.str = new List<string> { "Skids", "Gear" };
             positions_steering_right_type.hint = "Contact type";
             positions_steering_right_type.comment = "";
             positions_steering_right_type.unit = "";
@@ -3205,7 +3205,7 @@ namespace Parameter
 
             landing_gear_main_radius.val = 0.00f;
             landing_gear_main_radius.max = 1.00f;
-            landing_gear_main_radius.min = 0.001f;
+            landing_gear_main_radius.min = 0f;
             landing_gear_main_radius.hint = "Radius of main landing gear.";
             landing_gear_main_radius.comment = "";
             landing_gear_main_radius.unit = "m";
@@ -3219,7 +3219,7 @@ namespace Parameter
 
             landing_gear_main_transition_time_bay.val = 0.20f;
             landing_gear_main_transition_time_bay.max = 10.00f;
-            landing_gear_main_transition_time_bay.min = 0.000f;
+            landing_gear_main_transition_time_bay.min = -10f;
             landing_gear_main_transition_time_bay.hint = "Transition time for closing/opening gear bay doors (only collision detection, animation duration is not effected).";
             landing_gear_main_transition_time_bay.comment = "";
             landing_gear_main_transition_time_bay.unit = "sec";
@@ -3797,7 +3797,7 @@ namespace Parameter
             helicopter.booster.dirLH.vect3 = Helper.A_RL_S123(helicopter.booster.oriLH.vect3 * Helper.Deg_to_Rad, new Vector3(0, 1, 0) ); // per definition the booster local y-axis is the thrust axis
             
             //http://www.powerditto.de/Modellierung-Theorie2.doc
-            helicopter.brushless.Ke.val = 1f / (helicopter.brushless.ns.val * Mathf.PI / 30f); // [Volt/(rad/sec)]  back-emf factor , The motor Kv constant is the reciprocal of the back-emf constant: K_v = \frac{1}{K_e}
+            helicopter.brushless.Ke.val = 1f / (helicopter.brushless.ns.val * Mathf.PI / 30f); // [Volt/(rad/sec)]  back-emf factor , The motor Kv constant is the reciprocal of the back-emf constant: K_v = \\frac{1}{K_e}
             helicopter.brushless.Kt.val = 1f / (helicopter.brushless.ns.val * Mathf.PI / 30f); // [Nm/A]  torque constant
             helicopter.brushless.k.val = 1f / (helicopter.brushless.ns.val * Mathf.PI / 30f); // [Volt/(rad/sec)] is the same as [Nm/A]  k = Ke = Kt
 
@@ -3825,6 +3825,10 @@ namespace Parameter
             if (helicopter.tailrotor.rotor_exists.val && !helicopter.propeller.rotor_exists.val)
                 helicopter.transmission.J_mrtrpr_mr.val = helicopter.mainrotor.J.val +
                                                          (helicopter.tailrotor.J.val / Mathf.Pow(helicopter.transmission.n_mr2tr.val, 2)); // [kg m^2] w.r.t. mainrotor
+
+            if (!helicopter.tailrotor.rotor_exists.val && helicopter.propeller.rotor_exists.val)
+                helicopter.transmission.J_mrtrpr_mr.val = helicopter.mainrotor.J.val +
+                                                         (helicopter.propeller.J.val / Mathf.Pow(helicopter.transmission.n_mr2pr.val, 2)); // [kg m^2] w.r.t. mainrotor
 
             if (!helicopter.tailrotor.rotor_exists.val && !helicopter.propeller.rotor_exists.val)
                 helicopter.transmission.J_mrtrpr_mr.val = helicopter.mainrotor.J.val; // [kg m^2] w.r.t. mainrotor

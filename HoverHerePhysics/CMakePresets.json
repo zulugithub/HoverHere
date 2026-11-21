@@ -1,0 +1,132 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "HOVERHERE_WARNINGS_AS_ERRORS": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "windows-only",
+      "hidden": true,
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "unix-only",
+      "hidden": true,
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "msvc",
+      "displayName": "MSVC (Visual Studio 2026 Build Tools, x64)",
+      "inherits": ["base", "windows-only"],
+      "generator": "Visual Studio 18 2026",
+      "architecture": { "value": "x64", "strategy": "set" }
+    },
+    {
+      "name": "msvc-vcpkg",
+      "displayName": "MSVC, Boost.QVM from vcpkg (requires VCPKG_ROOT)",
+      "inherits": "msvc",
+      "condition": {
+        "type": "allOf",
+        "conditions": [
+          { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+          { "type": "notEquals", "lhs": "$env{VCPKG_ROOT}", "rhs": "" }
+        ]
+      },
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "msys2-ucrt64",
+      "hidden": true,
+      "inherits": ["base", "windows-only"],
+      "generator": "Ninja Multi-Config",
+      "environment": { "PATH": "C:/msys64/ucrt64/bin;$penv{PATH}" }
+    },
+    {
+      "name": "gcc-msys2",
+      "displayName": "GCC (MSYS2 UCRT64, Ninja Multi-Config)",
+      "inherits": "msys2-ucrt64",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe"
+      }
+    },
+    {
+      "name": "clang-msys2",
+      "displayName": "Clang (MSYS2 UCRT64, GNU ABI, Ninja Multi-Config)",
+      "inherits": "msys2-ucrt64",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/clang++.exe",
+        "HOVERHERE_STATIC_MINGW_RUNTIME": "OFF"
+      }
+    },
+    {
+      "name": "gcc",
+      "displayName": "GCC (Linux/macOS, Ninja Multi-Config)",
+      "inherits": ["base", "unix-only"],
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "clang",
+      "displayName": "Clang (Linux/macOS, Ninja Multi-Config)",
+      "inherits": ["base", "unix-only"],
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "msvc-debug", "configurePreset": "msvc", "configuration": "Debug" },
+    { "name": "msvc-release", "configurePreset": "msvc", "configuration": "Release" },
+    { "name": "msvc-vcpkg-debug", "configurePreset": "msvc-vcpkg", "configuration": "Debug" },
+    { "name": "msvc-vcpkg-release", "configurePreset": "msvc-vcpkg", "configuration": "Release" },
+    { "name": "gcc-msys2-debug", "configurePreset": "gcc-msys2", "configuration": "Debug" },
+    { "name": "gcc-msys2-release", "configurePreset": "gcc-msys2", "configuration": "Release" },
+    { "name": "clang-msys2-debug", "configurePreset": "clang-msys2", "configuration": "Debug" },
+    { "name": "clang-msys2-release", "configurePreset": "clang-msys2", "configuration": "Release" },
+    { "name": "gcc-debug", "configurePreset": "gcc", "configuration": "Debug" },
+    { "name": "gcc-release", "configurePreset": "gcc", "configuration": "Release" },
+    { "name": "clang-debug", "configurePreset": "clang", "configuration": "Debug" },
+    { "name": "clang-release", "configurePreset": "clang", "configuration": "Release" }
+  ],
+  "testPresets": [
+    {
+      "name": "msys2-test",
+      "hidden": true,
+      "environment": { "PATH": "C:/msys64/ucrt64/bin;$penv{PATH}" },
+      "output": { "outputOnFailure": true }
+    },
+    { "name": "msvc-debug", "configurePreset": "msvc", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "msvc-release", "configurePreset": "msvc", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "msvc-vcpkg-debug", "configurePreset": "msvc-vcpkg", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "msvc-vcpkg-release", "configurePreset": "msvc-vcpkg", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "gcc-msys2-debug", "inherits": "msys2-test", "configurePreset": "gcc-msys2", "configuration": "Debug" },
+    { "name": "gcc-msys2-release", "inherits": "msys2-test", "configurePreset": "gcc-msys2", "configuration": "Release" },
+    { "name": "clang-msys2-debug", "inherits": "msys2-test", "configurePreset": "clang-msys2", "configuration": "Debug" },
+    { "name": "clang-msys2-release", "inherits": "msys2-test", "configurePreset": "clang-msys2", "configuration": "Release" },
+    { "name": "gcc-debug", "configurePreset": "gcc", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "gcc-release", "configurePreset": "gcc", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "clang-debug", "configurePreset": "clang", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "clang-release", "configurePreset": "clang", "configuration": "Release", "output": { "outputOnFailure": true } }
+  ],
+  "workflowPresets": [
+    { "name": "msvc", "steps": [ { "type": "configure", "name": "msvc" }, { "type": "build", "name": "msvc-debug" }, { "type": "test", "name": "msvc-debug" }, { "type": "build", "name": "msvc-release" }, { "type": "test", "name": "msvc-release" } ] },
+    { "name": "gcc-msys2", "steps": [ { "type": "configure", "name": "gcc-msys2" }, { "type": "build", "name": "gcc-msys2-debug" }, { "type": "test", "name": "gcc-msys2-debug" }, { "type": "build", "name": "gcc-msys2-release" }, { "type": "test", "name": "gcc-msys2-release" } ] },
+    { "name": "clang-msys2", "steps": [ { "type": "configure", "name": "clang-msys2" }, { "type": "build", "name": "clang-msys2-debug" }, { "type": "test", "name": "clang-msys2-debug" }, { "type": "build", "name": "clang-msys2-release" }, { "type": "test", "name": "clang-msys2-release" } ] },
+    { "name": "gcc", "steps": [ { "type": "configure", "name": "gcc" }, { "type": "build", "name": "gcc-debug" }, { "type": "test", "name": "gcc-debug" }, { "type": "build", "name": "gcc-release" }, { "type": "test", "name": "gcc-release" } ] },
+    { "name": "clang", "steps": [ { "type": "configure", "name": "clang" }, { "type": "build", "name": "clang-debug" }, { "type": "test", "name": "clang-debug" }, { "type": "build", "name": "clang-release" }, { "type": "test", "name": "clang-release" } ] }
+  ]
+}

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Reference tool: compiles the ORIGINAL Unity parameter classes (Helicopter_Parameter.cs) against small stubs of
+    UnityEngine / Common.Helper, so that the schema can be seeded from the real C# code and the C# XML loading
+    (XmlMerging + XmlSerializer) can be used as the reference for the C++ loader. Dev tool only, not part of the build.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS0168;CS0219;CS0414;CS0649;CS0169;CS8981;SYSLIB0001</NoWarn>
+    <RootNamespace>HoverHere.Reference</RootNamespace>
+    <AssemblyName>hoverhere_csharp_reference</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.cs;UnityStubs.cs;LegacyXmlMerging.cs" />
+    <Compile Include="..\..\..\HoverHere\Assets\Scripting\Helicopter_Parameter.cs" Link="Original\Helicopter_Parameter.cs" />
+  </ItemGroup>
+
+</Project>

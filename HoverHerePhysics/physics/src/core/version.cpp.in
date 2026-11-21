@@ -1,0 +1,15 @@
+#include "hoverhere/version.hpp"
+
+namespace hoverhere {
+
+Version version() noexcept
+{
+    return Version{@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@};
+}
+
+std::string_view version_string() noexcept
+{
+    return "@PROJECT_VERSION@";
+}
+
+}  // namespace hoverhere

@@ -1,0 +1,12 @@
+/build/
+/out/
+/vcpkg_installed/
+/.cache/
+/CMakeUserPresets.json
+
+# .NET build output of the C# helper projects
+/bindings/csharp/**/bin/
+/bindings/csharp/**/obj/
+/tools/csharp_reference/bin/
+/tools/csharp_reference/obj/
+__pycache__/
