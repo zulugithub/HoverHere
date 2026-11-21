@@ -16,3 +16,15 @@ if(HOVERHERE_DOTNET AND HOVERHERE_BUILD_TESTS AND TARGET hoverhere_params_check)
 else()
     message(STATUS "C# layout test disabled (.NET SDK 'dotnet' not found)")
 endif()
+
+# Interop test of the Unity wrapper HoverHereNative.cs (the same files Unity compiles, C# 9): struct layout of every member against the C
+# compiler's table in the library, coordinate conversions, and a short simulation through the real P/Invoke interface.
+if(HOVERHERE_DOTNET AND HOVERHERE_BUILD_TESTS AND TARGET hoverhere_c_api)
+    set(_logo_resources "${PROJECT_SOURCE_DIR}/../HoverHere/Assets/Helicopters_Available/Logo600SE_V3/Resources")
+    add_test(NAME csharp_interop
+        COMMAND "${HOVERHERE_DOTNET}" run -c Release
+            --project "${CMAKE_CURRENT_SOURCE_DIR}/HoverHere.Interop.Check/HoverHere.Interop.Check.csproj"
+            -- "$<TARGET_FILE:hoverhere_c_api>" "${_logo_resources}")
+    set_tests_properties(csharp_interop PROPERTIES TIMEOUT 600)
+    message(STATUS "C# interop test: ${HOVERHERE_DOTNET}")
+endif()

@@ -274,7 +274,7 @@ namespace Helisimulator
         double v_i_tr; // [m/sec] tailrotor induced velocity 
         double v_i_pr; // [m/sec] propeller induced velocity 
 
-        Common.Helper.GroundMesh ground_mesh;
+        public Common.Helper.GroundMesh ground_mesh; // public: the native physics adapter takes over the same mesh
 
         List<Common.Helper.contact_info> contact_informations;
 
@@ -474,7 +474,7 @@ namespace Helisimulator
 
         double V_s_out; // [Volt] Governor_output voltage
 
-        public bool flag_freewheeling { get; protected set; } // Brushless freewheeling 
+        public bool flag_freewheeling { get; set; } // Brushless freewheeling 
 
         private double dflapping_a_s_mr_LR__int_dt = 0;
         private double dflapping_b_s_mr_LR__int_dt = 0;
@@ -634,8 +634,8 @@ namespace Helisimulator
         }
         public Wheels_Status_Variants wheel_status;
 
-        private float wheel_brake_target = 0; // [0, 1]
-        public float wheel_brake_strength { get; protected set; } // [0...1]
+        public float wheel_brake_target = 0; // [0, 1]  (public: read by the native physics adapter)
+        public float wheel_brake_strength { get; set; } // [0...1]
         private float wheel_brake_transition_velocity = 0; // [1/sec]
         private const float wheel_brake_transition_duration = 1.0f; // [sec]
         // ##################################################################################

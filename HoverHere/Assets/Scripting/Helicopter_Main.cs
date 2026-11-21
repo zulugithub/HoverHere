@@ -417,6 +417,12 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
     // mainrotor kinematics
     public int mainrotor_simplified0_or_BEMT1 = 0;
+
+    // C++ physics library hoverhere.dll instead of the C# physics (Helicopter_ODE.RK4Step). Switch it on in the inspector; needs
+    // Assets/Plugins/x86_64/hoverhere.dll. See Assets/Scripting/Native/Helicopter_NativePhysics.cs
+    public bool use_native_physics = false;
+    Helisimulator.Helicopter_NativePhysics native_physics;
+    string native_physics_setup_for = "";
     public Helicopter_Mainrotor_Mechanics.Helicopter_Mainrotor_Mechanics Helicopter_Mainrotor_Mechanics;
     // tailrotor kinematics
     public Helicopter_Tailrotor_Mechanics.Helicopter_Tailrotor_Mechanics Helicopter_Tailrotor_Mechanics;
@@ -547,6 +553,54 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
    // static readonly object _locker = new object();
 
     // ##################################################################################
+    // C++ physics (hoverhere.dll): build / rebuild the native model when the helicopter, the rotor model or the scenery changes.
+    // Called every frame from Update() (main thread); the physics thread only calls native_physics.Step().
+    // ##################################################################################
+    void Native_Physics_Update()
+    {
+        if (!use_native_physics)
+        {
+            if (native_physics != null)
+            {
+                native_physics.Dispose();
+                native_physics = null;
+                native_physics_setup_for = "";
+            }
+            return;
+        }
+        if (update_called_cntr < 2 || helicopter_name == "none")
+            return;
+
+        string setup_key = helicopter_name + "|" + mainrotor_simplified0_or_BEMT1;
+        if (native_physics == null || native_physics_setup_for != setup_key)
+        {
+            if (native_physics == null)
+                native_physics = new Helisimulator.Helicopter_NativePhysics();
+            native_physics_setup_for = setup_key; // also after an error: do not retry every frame
+
+            TextAsset main_mechanics = (TextAsset)Resources.Load(helicopter_name + "_mainrotor_mechanics", typeof(TextAsset));
+            TextAsset tail_mechanics = (TextAsset)Resources.Load(helicopter_name + "_tailrotor_mechanics", typeof(TextAsset));
+            string folder = System.IO.Path.Combine(Application.persistentDataPath, "NativePhysics");
+            bool ok = native_physics.Initialize(helicopter_ODE, folder,
+                                                main_mechanics != null ? main_mechanics.text : null,
+                                                tail_mechanics != null ? tail_mechanics.text : null,
+                                                mainrotor_simplified0_or_BEMT1 == 1);
+            if (ok)
+                UnityEngine.Debug.Log("hoverhere.dll physics active for " + helicopter_name + ". " + native_physics.LastError);
+            else
+                UnityEngine.Debug.LogWarning("hoverhere.dll physics could not be started, the C# physics keeps running: " + native_physics.LastError);
+        }
+        else
+        {
+            native_physics.UpdateGroundMeshIfChanged(helicopter_ODE);
+        }
+    }
+    // ##################################################################################
+
+
+
+
+    // ##################################################################################
     // This function is running in a thread with constant low stepsize (high frquency)
     // Inside of it the explicit ODE solver is called gets the ODE with all its calculations updated
     // The 4th order Runge Kutta needs four calls to the ODE to get the states for next timestep approximated
@@ -563,7 +617,17 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             stopwatch.Start();
 
             // main solver embedded ode calculations
-            int RK4Step_error = helicopter_ODE.RK4Step(last_takestep_in_frame, ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37);
+            int RK4Step_error = 0;
+            if (use_native_physics && native_physics != null && native_physics.IsReady)
+            {
+                // C++ physics: one fixed step, results are written into x_states[] and the output fields of helicopter_ODE
+                native_physics.Step(helicopter_ODE, u_inputs, dt * helicopter_ODE.par.simulation.physics.timescale.val);
+                time = native_physics.SimulationTime;
+            }
+            else
+            {
+                RK4Step_error = helicopter_ODE.RK4Step(last_takestep_in_frame, ref helicopter_ODE.x_states, u_inputs, ref time, dt * helicopter_ODE.par.simulation.physics.timescale.val, 0, 37);
+            }
 
             // if results are outside of bounds (see check_results()-function) than catch error
             if (RK4Step_error > 0)
@@ -684,6 +748,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
 
         // reset to inintial state in ordinay differetial quations thread
         helicopter_ODE.Set_Initial_Conditions();
+        if (native_physics != null && native_physics.IsReady)
+            native_physics.Reset(helicopter_ODE);
 
         // anti stutter - extrapolation of last two ODE-thread results
         //IO_AntiStutter__Preset_ODE_Thread_Transforms();
@@ -2546,6 +2612,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         // wait a moment after start - TODO remove this: unnecessary 
         // ##################################################################################
         update_called_cntr++;
+        Native_Physics_Update();
         //////if(Time.frameCount == 200)
         if (update_called_cntr == 1) // TODO remove this complete if(...){}
         {
@@ -5171,6 +5238,11 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
     #region Quit
     void OnApplicationQuit()
     {
+        if (native_physics != null)
+        {
+            native_physics.Dispose();
+            native_physics = null;
+        }
         //UnityEngine.Debug.Log("Application ending after " + Time.time + " seconds");
 //#if UNITY_EDITOR
         //Thread.Sleep(1000);

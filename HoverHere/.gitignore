@@ -191,3 +191,5 @@ Assets/Materials/ParallaxOcclusionTest
 
 
 RAH66_Comanche*
+# built by HoverHerePhysics (cmake --build --preset msvc-release), copy it here to use the native physics
+/Assets/Plugins/x86_64/hoverhere.dll
