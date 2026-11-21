@@ -850,3 +850,24 @@ TEST_CASE("every grid point can be logged as a CSV row")
     }
     CHECK(rows == static_cast<int>(kBemtElementCount));
 }
+
+TEST_CASE("a rotor that turns the other way (inverted rotation direction) is the mirror image: same thrust, torque opposing the rotation")
+{
+    BemtConfig cfg = logo600();
+    cfg.quasi_static = true;
+    const BemtGrid grid = make_bemt_grid(cfg);
+    BemtFilterState normal_state;
+    BemtFilterState inverted_state;
+    BemtInputs normal = hover_inputs(5 * kDeg);
+    BemtInputs inverted = hover_inputs(5 * kDeg);
+    inverted.omega_shaft = -kRotorSpeed;
+    const BemtOutputs a = bemt_evaluate(cfg, grid, normal_state, normal);
+    const BemtOutputs b = bemt_evaluate(cfg, grid, inverted_state, inverted);
+    CHECK(a.thrust > 10);
+    CHECK(b.thrust == doctest::Approx(a.thrust).epsilon(1e-6));
+    CHECK(b.force_O.a[1] == doctest::Approx(a.force_O.a[1]).epsilon(1e-6));
+    CHECK(a.shaft_torque < 0);                    // resists the positive rotation
+    CHECK(b.shaft_torque > 0);                    // resists the negative rotation
+    CHECK(b.shaft_torque == doctest::Approx(-a.shaft_torque).epsilon(1e-6));
+    CHECK(b.Vi_mean == doctest::Approx(a.Vi_mean).epsilon(1e-6));
+}

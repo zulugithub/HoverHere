@@ -457,6 +457,12 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     const Real dPsi = grid.sector_angle;
     const bool use_lag = cfg.dynamic_inflow && !cfg.quasi_static && state.lag_initialized;
 
+    // The blade element equations are written for a blade that moves towards -z of the element frame (V2 < 0, rotation about +y of the
+    // disc). A rotor with the opposite sense of rotation (invert_mainrotor_rotation_direction) is the mirror image: the element sees
+    // the mirrored tangential velocity and the tangential (drag) force changes its direction, so the aerodynamic torque still
+    // opposes the rotation. The raw V2 stays in the outputs.
+    const Real rotation_sign = in.omega_shaft < 0 ? Real{-1} : Real{1};
+
     Vec3 force_O{{0, 0, 0}};
     Vec3 torque_D{{0, 0, 0}};
     Real Vi_area_sum = 0;
@@ -479,7 +485,7 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
                 const Real bridge = johnson_baseline(local_Vz, local_Vx, cfg.vrs) + cfg.vrs.zeta * cfg.vrs.f * johnson_vrs_correction(local_Vz, local_Vx, cfg.vrs, unused);
                 Vi_start = polarity * bridge * v_h;
             }
-            const ElementSolution solution = solve_element(cfg, Vi_start, out.Vc[i], out.V2[i], out.beta[i], factor1, factor2);
+            const ElementSolution solution = solve_element(cfg, Vi_start, out.Vc[i], rotation_sign * out.V2[i], out.beta[i], factor1, factor2);
             out.Vi_raw[i] = solution.Vi;
             out.residual[i] = solution.residual;
             out.iterations[i] = static_cast<std::uint8_t>(std::min(solution.iterations, 255));
@@ -495,7 +501,7 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
             out.Vi[i] = use_lag ? state.Vi_lag[i] : out.Vi_target[i];
 
             // blade forces with the induced velocity that is actually in the flow
-            const ElementPhysics e = element_function(cfg, out.Vi[i], out.Vc[i], out.V2[i], out.beta[i], factor1, factor2);
+            const ElementPhysics e = element_function(cfg, out.Vi[i], out.Vc[i], rotation_sign * out.V2[i], out.beta[i], factor1, factor2);
             out.phi[i] = e.phi;
             out.alpha[i] = e.alpha;
             out.cl[i] = e.cl;
@@ -509,7 +515,7 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
 
             // sum up thrust (world frame) and the moment about the hub (disc frame)
             const Mat3 Ry = frames::rot_y(grid.psi[i]);
-            const Vec3 F_blade{{0, out.dT[i] * segment, out.dQ[i] * segment}};
+            const Vec3 F_blade{{0, out.dT[i] * segment, rotation_sign * out.dQ[i] * segment}};
             force_O = force_O + A_ON * (Ry * F_blade);
             torque_D = torque_D + A_DO * (A_ON * (Ry * qvm::cross(Vec3{{radius, 0, 0}}, F_blade)));
 
