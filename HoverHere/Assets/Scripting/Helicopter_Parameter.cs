@@ -1558,7 +1558,7 @@ namespace Parameter
         public stru_Vector3 posLH { get; set; } // [m] Rotor position relative to helicopter's center of gravity in helicopter's local coordinate system
         public stru_Vector3 oriLH { get; set; } // [deg] Rotor orientation, relative to helicopter's local coordinate system (as right handed S123 or B321 rotation )
         public stru_Vector3 dirLH { get; set; } // [-] Rotor y-axis direction unit vector, relative to helicopter's local coordinate system
-
+        public stru_float wake_inertia_fumble_factor { get; set; } // [-] fumble factor for rotor wake inertia, to account for the fact that the rotor wake is not a rigid body and has its own dynamics. This factor is used to adjust the rotor wake inertia in the simulation. 
 
         public stru_rotor()
         {
@@ -1576,6 +1576,7 @@ namespace Parameter
             posLH = new stru_Vector3();
             oriLH = new stru_Vector3();
             dirLH = new stru_Vector3();
+            wake_inertia_fumble_factor = new stru_float();
         }
     }
     // ##################################################################################
@@ -1666,6 +1667,13 @@ namespace Parameter
             dirLH.hint = "Rotor y-axis direction unit vector, relative to helicopter's local coordinate system.";
             dirLH.comment = "";
             dirLH.unit = "-";
+
+            wake_inertia_fumble_factor.val = 1.0f;
+            wake_inertia_fumble_factor.min = 0.1f;
+            wake_inertia_fumble_factor.max = 5.0f;
+            wake_inertia_fumble_factor.hint = "Fumble factor for rotor wake inertia";
+            wake_inertia_fumble_factor.comment = "Adjusts the rotor wake inertia in the simulation";
+            wake_inertia_fumble_factor.unit = "-";
         }
     }
     // ##################################################################################

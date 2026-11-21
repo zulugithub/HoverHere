@@ -429,8 +429,12 @@ namespace Helisimulator
         private double dDELTA_y_yaw__int_dt = 0;     // [rad/sec] gyro error value integral
         private double dDELTA_z_pitch__int_dt = 0;   // [rad/sec] flybarless error value integral
         private double DELTA_x_roll__diff = 0;    // [rad/sec] flybarless error value differential
+        private double DELTA_x_roll__diff_held = 0;    // [rad/sec] flybarless error value differential
+        
         private double DELTA_y_yaw__diff = 0;     // [rad/sec] gyro error value differential
+        private double DELTA_y_yaw__diff_held = 0;    // [rad/sec] flybarless error value differential
         private double DELTA_z_pitch__diff = 0;   // [rad/sec] flybarless error value differential
+        private double DELTA_z_pitch__diff_held = 0;    // [rad/sec] flybarless error value differential
         private double DELTA_x_roll__diff_old = 0;    // [rad/sec] flybarless error value differential _old
         private double DELTA_y_yaw__diff_old = 0;     // [rad/sec] gyro error value differential _old
         private double DELTA_z_pitch__diff_old = 0;   // [rad/sec] flybarless error value differential _old
@@ -2010,6 +2014,9 @@ const double eta = 0.80f;
             double dtime)                               // [IN] timestep    
         {
 
+            double full_dt = (integrator_function_call_number < 3) ? (dtime * 2.0) : dtime;
+   
+
             // ##################################################################################
             // update debugging info only in the last Runge-Kutta solver call of ODE (once per frame)
             // ##################################################################################
@@ -2225,7 +2232,12 @@ const double eta = 0.80f;
                         // PI controller                  
                         delta_error = (par.transmitter_and_helicopter.helicopter.flybarless.K_a.vect3[flight_bank] * Mathf.Deg2Rad * input_x_roll - (float)wx_LH); // [rad/sec] error value in PI controller
                         //delta_error = (par.transmitter_and_helicopter.helicopter.flybarless.K_a.val * Mathf.Deg2Rad * input_x_roll - (float)wx_LH) / (par.transmitter_and_helicopter.helicopter.flybarless.K_a.val * Mathf.Deg2Rad); // [rad/sec] error value in PI controller
-                        DELTA_x_roll__diff = (delta_error - DELTA_x_roll__diff_old) / dtime; // differential part
+                        if (integrator_function_call_number == 0)
+                        {
+                            DELTA_x_roll__diff_held = (delta_error - DELTA_x_roll__diff_old) / full_dt;
+                            DELTA_x_roll__diff_old = delta_error;
+                        }
+                        DELTA_x_roll__diff = DELTA_x_roll__diff_held;
                         if (integrator_function_call_number == 3)
                             DELTA_x_roll__diff_old = delta_error;
                         delta_lat_mr = par.transmitter_and_helicopter.helicopter.flybarless.K_p.vect3[flight_bank] * delta_error +
@@ -2235,7 +2247,12 @@ const double eta = 0.80f;
 
                         delta_error = (par.transmitter_and_helicopter.helicopter.gyro.K_a.vect3[flight_bank] * Mathf.Deg2Rad * input_y_yaw - (float)wy_LH); // [rad/sec] error value in PI controller
                         //delta_error = (par.transmitter_and_helicopter.helicopter.gyro.K_a.val * Mathf.Deg2Rad * input_y_yaw - (float)wy_LH) / (par.transmitter_and_helicopter.helicopter.gyro.K_a.val * Mathf.Deg2Rad); // [rad/sec] error value in PI controller
-                        DELTA_y_yaw__diff = (delta_error - DELTA_y_yaw__diff_old) / dtime; // differential part
+                        if (integrator_function_call_number == 0)
+                        {
+                            DELTA_y_yaw__diff_held = (delta_error - DELTA_y_yaw__diff_old) / full_dt;
+                            DELTA_y_yaw__diff_old = delta_error;
+                        }
+                        DELTA_y_yaw__diff = DELTA_y_yaw__diff_held;
                         if (integrator_function_call_number == 3)
                             DELTA_y_yaw__diff_old = delta_error;
                         delta_col_tr = par.transmitter_and_helicopter.helicopter.gyro.K_p.vect3[flight_bank] * delta_error +
@@ -2245,7 +2262,12 @@ const double eta = 0.80f;
 
                         delta_error = (par.transmitter_and_helicopter.helicopter.flybarless.K_a.vect3[flight_bank] * Mathf.Deg2Rad * input_z_pitch - (float)wz_LH); // [rad/sec] error value in PI controller
                         //delta_error = (par.transmitter_and_helicopter.helicopter.flybarless.K_a.val * Mathf.Deg2Rad * input_z_pitch - (float)wz_LH) / (par.transmitter_and_helicopter.helicopter.flybarless.K_a.val * Mathf.Deg2Rad); // [rad/sec] error value in PI controller
-                        DELTA_z_pitch__diff = (delta_error - DELTA_z_pitch__diff_old) / dtime; // differential part
+                        if (integrator_function_call_number == 0)
+                        {
+                            DELTA_z_pitch__diff_held = (delta_error - DELTA_z_pitch__diff_old) / full_dt;
+                            DELTA_z_pitch__diff_old = delta_error;
+                        }
+                        DELTA_z_pitch__diff = DELTA_z_pitch__diff_held;      
                         if (integrator_function_call_number == 3)
                             DELTA_z_pitch__diff_old = delta_error;
                         delta_lon_mr = par.transmitter_and_helicopter.helicopter.flybarless.K_p.vect3[flight_bank] * delta_error +
@@ -3458,6 +3480,7 @@ float beta_tr = 0; // calculated blade angle not used yet
             if (Helicopter_Main.mainrotor_simplified0_or_BEMT1 == 1)
             {
                 Helicopter_Rotor_Physics.Rotor_Disc_BEMT_Calculations(false,
+                    integrator_function_call_number, // <--- NEU übergeben
                     ref x_states, 
                     par.transmitter_and_helicopter.helicopter.mass_total.val,
                     (stru_rotor)par.transmitter_and_helicopter.helicopter.mainrotor, ref beta, velo_wind_O,
@@ -3568,7 +3591,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                     if (omega_mo_target_with_soft_start <= omega_mo_target)
                     {
                         if (integrator_function_call_number == 0)
-                            omega_mo_target_with_soft_start += omega_mo_target * (float)dtime * start_speed_factor;
+                            omega_mo_target_with_soft_start += omega_mo_target * (float)full_dt * start_speed_factor;
                     }
                     else
                         omega_mo_target_with_soft_start = omega_mo_target;
@@ -3578,7 +3601,7 @@ float beta_tr = 0; // calculated blade angle not used yet
                     if (omega_mo_target_with_soft_start >= omega_mo_target)
                     {
                         if (integrator_function_call_number == 0)
-                            omega_mo_target_with_soft_start += omega_mo_target * (float)dtime * start_speed_factor;
+                            omega_mo_target_with_soft_start += omega_mo_target * (float)full_dt * start_speed_factor;
                     }
                     else
                         omega_mo_target_with_soft_start = omega_mo_target;

@@ -1140,40 +1140,46 @@ namespace Rotor
             // ##################################################################################
             if (calculate_turbulence)
             {
-                // get the local translational speed
-                float translational_velocity_scalar_abs = v_PRO_LH.magnitude; // [m/sec] velo_LH
-                // rotation around y-axis (most often rotor shaft axis) has lower turbulence influence.
-                float rotational_velocity_scalar_abs = Mathf.Sqrt(1.0f*omega_LH.x*omega_LH.x + 0.2f*omega_LH.y*omega_LH.y + 1.0f*omega_LH.z*omega_LH.z); // [rad/sec]
-
-                // turbulence strength depends on rotational speed but also on translational speed:
-                // - if rotational speed is high turbulence is high
-                // - but if translational speed is high turbulence is low, even if rotational speed is high (rotor gets undisturbed air)
-                strength_turbulence += Helper.Step(rotational_velocity_scalar_abs, par_tuning.turbulence.rotational_velocity_limit.val/2.0f, 0, par_tuning.turbulence.rotational_velocity_limit.val, 1) * 
-                                       Helper.Step(translational_velocity_scalar_abs, par_tuning.turbulence.translational_velocity_limit.val/2.0f, 1, par_tuning.turbulence.translational_velocity_limit.val, 0.25f); // [0...1]
-
-                strength_turbulence = Mathf.Clamp(strength_turbulence, 0, 1);
-             
-                // turbulence is represented with random values
-                float turbulence_time_elapsed = time;
-                turbulence_time_elapsed %= 1f / par_tuning.turbulence.frequency.val; // [1/Hz] select the frequency of the turbulence
-                if (turbulence_time_elapsed < turbulence_time_elapsed_old[(int)rotor_type])
+                if (integrator_function_call_number == 0)
                 {
-                    turbulence_force_LH[(int)rotor_type] = new Vector3(
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.x,
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.y,
-                         ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.z);  // [N]
-                    turbulence_torque_LH_target[(int)rotor_type] = new Vector3(
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.x,
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.y, 
-                        ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.z ); // [Nm]
+                    float full_dt = dtime * 2.0f;
+                    
+                    // get the local translational speed
+                    float translational_velocity_scalar_abs = v_PRO_LH.magnitude; // [m/sec] velo_LH
+                    // rotation around y-axis (most often rotor shaft axis) has lower turbulence influence.
+                    float rotational_velocity_scalar_abs = Mathf.Sqrt(1.0f*omega_LH.x*omega_LH.x + 0.2f*omega_LH.y*omega_LH.y + 1.0f*omega_LH.z*omega_LH.z); // [rad/sec]
+
+                    // turbulence strength depends on rotational speed but also on translational speed:
+                    // - if rotational speed is high turbulence is high
+                    // - but if translational speed is high turbulence is low, even if rotational speed is high (rotor gets undisturbed air)
+                    strength_turbulence += Helper.Step(rotational_velocity_scalar_abs, par_tuning.turbulence.rotational_velocity_limit.val/2.0f, 0, par_tuning.turbulence.rotational_velocity_limit.val, 1) * 
+                                        Helper.Step(translational_velocity_scalar_abs, par_tuning.turbulence.translational_velocity_limit.val/2.0f, 1, par_tuning.turbulence.translational_velocity_limit.val, 0.25f); // [0...1]
+
+                    strength_turbulence = Mathf.Clamp(strength_turbulence, 0, 1);
+                
+                    // turbulence is represented with random values
+                    float turbulence_time_elapsed = time;
+                    turbulence_time_elapsed %= 1f / par_tuning.turbulence.frequency.val; // [1/Hz] select the frequency of the turbulence
+                    if (turbulence_time_elapsed < turbulence_time_elapsed_old[(int)rotor_type])
+                    {
+                        turbulence_force_LH[(int)rotor_type] = new Vector3(
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.x,
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.y,
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.force_strength.vect3.z);  // [N]
+                        turbulence_torque_LH_target[(int)rotor_type] = new Vector3(
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.x,
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.y, 
+                            ((float)random.NextDouble() - 0.5f) * 2f * strength_turbulence * par_tuning.turbulence.torque_strength.vect3.z ); // [Nm]
+                    }
+                    turbulence_time_elapsed_old[(int)rotor_type] = turbulence_time_elapsed;
+
+                    Vector3 turbulence_torque_LH_velocity_ = turbulence_torque_LH_velocity[(int)rotor_type];
+                    turbulence_torque_LH[(int)rotor_type] = Vector3.SmoothDamp(
+                        turbulence_torque_LH[(int)rotor_type],
+                        turbulence_torque_LH_target[(int)rotor_type],
+                        ref turbulence_torque_LH_velocity_, 0.3f, 1000.0f, full_dt);
+                    turbulence_torque_LH_velocity[(int)rotor_type] = turbulence_torque_LH_velocity_; // Hinweis: wurde bisher gar nicht zurückgeschrieben!
                 }
-                turbulence_time_elapsed_old[(int)rotor_type] = turbulence_time_elapsed;
-
-                Vector3 turbulence_torque_LH_velocity_ = turbulence_torque_LH_velocity[(int)rotor_type];
-                turbulence_torque_LH[(int)rotor_type] = Vector3.SmoothDamp(turbulence_torque_LH[(int)rotor_type], turbulence_torque_LH_target[(int)rotor_type], ref turbulence_torque_LH_velocity_, 0.3F, 1000, (float)dtime);
-
-                force_at_heli_CH_O += Helper.A_RL(q, turbulence_force_LH[(int)rotor_type]);
-                torque_at_heli_CH_LH += turbulence_torque_LH[(int)rotor_type];
             }
             else
             {
@@ -1815,6 +1821,7 @@ namespace Rotor
         static float[] debug_vi_radial_mean = new float[4];
 
         static public void Rotor_Disc_BEMT_Calculations(bool flag_calculate_only_stiffness_damping, 
+            int integrator_function_call_number, // <--- NEU hinzufügen
             ref double[] x_states, 
             float mass_total, // [kg] par.transmitter_and_helicopter.helicopter.mass_total.val
             stru_rotor par_rotor, ref float[] beta, Vector3 velo_wind_O, 
@@ -2080,7 +2087,7 @@ float rho_air = 1.27f; // TODO  rho_air;
 
             // Step 4: Apply Johnson Table 3 Algorithm
             float v_johnson_quasistatic = Johnson_Table3_Algorithm(Vz_scaled, Vx_scaled, par_vrs, out vrs_state.strength_VRS);
-            float v_johnson_unscaled = thrust_polarity * v_johnson_quasistatic * v_h;
+            float v_johnson_unscaled = thrust_polarity * v_johnson_quasistatic * v_h; // - ???
 
 
             // Step 5: Apply time lag for transient dynamics. Bypassed during CSV test sweeps so
@@ -2092,18 +2099,25 @@ float rho_air = 1.27f; // TODO  rho_air;
                 vrs_state.v_johnson_previous = v_johnson_unscaled;
                 vrs_state.dv_lag = 0.0f;
             }
-            else
+            else if (integrator_function_call_number == 0)
             {
+                float full_dt = dtime * 2.0f; // RK4Step übergibt bei call 0 h/2 -> voller Schritt ist h
                 ApplyTimeLag(
                     v_johnson_unscaled,
                     vrs_state.v_johnson_previous,
                     omega_mr,
                     par_vrs.tau_rotor_revolutions,
-                    (float)dtime,
+                    full_dt,
                     ref vrs_state.dv_lag,
                     out v_johnson_lagged);
 
                 vrs_state.v_johnson_previous = v_johnson_lagged;
+                //vrs_state_persistent = vrs_state;
+            }
+            else
+            {
+                // In den RK4-Zwischenstufen 1..3 eingefrorenen Zustand nutzen
+                v_johnson_lagged = vrs_state_persistent.v_johnson_previous;
             }
             
             // Store back to persistent state
@@ -2272,7 +2286,9 @@ float rho_air = 1.27f; // TODO  rho_air;
 
 
                     // store induced velocity
-                    Vi_LD[r, c] = Vi_bemt;
+                    // Mit dem geblendeten Vi warm-starten, damit Newton nicht auf den unphysikalischen Ast zurückspringt
+                    if (integrator_function_call_number == 0 || is_testing)
+                        Vi_LD[r, c] = Vi;
 
                     // sum up Vi for further processing ( ground effect... )
                     //Vi_sum += Vi;
@@ -2312,9 +2328,44 @@ float rho_air = 1.27f; // TODO  rho_air;
                     }
                     else
                     {
-                        // Im echten Spiel bleibt die Trägheit voll aktiv
-                        Vi_LD_smoothdamp[r, c] = Mathf.SmoothDamp(Vi_LD_smoothdamp[r, c], Vi, ref Vi_LD_smoothdamp_velocity[r, c], 0.8000000000f, 10000, (float)dtime); // [m/sec]
-                        Vi_LD_smoothdamp_diff[r, c] = Vi_LD_smoothdamp[r, c] - Vi;
+                        if (integrator_function_call_number == 0)
+                        {
+                            float full_dt = dtime * 2.0f;
+                            Vi_LD_smoothdamp[r, c] = Mathf.SmoothDamp(
+                                Vi_LD_smoothdamp[r, c], Vi,
+                                ref Vi_LD_smoothdamp_velocity[r, c],
+                                0.25f, 10000.0f, full_dt); // 0.25s Dynamic Inflow Zeitkonstante
+ 
+                            /*
+                            // 1. Resolve local aerodynamic state
+                            // Vc is the vertical climb/descent velocity, V2 is the local blade tangential velocity
+                            float V_axial = Vi_LD_smoothdamp[r, c] + Vc; 
+                            float U_local = Mathf.Sqrt(V2 * V2 + V_axial * V_axial);
+
+                            // Clamp to avoid division by zero if the rotor and air are completely stationary
+                            U_local = Mathf.Max(U_local, 0.1f);
+
+                            // 2. Calculate the Pitt-Peters apparent mass time constant
+                            // K_apparent = 8 / (3 * pi) approx 0.848826
+                            float tau = (0.848826f * par_rotor.R.val) / U_local;
+
+                            // Optional: Expose a lag tuning multiplier (e.g. 0.5 to 2.0) in the inspector to adjust handling
+                            float lag_multiplier = par_rotor.wake_inertia_fumble_factor.val; 
+                            tau *= Mathf.Max(0.01f, lag_multiplier);
+
+                            // 3. Unconditionally stable Implicit Euler Step
+                            float dt_over_tau = (float)dtime / tau;
+                            float Vi_target = Vi; // Steady-state target solved by BEMT/Johnson logic
+
+                            // Update the state array
+                            Vi_LD_smoothdamp[r, c] = (Vi_LD_smoothdamp[r, c] + dt_over_tau * Vi_target) / (1.0f + dt_over_tau);
+
+                            // 4. Update the difference for the rotor forces calculation
+                            Vi_LD_smoothdamp_diff[r, c] = Vi_LD_smoothdamp[r, c] - Vi_target;
+                            */
+
+                        }
+                        Vi_LD_smoothdamp_diff[r, c] = Vi_LD_smoothdamp[r, c] - Vi;    
                     }
                     ///////////////////////////////////////////////////////////////////
 
@@ -2635,7 +2686,7 @@ float rho_air = 1.27f; // TODO  rho_air;
                         Vector3[,] F_LB_O_torque = new Vector3[r_n, c_n];
 
                         Rotor_Disc_BEMT_Calculations(
-                            false, ref x_states, test_mass_total, par_rotor, ref beta, Vector3.zero,
+                            false, 0, ref x_states, test_mass_total, par_rotor, ref beta, Vector3.zero,
                             ref T_stiffLH, ref T_stiffLD, ref T_dampLH, ref T_dampLD,
                             ref A_OLDnorot, ref r_LBO_O, ref dr_LBO_O_dt, ref dr_LBO_LB_dt,
                             ref F_LB_O_thrust, ref F_LB_O_torque,
