@@ -93,6 +93,13 @@ HH_API hh_result hh_sim_load_xml(hh_sim* sim, const char* path, int32_t kind);
 HH_API hh_result hh_sim_load_xml_text(hh_sim* sim, const char* xml, const char* source_name, int32_t kind);
 HH_API hh_result hh_sim_set_options(hh_sim* sim, const hh_sim_options* options);
 
+/* Live tuning: applies the parameter files loaded since the last reset (hh_sim_load_xml*) to the RUNNING simulation. Nothing is reset: state,
+ * rotor filters, controller integrators, servo positions and contact memory stay; masses, inertia, rotor, drivetrain, controller gains,
+ * aerodynamics and collision parameters are recompiled and take effect with the next step. Safe while the physics thread runs.
+ * HH_ERROR_MODEL: the parameters are invalid (nothing changed, see hh_sim_get_message); HH_ERROR_INVALID_STATE: no model yet, or the rotor
+ * system changed (tandem / BEMT / rotor exists), which needs hh_sim_reset. */
+HH_API hh_result hh_sim_update_parameters(hh_sim* sim);
+
 /* Ground mesh in the right handed world frame (y up): vertex_count * 3 floats and index_count indices (three per triangle). The data is
  * copied. Replacing the mesh while the physics thread runs is possible but takes the physics mutex (not real time safe). */
 HH_API hh_result hh_sim_set_ground_mesh(hh_sim* sim, const float* vertices_xyz, uint32_t vertex_count, const uint32_t* indices,

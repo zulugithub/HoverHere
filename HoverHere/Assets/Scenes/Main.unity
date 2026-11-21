@@ -105275,6 +105275,7 @@ MonoBehaviour:
   reflextion_probe: {fileID: 1084945288}
   position_lights_state: 0
   mainrotor_simplified0_or_BEMT1: 0
+  use_native_physics: 1
   skybox_material: {fileID: 2100000, guid: 818a024ed3e03604b9f2886613f2a77f, type: 2}
   ground_material: {fileID: 2100000, guid: cc08277d51524864b9d603a6b6251904, type: 2}
   frames_per_sec_display_update_frequency: 0.5

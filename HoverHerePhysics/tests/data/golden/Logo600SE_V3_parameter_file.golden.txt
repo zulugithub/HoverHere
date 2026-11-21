@@ -35,7 +35,7 @@ helicopter/gyro/K_p	0.2	0.2	0.2
 helicopter/gyro/K_d	0.0001	0.0001	0.0001
 helicopter/gyro/direct_feadtrough_gyroscope	0
 helicopter/flybarless/K_a	240	270	320
-helicopter/flybarless/K_I	2.5	2.5	2.5
+helicopter/flybarless/K_I	1.0	1.0	1.0
 helicopter/flybarless/K_p	0.1	0.1	0.1
 helicopter/flybarless/K_d	0.1	0.1	0.1
 helicopter/flybarless/direct_feadtrough_flybarless	0

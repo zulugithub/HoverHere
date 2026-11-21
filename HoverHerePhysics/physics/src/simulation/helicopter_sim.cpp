@@ -222,6 +222,9 @@ struct HelicopterSim::Impl {
         Vec3 propeller_force_O{{0, 0, 0}};
         Vec3 propeller_torque_L{{0, 0, 0}};
         Real booster_thrust = 0;
+        int booster_count = 0;
+        std::array<Vec3, 2> booster_force_L{};
+        std::array<Vec3, 2> booster_position_L{};
         Vec3 unbalance_force_O{{0, 0, 0}};
         dynamics::DrivetrainInputs drive_in{};
         dynamics::DrivetrainEvaluation drive{};
@@ -257,6 +260,8 @@ struct HelicopterSim::Impl {
 
     // ---- state ---------------------------------------------------------------------------------------------------------------------
     SimState x{};
+    SimState x_prev{};                       // state before the last step
+    Real alpha = 1;                          // [0, 1] position of the rendered state between x_prev and x (rest of the frame time in the clock)
     Real t = 0;
     std::uint64_t steps = 0;
     bool diverged = false;
@@ -292,6 +297,8 @@ struct HelicopterSim::Impl {
     ~Impl() { stop_thread(); }
 
     bool build(const SimSetup& s, const hh_sim_options& o, std::string* error);
+    bool derive(const SimSetup& s, std::string* error);
+    bool update(const SimSetup& s, std::string* error);
     void reset(const hh_reset_params& r);
     void step(const hh_sim_inputs& in);
     int advance(double frame_dt, const hh_sim_inputs& in);
@@ -299,7 +306,8 @@ struct HelicopterSim::Impl {
     bool fill_bemt(hh_bemt_telemetry& out) const;
 
     void evaluate(const SimState& s, const StepHold& hold, const ControlCache& cc, StageEvaluation& e) const noexcept;
-    [[nodiscard]] ControlCache make_control_cache(const StepHold& hold) const noexcept;
+    [[nodiscard]] ControlCache make_control_cache(const StepHold& hold, const std::array<Real, 4>& sigma4) const noexcept;
+    [[nodiscard]] SimState render_state() const noexcept;
     [[nodiscard]] kinematics::SwashplateCommand swashplate_command(const std::array<Real, 3>& sigma) const noexcept;
     [[nodiscard]] control::ControllerInputs controller_inputs(const hh_sim_inputs& in, Real fade) const noexcept;
     void post_step(const StageEvaluation& e0, const StepHold& hold, const control::ControllerInputs& ci, const hh_sim_inputs& in);
@@ -323,7 +331,6 @@ bool HelicopterSim::Impl::build(const SimSetup& s, const hh_sim_options& o, std:
     };
     stop_thread();
     configured = false;
-    setup = s;
     options = o;
     if (options.dt <= 0 || options.dt > 0.02) {
         return fail("dt has to be in (0, 0.02] s");
@@ -331,19 +338,58 @@ bool HelicopterSim::Impl::build(const SimSetup& s, const hh_sim_options& o, std:
     if (!(options.time_scale >= 0) || !std::isfinite(options.time_scale)) {
         return fail("time_scale has to be a finite number >= 0");
     }
-
-    p = params::compile_to_si(s.params);
+    if (!derive(s, error)) {
+        return false;
+    }
     const auto& h = p.helicopter;
-    body_p = dynamics::make_rigid_body_params(h.mass_total, h.Jxx_Jyy_Jzz, h.Jxy_Jxz_Jyz);
-    if (!dynamics::is_valid(body_p)) {
+    controller = std::make_unique<control::FblController>(fbl_cfg, mech_main, control::make_fallback_ccpm_mixer(h, fbl_cfg));
+    servos = control::ServoBank(control::servo_time_constants(h.servo_damping));
+
+    numerics::ClockConfig cc;
+    cc.dt = options.dt;
+    cc.max_substeps = options.max_substeps > 0 ? options.max_substeps : 1000;
+    cc.max_frame_dt = options.max_frame_dt > 0 ? options.max_frame_dt : 0.25;
+    cc.time_scale = options.time_scale;
+    clock = numerics::FixedStepClock(cc);
+    dt = clock.dt();
+
+    configured = true;
+    has_nominal = false;
+    return true;
+}
+
+// Everything that follows from the parameters (SI parameters, rotor and aerodynamics configurations, mechanism, collision points). Validates
+// before it changes anything, so a failing update leaves the running model untouched.
+bool HelicopterSim::Impl::derive(const SimSetup& s, std::string* error)
+{
+    const auto fail = [error](const char* message) {
+        if (error != nullptr) {
+            *error = message;
+        }
+        return false;
+    };
+    const params::ModelParamsSI new_p = params::compile_to_si(s.params);
+    const auto& h = new_p.helicopter;
+    const dynamics::RigidBodyParams new_body = dynamics::make_rigid_body_params(h.mass_total, h.Jxx_Jyy_Jzz, h.Jxy_Jxz_Jyz);
+    if (!dynamics::is_valid(new_body)) {
         return fail("mass and inertia tensor do not describe a physical body");
     }
-    drive_p = dynamics::make_drivetrain_params(h);
-    if (!dynamics::is_valid(drive_p)) {
+    const dynamics::DrivetrainParams new_drive = dynamics::make_drivetrain_params(h);
+    if (!dynamics::is_valid(new_drive)) {
         return fail("the drivetrain parameters are not valid (gear ratios, inertias or motor constants)");
     }
+    const bool new_tandem = h.rotor_systems_configuration == 1;
+    const bool new_main_exists = h.mainrotor.rotor_exists;
+    const bool new_bemt_main = options.rotor_model == HH_ROTOR_BEMT && !new_tandem && new_main_exists;
+    if (configured && (new_tandem != tandem || new_main_exists != main_exists || new_bemt_main != bemt_main)) {
+        return fail("the rotor system changed, the model has to be rebuilt with a reset");
+    }
 
-    tandem = h.rotor_systems_configuration == 1;
+    setup = s;
+    p = new_p;
+    body_p = new_body;
+    drive_p = new_drive;
+    tandem = new_tandem;
     main_exists = h.mainrotor.rotor_exists;
     bemt_main = options.rotor_model == HH_ROTOR_BEMT && !tandem && main_exists;
     cfg_main = aero::make_classic_rotor_config(p, aero::RotorKind::Mainrotor);
@@ -366,7 +412,6 @@ bool HelicopterSim::Impl::build(const SimSetup& s, const hh_sim_options& o, std:
     mech_tail = s.tailrotor_mechanics;
     const kinematics::CcpmMixer fallback = control::make_fallback_ccpm_mixer(h, fbl_cfg);
     mixer = mech_main ? kinematics::calibrate_ccpm_mixer(*mech_main) : fallback;
-    controller = std::make_unique<control::FblController>(fbl_cfg, mech_main, fallback);
 
     const auto& sd = h.servo_damping;
     channel_tau = {sd.servo_col_mr_time_constant, sd.servo_lat_mr_time_constant, sd.servo_lon_mr_time_constant,
@@ -374,19 +419,30 @@ bool HelicopterSim::Impl::build(const SimSetup& s, const hh_sim_options& o, std:
     for (Real& tau : channel_tau) {
         tau = tau > Real{0.005} ? tau : Real{0};  // below 5 ms the servo is treated as instantaneous (as in Unity)
     }
-    servos = control::ServoBank(control::servo_time_constants(sd));
-
-    numerics::ClockConfig cc;
-    cc.dt = options.dt;
-    cc.max_substeps = options.max_substeps > 0 ? options.max_substeps : 1000;
-    cc.max_frame_dt = options.max_frame_dt > 0 ? options.max_frame_dt : 0.25;
-    cc.time_scale = options.time_scale;
-    clock = numerics::FixedStepClock(cc);
-    dt = clock.dt();
 
     collision.set_config(collision::make_collision_config(p));
-    configured = true;
-    has_nominal = false;
+    return true;
+}
+
+// New parameters for the running simulation: state, filters, controller integrators and servo positions are kept.
+bool HelicopterSim::Impl::update(const SimSetup& s, std::string* error)
+{
+    if (!configured) {
+        if (error != nullptr) {
+            *error = "the simulation is not configured yet";
+        }
+        return false;
+    }
+    if (!derive(s, error)) {
+        return false;
+    }
+    const auto& h = p.helicopter;
+    if (auto* fbl = dynamic_cast<control::FblController*>(controller.get())) {
+        fbl->update_config(fbl_cfg, mech_main, control::make_fallback_ccpm_mixer(h, fbl_cfg));
+    }
+    control::ServoBank new_servos(control::servo_time_constants(h.servo_damping));
+    new_servos.reset(servos.sigma());
+    servos = new_servos;
     return true;
 }
 
@@ -402,11 +458,10 @@ kinematics::SwashplateCommand HelicopterSim::Impl::swashplate_command(const std:
     return kinematics::ccpm_swashplate(mixer, sigma);
 }
 
-HelicopterSim::Impl::ControlCache HelicopterSim::Impl::make_control_cache(const StepHold& hold) const noexcept
+HelicopterSim::Impl::ControlCache HelicopterSim::Impl::make_control_cache(const StepHold& hold, const std::array<Real, 4>& sigma4) const noexcept
 {
     ControlCache cc;
     const auto& h = p.helicopter;
-    const auto& sigma4 = servos.sigma();
     const std::array<Real, 3> sigma{sigma4[0], sigma4[1], sigma4[2]};
 
     if (tandem) {
@@ -585,6 +640,7 @@ void HelicopterSim::Impl::evaluate(const SimState& s, const StepHold& hold, cons
 
     // booster (Airwolf): thrust along its axis, a mirrored twin when symmetric
     e.booster_thrust = 0;
+    e.booster_count = 0;
     if (h.booster.booster_exists) {
         e.booster_thrust = h.booster.thrust * hold.stick_booster;
         const int count = h.booster.booster_symmetric ? 2 : 1;
@@ -593,6 +649,9 @@ void HelicopterSim::Impl::evaluate(const SimState& s, const StepHold& hold, cons
             const Vec3 dir{{h.booster.dirLH.a[0] * scale.a[0], h.booster.dirLH.a[1] * scale.a[1], h.booster.dirLH.a[2] * scale.a[2]}};
             const Vec3 pos{{h.booster.posLH.a[0] * scale.a[0], h.booster.posLH.a[1] * scale.a[1], h.booster.posLH.a[2] * scale.a[2]}};
             const Vec3 force_L = dir * e.booster_thrust;
+            e.booster_force_L[static_cast<std::size_t>(i)] = force_L;
+            e.booster_position_L[static_cast<std::size_t>(i)] = pos;
+            e.booster_count = count;
             force_O = force_O + body.A_OL * force_L;
             torque_L = torque_L + qvm::cross(pos, force_L);
         }
@@ -713,7 +772,7 @@ void HelicopterSim::Impl::reset(const hh_reset_params& r)
         put<5>(x, idx::drive, dr);
         soft_target = target;
         hold.omega_mo_target = target;
-        const ControlCache cc = make_control_cache(hold);
+        const ControlCache cc = make_control_cache(hold, servos.sigma());
         StageEvaluation e;
         evaluate(x, hold, cc, e);
         dynamics::DrivetrainInputs din = e.drive_in;
@@ -731,8 +790,10 @@ void HelicopterSim::Impl::reset(const hh_reset_params& r)
 
     hold.omega_mo_target = soft_target;
     last_hold = hold;
-    last_control = make_control_cache(hold);
+    last_control = make_control_cache(hold, servos.sigma());
     evaluate(x, hold, last_control, nominal);
+    x_prev = x;
+    alpha = 1;
     has_nominal = true;
     accel_L = nominal.specific_force_L;
     (void)h;
@@ -786,7 +847,8 @@ void HelicopterSim::Impl::step(const hh_sim_inputs& in)
     }
     hold.wind_O = in.use_wind_override != 0 ? to_vec(in.wind_O) : aero::wind_velocity_O(p.scenery.weather);
 
-    const ControlCache cc = make_control_cache(hold);
+    // the servo position held over the step is the one at the middle of the step
+    const ControlCache cc = make_control_cache(hold, servos.advanced(fc_out.sigma, dt / 2));
 
     // stage 1 is the nominal evaluation of the start state
     StageEvaluation e0;
@@ -802,6 +864,7 @@ void HelicopterSim::Impl::step(const hh_sim_inputs& in)
         diverged = true;
         return;
     }
+    x_prev = x;
     x = next;
     t += dt;
     ++steps;
@@ -881,19 +944,36 @@ int HelicopterSim::Impl::advance(const double frame_dt, const hh_sim_inputs& in)
     for (std::int32_t i = 0; i < plan.steps; ++i) {
         step(in);
     }
+    alpha = plan.alpha;  // the rendered state lies this far between the last two steps
     return plan.steps;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------
 // outputs
 // ---------------------------------------------------------------------------------------------------------------------------------------
+// The physics runs with a fixed step, the host renders with its own frame time. The part of the frame that is left in the clock decides where
+// between the last two steps the displayed state lies; interpolating removes the jitter of 0 or 1 extra step per frame (a millimeter or
+// more per frame at high speed) at the price of showing the state one step (1 ms) late.
+SimState HelicopterSim::Impl::render_state() const noexcept
+{
+    if (!(alpha < 1) || !has_nominal) {
+        return x;
+    }
+    SimState r{};
+    for (std::size_t i = 0; i < kStateSize; ++i) {
+        r[i] = x_prev[i] + (x[i] - x_prev[i]) * alpha;
+    }
+    return r;
+}
+
 void HelicopterSim::Impl::fill_mechanics(hh_sim_outputs& out) const
 {
     out.mainrotor_mechanics = hh_mainrotor_mechanics{};
     out.tailrotor_mechanics = hh_tailrotor_mechanics{};
     const auto& sigma4 = servos.sigma();
     const std::array<Real, 3> sigma{sigma4[0], sigma4[1], sigma4[2]};
-    const dynamics::DrivetrainState dr = take<5>(x, idx::drive);
+    const SimState xr = render_state();
+    const dynamics::DrivetrainState dr = take<5>(xr, idx::drive);
 
     if (mech_main && !tandem) {
         const kinematics::SwashplatePose pose = kinematics::step2_servos_to_swashplate(*mech_main, sigma);
@@ -964,9 +1044,10 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
         return;
     }
     const StageEvaluation& e = nominal;
+    const SimState xr = render_state();
     const auto& h = p.helicopter;
-    const dynamics::RigidBodyState rb = take<13>(x, idx::body);
-    const dynamics::DrivetrainState dr = take<5>(x, idx::drive);
+    const dynamics::RigidBodyState rb = take<13>(xr, idx::body);
+    const dynamics::DrivetrainState dr = take<5>(xr, idx::drive);
     const Mat3 A_OL = dynamics::attitude_A_OL(rb);
     const Quat q = frames::quat_normalized(dynamics::orientation(rb));
 
@@ -1012,8 +1093,8 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
     out.motor_power_mechanical = e.drive.P_mo_mech;
 
     // rotors
-    const aero::FlappingState fm = take<2>(x, idx::flap_main);
-    const aero::FlappingState ft = take<2>(x, idx::flap_tail);
+    const aero::FlappingState fm = take<2>(xr, idx::flap_main);
+    const aero::FlappingState ft = take<2>(xr, idx::flap_tail);
     hh_rotor_output& mr = out.mainrotor;
     if (main_exists && bemt_main) {
         // the BEMT thrust is the length of the force vector: give it the sign of the force along the shaft
@@ -1036,14 +1117,14 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
         fill_rotor_output_classic(e.propeller_out, aero::FlappingState{}, out.propeller);
     }
     out.booster_thrust = e.booster_thrust;
-    const Quat disc_q = frames::quat_normalized(aero::disc_orientation(take<6>(x, idx::disc)));
+    const Quat disc_q = frames::quat_normalized(aero::disc_orientation(take<6>(xr, idx::disc)));
     if (bemt_main) {
         out.rotor_disc_orientation[0] = disc_q.a[0];
         out.rotor_disc_orientation[1] = disc_q.a[1];
         out.rotor_disc_orientation[2] = disc_q.a[2];
         out.rotor_disc_orientation[3] = disc_q.a[3];
-        out.rotor_disc_rate_x = x[idx::disc + aero::disc::wx];
-        out.rotor_disc_rate_z = x[idx::disc + aero::disc::wz];
+        out.rotor_disc_rate_x = xr[idx::disc + aero::disc::wx];
+        out.rotor_disc_rate_z = xr[idx::disc + aero::disc::wz];
     } else {
         out.rotor_disc_orientation[0] = 1;
     }
@@ -1131,6 +1212,75 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
     out.wheel_brake_strength = mem.wheel_brake_strength;
     out.hub_distance_to_ground[0] = e.contact.hub_distance[0];
     out.hub_distance_to_ground[1] = e.contact.hub_distance[1];
+
+    // ---- debug display
+    const Real mean_pitch = [&] {
+        Real sum = 0;
+        for (const Real b : last_control.blade_pitch) {
+            sum += b;
+        }
+        return sum / static_cast<Real>(last_control.blade_pitch.size());
+    }();
+    const auto classic_debug = [&](const aero::ClassicRotorOutputs& r, const Real rho, const Real radius, const Real collective, hh_rotor_debug& d) {
+        d.power_profile = r.P_profile;
+        d.power_induced = r.P_induced;
+        d.power_parasite = r.P_parasite;
+        d.power_climb = r.P_climb;
+        d.flapping_tau = r.flapping_tau;
+        const Real v_h = std::sqrt(std::max(std::abs(r.thrust), Real{0.01}) / (2 * rho * frames::kPi * radius * radius));
+        d.vz_scaled = r.vertical_speed / v_h;
+        d.vx_scaled = r.horizontal_speed / v_h;
+        d.vortex_ring_use = 1;
+        d.vortex_ring_strength = r.vrs_strength;
+        d.turbulence = r.turbulence_strength;
+        d.collective_pitch = collective;
+        d.horizontal_speed = r.horizontal_speed;
+    };
+    const Real rho = p.scenery.weather.rho_air;
+    hh_rotor_debug& dm = out.mainrotor_debug;
+    if (bemt_main) {
+        dm.power_profile = -e.bemt_out.shaft_torque * dr[drv::omega_mr];
+        dm.vz_scaled = e.bemt_out.Vz_scaled;
+        dm.vx_scaled = e.bemt_out.Vx_scaled;
+        dm.vortex_ring_use = e.bemt_out.use_vrs;
+        dm.vortex_ring_strength = e.bemt_out.strength_vrs;
+        dm.turbulence = e.bemt_out.turbulence_strength;
+        dm.collective_pitch = mean_pitch;
+        dm.horizontal_speed = e.bemt_out.horizontal_speed;
+        from_vec(e.bemt_out.torque_hub_on_body_L, dm.hub_torque_L);
+    } else if (main_exists) {
+        classic_debug(e.main_out, rho, h.mainrotor.R, last_control.main.Theta_col, dm);
+    }
+    if (e.tail_active) {
+        classic_debug(e.tail_out, rho, h.tailrotor.R, last_control.tail.Theta_col, out.tailrotor_debug);
+    }
+    if (e.propeller_active) {
+        classic_debug(e.propeller_out, rho, h.propeller.R, last_control.propeller.Theta_col, out.propeller_debug);
+    }
+    from_vec(e.contact_in.position_O + A_OL * geo_main.position_L, dm.position_O);
+    from_vec(e.contact_in.position_O + A_OL * geo_tail.position_L, out.tailrotor_debug.position_O);
+    from_vec(e.contact_in.position_O + A_OL * geo_prop.position_L, out.propeller_debug.position_O);
+
+    from_vec(frames::transposed(A_OL) * last_hold.wind_O, out.wind_L);
+    from_vec(A_OL * e.aero.fuselage_force_L, out.fuselage_force_O);
+    for (std::size_t s = 0; s < e.aero.surface.size(); ++s) {
+        from_vec(A_OL * e.aero.surface[s].force_L, out.surface_force_O[s]);
+    }
+    from_vec(e.loads.torque_L - e.contact.torque_L, out.nonground_torque_L);
+    if (const auto* fbl = dynamic_cast<const control::FblController*>(controller.get())) {
+        const auto integrals = fbl->integrals();
+        out.controller_integral[0] = integrals[0];
+        out.controller_integral[1] = integrals[1];
+        out.controller_integral[2] = integrals[2];
+    }
+    out.motor_voltage_terminal = e.drive.V_mo;
+    out.motor_efficiency = e.drive.eta_mo;
+    out.booster_count = e.booster_count;
+    for (int i = 0; i < e.booster_count; ++i) {
+        const auto k = static_cast<std::size_t>(i);
+        from_vec(A_OL * e.booster_force_L[k], out.booster_force_O[k]);
+        from_vec(e.contact_in.position_O + A_OL * e.booster_position_L[k], out.booster_position_O[k]);
+    }
 }
 
 bool HelicopterSim::Impl::fill_bemt(hh_bemt_telemetry& out) const
@@ -1162,6 +1312,12 @@ bool HelicopterSim::Impl::fill_bemt(hh_bemt_telemetry& out) const
         out.dQ[i] = b.dQ[i];
         out.vrs_weight[i] = b.vrs_weight[i];
         out.residual[i] = b.residual[i];
+    }
+    for (std::size_t i = 0; i < aero::kBemtElementCount; ++i) {
+        from_vec(b.position_O[i], out.position_O[i]);
+        from_vec(b.induced_velocity_O[i], out.induced_velocity_O[i]);
+        from_vec(b.force_thrust_O[i], out.force_thrust_O[i]);
+        from_vec(b.force_torque_O[i], out.force_torque_O[i]);
     }
     out.thrust = b.thrust;
     out.shaft_torque = b.shaft_torque;
@@ -1245,6 +1401,12 @@ bool HelicopterSim::configured() const noexcept
     return impl_->configured;
 }
 
+bool HelicopterSim::update_parameters(const SimSetup& setup, std::string* error)
+{
+    std::lock_guard<std::mutex> lock(impl_->mutex);
+    return impl_->update(setup, error);
+}
+
 void HelicopterSim::set_flight_controller(std::unique_ptr<control::IFlightController> controller)
 {
     std::lock_guard<std::mutex> lock(impl_->mutex);
@@ -1294,6 +1456,7 @@ void HelicopterSim::step_fixed(const hh_sim_inputs& inputs)
     }
     std::lock_guard<std::mutex> lock(impl_->mutex);
     impl_->step(inputs);
+    impl_->alpha = 1;  // no frame time involved: the output is the state of the last step itself
 }
 
 int HelicopterSim::advance(const double frame_dt, const hh_sim_inputs& inputs)

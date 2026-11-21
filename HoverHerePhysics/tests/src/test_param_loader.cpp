@@ -488,7 +488,7 @@ TEST_CASE("misplaced elements are reported, the shipped files are free of the kn
     <propeller> <b> <val>0</val> </b> </propeller>
     <propeller> <b> <val>3</val> </b> <dirL> <vect3> <x>0</x> <y>0</y> <z>0</z> </vect3> </dirL> </propeller>
   </helicopter>
-  <flapping> <hub_stiffness_mr> <val>250</val> </hub_stiffness_mr> </flapping>
+  <flapping> <hub_stiffness_mr> <val>120</val> </hub_stiffness_mr> </flapping>
   <tuning>
     <rotor_tuning>
       <propeller> <inflow_factor> <val>1.0</val> </inflow_factor> </propeller>
@@ -526,7 +526,7 @@ TEST_CASE("misplaced elements are reported, the shipped files are free of the kn
     INFO(report12.format());
     CHECK(report12.ok());
     CHECK(report12.diagnostics.empty());
-    CHECK(q.helicopter.flapping.hub_stiffness_mr == 250);  // <flapping> is below <helicopter> now and takes effect
+    CHECK(q.helicopter.flapping.hub_stiffness_mr == 120);  // <flapping> is below <helicopter> now and takes effect
     CHECK(q.helicopter.flapping.e == 0.05);
 }
 

@@ -123,6 +123,24 @@ typedef struct hh_rotor_output {
     double turbulence_strength;   /* [0, 1] */
 } hh_rotor_output;
 
+/* Quantities for the debug display of the host application (lines for the forces, the text window). */
+typedef struct hh_rotor_debug {
+    double position_O[3];         /* hub in the world frame [m] */
+    double hub_torque_L[3];       /* torque of the hub spring and damper on the fuselage, body frame [Nm] (BEMT rotor disc, else 0) */
+    double power_profile;         /* [W] */
+    double power_induced;
+    double power_parasite;
+    double power_climb;
+    double flapping_tau;          /* [s] flapping time constant (classic model) */
+    double vz_scaled;             /* vertical air speed / hover induced velocity */
+    double vx_scaled;             /* horizontal air speed / hover induced velocity */
+    double vortex_ring_use;       /* [0, 1] */
+    double vortex_ring_strength;  /* [0, 1] */
+    double turbulence;            /* [0, 1] */
+    double collective_pitch;      /* mean blade pitch [rad] */
+    double horizontal_speed;      /* air speed in the rotor plane [m/s] */
+} hh_rotor_debug;
+
 typedef struct hh_audio {
     double mainrotor_speed;       /* [rad/s] */
     double tailrotor_speed;
@@ -233,12 +251,32 @@ typedef struct hh_sim_outputs {
     double wheel_steering[3];     /* center, left, right: heading of the wheel [0, 1) per revolution */
     double wheel_brake_strength;  /* [0, 1] */
     double hub_distance_to_ground[2];  /* main rotor, tail rotor [m] */
+
+    /* debug display */
+    hh_rotor_debug mainrotor_debug;
+    hh_rotor_debug tailrotor_debug;
+    hh_rotor_debug propeller_debug;
+    double wind_L[3];                  /* wind in the body frame [m/s] */
+    double fuselage_force_O[3];        /* air drag of the fuselage, world frame [N] */
+    double surface_force_O[4][3];      /* horizontal fin, vertical fin, left wing, right wing, world frame [N] */
+    double controller_integral[3];     /* integrators of the flybarless controller [rad/s]: roll, yaw, pitch (0 for other controllers) */
+    double nonground_torque_L[3];      /* sum of the torques of the air, the rotors, the booster (everything but the ground) [Nm] */
+    double motor_voltage_terminal;     /* [V] */
+    double motor_efficiency;           /* [0, 1] */
+    int32_t booster_count;
+    int32_t reserved3;
+    double booster_force_O[2][3];      /* [N] */
+    double booster_position_O[2][3];   /* [m] */
 } hh_sim_outputs;
 
 typedef struct hh_bemt_telemetry {
     uint32_t struct_size;
     int32_t valid;                /* 1: the main rotor is a BEMT rotor and has been evaluated */
     double time;
+    double position_O[HH_BEMT_ELEMENTS][3];       /* element position, world frame [m] */
+    double induced_velocity_O[HH_BEMT_ELEMENTS][3];  /* induced velocity Vi of the element along the negative disc axis, world frame [m/s] */
+    double force_thrust_O[HH_BEMT_ELEMENTS][3];   /* thrust force of the element [N] */
+    double force_torque_O[HH_BEMT_ELEMENTS][3];   /* tangential force of the element [N] */
     double radius[HH_BEMT_ELEMENTS];     /* index = r * HH_BEMT_AZIMUTH + c */
     double psi[HH_BEMT_ELEMENTS];
     double beta[HH_BEMT_ELEMENTS];

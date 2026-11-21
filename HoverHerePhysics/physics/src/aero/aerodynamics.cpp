@@ -92,9 +92,12 @@ AerodynamicsResult aerodynamics_evaluate(const AerodynamicsConfig& cfg, const Bo
     r.fuselage_force_L = fuselage_force_L(cfg.fuselage, rho_air, body.velocity_L - wind_L, wake);
     Vec3 force_L = r.fuselage_force_L;
     Vec3 torque_L{{0, 0, 0}};
+    std::size_t surface_index = 0;
     for (const params::si::Wing* wing : {&cfg.horizontal_fin, &cfg.vertical_fin, &cfg.horizontal_wing_left, &cfg.horizontal_wing_right}) {
+        const std::size_t index = surface_index++;
         if (wing->wing_exists) {
             const SurfaceLoads s = wing_loads(*wing, rho_air, body, wind_O, wake);
+            r.surface[index] = s;
             force_L = force_L + s.force_L;
             torque_L = torque_L + s.torque_L;
         }

@@ -139,7 +139,7 @@ helicopter:
     direct_feedthrough_gyroscope: {type: bool, xml: direct_feadtrough_gyroscope, default: false, doc: "Turn off the gyro (stick commands go straight to the servo)"}
   flybarless:
     K_a: {type: bank3, unit: "deg/s", default: [240, 270, 320], doc: "Flybarless maximum rotation velocity (should be smaller than what the helicopter can perform, otherwise the stick range is not fully used; per flight bank)"}
-    K_I: {type: bank3, unit: "1/s", default: [2.5, 2.5, 2.5], doc: "Flybarless integral gain (per flight bank)"}
+    K_I: {type: bank3, unit: "1/s", default: [1.0, 1.0, 1.0], doc: "Flybarless integral gain (per flight bank)"}
     K_p: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless proportional gain (per flight bank)"}
     K_d: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless differential gain (per flight bank)"}
     direct_feedthrough_flybarless: {type: bool, xml: direct_feadtrough_flybarless, default: false, doc: "Turn off the flybarless controller (stick commands go straight to the servos)"}

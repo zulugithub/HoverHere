@@ -431,7 +431,7 @@ void write_number(std::ostream& os, const double v)
 
 }  // namespace
 
-double find_hover_collective(const simulation::SimSetup& setup, const hh_sim_options& options)
+double find_hover_collective(const simulation::SimSetup& setup, const hh_sim_options& options, const int flight_bank)
 {
     HelicopterSim sim;
     if (!sim.configure(setup, options)) {
@@ -448,6 +448,7 @@ double find_hover_collective(const simulation::SimSetup& setup, const hh_sim_opt
         sim.reset(reset);
         hh_sim_inputs in = simulation::default_sim_inputs();
         in.collective = collective;
+        in.flight_bank = flight_bank;
         const int steps = static_cast<int>(std::lround(2.0 / sim.dt()));
         double sum = 0;
         int samples = 0;
@@ -493,7 +494,7 @@ RunSummary run_maneuver(const Maneuver& maneuver, const RunOptions& options)
     if (!maneuver.sticks) {
         return fail("the maneuver has no stick profile");
     }
-    summary.trim_collective = options.trim_collective ? *options.trim_collective : find_hover_collective(options.setup, options.sim_options);
+    summary.trim_collective = options.trim_collective ? *options.trim_collective : find_hover_collective(options.setup, options.sim_options, options.flight_bank);
     if (options.log != nullptr) {
         *options.log << "hover trim collective: " << summary.trim_collective << "\n";
     }
@@ -611,6 +612,7 @@ RunSummary run_maneuver(const Maneuver& maneuver, const RunOptions& options)
         in.booster = std::clamp(sticks.booster, -1.0, 1.0);
         in.motor_enabled = sticks.motor_enabled ? 1 : 0;
         in.wheel_brake = std::clamp(sticks.wheel_brake, 0.0, 1.0);
+        in.flight_bank = options.flight_bank;
         if (step % log_every == 0) {
             record(true, grid_every != 0 && step % grid_every == 0);
         } else if (grid_every != 0 && step % grid_every == 0) {

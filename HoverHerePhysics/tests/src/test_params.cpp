@@ -211,7 +211,7 @@ TEST_CASE("to_si converts angles, speeds, charge and temperature")
     CHECK(si.helicopter.tailrotor.oriLH.a[0] == doctest::Approx(kPi / 2));
     CHECK(si.helicopter.governor.target_rpm[0] == doctest::Approx(1160 * kRpm));
     CHECK(si.helicopter.flybarless.K_a[1] == doctest::Approx(270 * kDeg));
-    CHECK(si.helicopter.flybarless.K_I[0] == 2.5);                              // 1/s stays
+    CHECK(si.helicopter.flybarless.K_I[0] == 1.0);                              // 1/s stays
     CHECK(si.helicopter.accumulator.capacity == doctest::Approx(5000 * 3.6));  // mAh -> A s
     CHECK(si.helicopter.brushless.ns == doctest::Approx(560 * kRpm));
     CHECK(si.helicopter.sound_volume == doctest::Approx(1.0));  // percent -> ratio

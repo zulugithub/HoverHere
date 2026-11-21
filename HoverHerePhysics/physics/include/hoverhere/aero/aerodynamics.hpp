@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "hoverhere/aero/rotor_common.hpp"
 #include "hoverhere/params/model_params.hpp"
 
@@ -37,6 +39,8 @@ struct AerodynamicsResult {
     Vec3 force_O{{0, 0, 0}};           // [N] sum of all surfaces, world frame
     Vec3 torque_L{{0, 0, 0}};          // [Nm] sum, body frame, about the centre of mass
     Vec3 fuselage_force_L{{0, 0, 0}};  // [N] drag of the fuselage alone (input of the rotor parasite power)
+    // loads of the single surfaces (zero for surfaces that do not exist): horizontal fin, vertical fin, left wing, right wing
+    std::array<SurfaceLoads, 4> surface{};
 };
 
 // Fuselage drag: quadratic in the air velocity along each body axis; the vertical axis sees the rotor wakes.

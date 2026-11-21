@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -13,6 +14,7 @@
 
 #include "hoverhere/core/math.hpp"
 #include "hoverhere/io/param_loader.hpp"
+#include "hoverhere/params/params.hpp"
 #include "hoverhere/version.hpp"
 #include "maneuver_runner.hpp"
 
@@ -102,6 +104,9 @@ const char* const kUsage =
     "  --add-trim             add the hover trim to the collective column of the profile\n"
     "  --ground-obj FILE      ground mesh (Wavefront OBJ of a skymap collision_landing_object.obj, mapped like Unity: x -> -x, z -> -z)\n"
     "  --ground-obj-raw FILE  same, coordinates taken as stored\n"
+    "  --bank N               flight bank 0..2 (controller gains and rotor speed setpoint, default 0)\n"
+    "  --set PATH=VALUE       set a parameter of the helicopter file after loading (user units), e.g. helicopter/flybarless/K_d=0 or\n"
+    "                         helicopter/flybarless/K_p[1]=0.2 (component of a 3 value parameter), tuning/turbulence/frequency=2; repeatable\n"
     "  --dt SECONDS           physics step (default 0.001)\n"
     "  --seed N               random seed of the turbulence\n"
     "  --no-vrs --no-ground-effect --no-turbulence --no-dynamic-inflow --quasi-static   switch off parts of the BEMT model\n";
@@ -133,6 +138,7 @@ int run_command(const std::vector<std::string>& args)
     bool ground_raw = false;
     bool no_mechanics = false;
     bool add_trim = false;
+    std::vector<std::string> assignments;
 
     for (std::size_t i = 0; i < args.size(); ++i) {
         const std::string& a = args[i];
@@ -182,6 +188,10 @@ int run_command(const std::vector<std::string>& args)
         } else if (a == "--ground-obj-raw") {
             ground_obj = value();
             ground_raw = true;
+        } else if (a == "--bank") {
+            options.flight_bank = std::clamp(std::atoi(value().c_str()), 0, 2);
+        } else if (a == "--set") {
+            assignments.push_back(value());
         } else if (a == "--dt") {
             options.sim_options.dt = std::atof(value().c_str());
         } else if (a == "--seed") {
@@ -215,6 +225,27 @@ int run_command(const std::vector<std::string>& args)
     // parameters
     if (!load_report_ok(io::load_parameters_file(*heli, hoverhere::params::ParamDocument::Heli, options.setup.params))) {
         return 3;
+    }
+    for (const std::string& assignment : assignments) {
+        const std::size_t equals = assignment.find('=');
+        if (equals == std::string::npos) {
+            std::cerr << "--set expects PATH=VALUE: " << assignment << "\n";
+            return 2;
+        }
+        std::string path = assignment.substr(0, equals);
+        std::size_t component = 0;
+        const std::size_t bracket = path.find('[');
+        if (bracket != std::string::npos) {
+            component = static_cast<std::size_t>(std::atoi(path.c_str() + bracket + 1));
+            path = path.substr(0, bracket);
+        }
+        const auto* descriptor = hoverhere::params::find_descriptor(hoverhere::params::model_param_descriptors(), path);
+        if (descriptor == nullptr) {
+            std::cerr << "unknown parameter " << path << "\n";
+            return 2;
+        }
+        hoverhere::params::write_component(&options.setup.params, *descriptor, component, std::atof(assignment.c_str() + equals + 1));
+        std::cout << "set " << path << "[" << component << "] = " << assignment.substr(equals + 1) << "\n";
     }
     if (scenery && !load_report_ok(io::load_parameters_file(*scenery, hoverhere::params::ParamDocument::Scenery, options.setup.params))) {
         return 3;

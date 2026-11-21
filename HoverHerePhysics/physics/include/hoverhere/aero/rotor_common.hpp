@@ -90,7 +90,12 @@ struct TurbulenceConfig {
     Real frequency = 5;                      // [1/s]
     Vec3 force_strength{{2, 12, 2}};         // [N]  amplitude per body axis
     Vec3 torque_strength{{50, 2, 50}};       // [Nm] amplitude per body axis
-    Real torque_smooth_time = 0.3;           // [s]
+    // The torque noise is smoothed with a critically damped filter. The Unity code smoothed it with Vector3.SmoothDamp(0.3 s) but never wrote
+    // the filter velocity back and called it four times per RK4 step, which made the torque follow its target about 40 000 times slower than
+    // intended (an effective lag of about 12 s at the 1 ms step, an rms of 5 % of the amplitude). The tuning parameters of the parameter
+    // files were set with that behaviour; this time constant reproduces the same rms of the torque (5.2 % of the amplitude at the default
+    // draw frequency of 5 Hz) with a correctly working filter.
+    Real torque_smooth_time = 11.7;          // [s]
     Real torque_max_speed = 1000;            // [Nm/s]
 };
 [[nodiscard]] TurbulenceConfig make_turbulence_config(const params::si::Turbulence& p) noexcept;

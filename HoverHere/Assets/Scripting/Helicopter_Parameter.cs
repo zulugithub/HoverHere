@@ -3501,7 +3501,7 @@ namespace Parameter
             K_a.comment = "";
             K_a.unit = "deg/sec";
 
-            K_I.vect3 = new Vector3 { x = 2.5f, y = 2.5f, z = 2.5f }; // bank 1 2 3
+            K_I.vect3 = new Vector3 { x = 1.0f, y = 1.0f, z = 1.0f }; // bank 1 2 3
             //K_I.min = 0.01f;
             //K_I.max = 10f;
             K_I.hint = "Flybarless integral gain";

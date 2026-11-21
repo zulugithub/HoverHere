@@ -572,6 +572,8 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             return;
 
         string setup_key = helicopter_name + "|" + mainrotor_simplified0_or_BEMT1;
+        if (native_physics != null && native_physics.NeedsRebuild)
+            native_physics_setup_for = ""; // the rotor system was changed in the GUI: build a new native model
         if (native_physics == null || native_physics_setup_for != setup_key)
         {
             if (native_physics == null)
@@ -585,6 +587,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
                                                 main_mechanics != null ? main_mechanics.text : null,
                                                 tail_mechanics != null ? tail_mechanics.text : null,
                                                 mainrotor_simplified0_or_BEMT1 == 1);
+            native_physics.AttachMechanics(Helicopter_Mainrotor_Mechanics, Helicopter_Tailrotor_Mechanics);
             if (ok)
                 UnityEngine.Debug.Log("hoverhere.dll physics active for " + helicopter_name + ". " + native_physics.LastError);
             else
@@ -592,6 +595,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
         }
         else
         {
+            native_physics.AttachMechanics(Helicopter_Mainrotor_Mechanics, Helicopter_Tailrotor_Mechanics);
             native_physics.UpdateGroundMeshIfChanged(helicopter_ODE);
         }
     }
@@ -621,7 +625,7 @@ public partial class Helicopter_Main : Helicopter_TimestepModel
             if (use_native_physics && native_physics != null && native_physics.IsReady)
             {
                 // C++ physics: one fixed step, results are written into x_states[] and the output fields of helicopter_ODE
-                native_physics.Step(helicopter_ODE, u_inputs, dt * helicopter_ODE.par.simulation.physics.timescale.val);
+                native_physics.Step(helicopter_ODE, u_inputs, dt * helicopter_ODE.par.simulation.physics.timescale.val, last_takestep_in_frame, ui_debug_panel_state);
                 time = native_physics.SimulationTime;
             }
             else

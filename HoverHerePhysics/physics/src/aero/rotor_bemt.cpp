@@ -289,6 +289,7 @@ BemtConfig make_bemt_config(const params::si::ModelParams& p) noexcept
     c.rotor = p.helicopter.mainrotor;
     c.disc_inertia_tilt = p.helicopter.flapping.I_flapping;
     c.disc_inertia_spin = p.helicopter.mainrotor.J;
+    c.hub_stiffness = p.helicopter.flapping.hub_stiffness_mr; // what about tailrotor? (Unity uses the same value for both rotors)
     c.gravity = p.scenery.gravity;
     c.wake_inertia_fumble_factor = p.tuning.rotor_tuning.mainrotor_tuning.wake_inertia_fumble_factor;
     c.turbulence_config = make_turbulence_config(p.tuning.turbulence);
@@ -359,6 +360,7 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     const Mat3 A_OR = A_OL * A_LR;
     const Mat3 A_OD = frames::A_RL(frames::quat_normalized(disc_orientation(in.disc)));
     const Mat3 A_DO = frames::transposed(A_OD);
+    const Vec3 hub_O = in.body.position_O + A_OL * geometry.position_L;
     const Real wx_disc = in.disc[disc::wx];
     const Real wz_disc = in.disc[disc::wz];
 
@@ -517,6 +519,10 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
             const Mat3 Ry = frames::rot_y(grid.psi[i]);
             const Vec3 F_blade{{0, out.dT[i] * segment, rotation_sign * out.dQ[i] * segment}};
             force_O = force_O + A_ON * (Ry * F_blade);
+            out.position_O[i] = hub_O + A_ON * (Ry * Vec3{{radius, 0, 0}});
+            out.induced_velocity_O[i] = A_ON * (Ry * Vec3{{0, -out.Vi[i], 0}});
+            out.force_thrust_O[i] = A_ON * (Ry * Vec3{{0, out.dT[i] * segment, 0}});
+            out.force_torque_O[i] = A_ON * (Ry * Vec3{{0, 0, rotation_sign * out.dQ[i] * segment}});
             torque_D = torque_D + A_DO * (A_ON * (Ry * qvm::cross(Vec3{{radius, 0, 0}}, F_blade)));
 
             const Real dA = radius * segment * dPsi;

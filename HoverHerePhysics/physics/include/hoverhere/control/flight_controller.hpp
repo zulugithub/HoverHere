@@ -102,6 +102,10 @@ struct FblConfig {
     Real collective_stroke_offset = 0;     // [m] stroke at zero collective deflection (collective_stroke * Theta_col_0 / K_col)
     Real tail_throw = 30 * 3.14159265358979323846 / 180;          // [rad] tail servo angle at full yaw deflection
     Real speed_below_which_integrators_decay = 0;  // [rad/s] 70 % of the setpoint of bank 0
+    // First order low pass on the differentiated error (exact discretization): the numerical derivative of a gyro signal amplifies the
+    // noise of the sample by 1 / dt. 0: no filter (the raw difference quotient). 4 ms is a corner frequency of about 40 Hz, far above the
+    // control bandwidth of the loop (a few Hz), and well below the shaft frequency.
+    Real d_filter_time_constant = 0.004;           // [s]
 };
 
 [[nodiscard]] FblConfig make_fbl_config(const params::si::ModelParams& p) noexcept;
@@ -119,12 +123,17 @@ public:
     void post_step(const ControllerInputs& in, Real dt) override;
     void reset() override;
 
+    // New gains and mechanism while the controller keeps running: the integrators and the derivative memory stay as they are.
+    void update_config(const FblConfig& config, const std::optional<params::mechanics::MainrotorMechanics>& mechanics,
+                       const kinematics::CcpmMixer& fallback_mixer);
+
     // integrator values [rad] for tests and logging: roll, yaw, pitch
     [[nodiscard]] std::array<Real, 3> integrals() const noexcept { return {integral_[0], integral_[1], integral_[2]}; }
 
 private:
     struct Evaluation {
         std::array<Real, 3> error{};       // roll, yaw, pitch [rad/s]
+        std::array<Real, 3> derivative{};  // low passed derivative of the error [rad/s^2]
         std::array<bool, 3> saturated{};   // the output of the channel is limited: no integration
         NormalizedCommands commands{};
     };
@@ -135,6 +144,7 @@ private:
     kinematics::CcpmMixer mixer_;
     std::array<Real, 3> integral_{};        // roll, yaw, pitch
     std::array<Real, 3> error_previous_{};
+    std::array<Real, 3> derivative_filtered_{};   // [rad/s^2] low passed derivative of the error
     bool has_previous_ = false;
 };
 
@@ -148,6 +158,9 @@ public:
     void reset(const std::array<Real, 4>& sigma) noexcept { sigma_ = sigma; }
     [[nodiscard]] const std::array<Real, 4>& sigma() const noexcept { return sigma_; }
     void post_step(const std::array<Real, 4>& command, Real dt) noexcept;
+    // Servo positions after `dt` of lag towards `command`, without changing the state: the value at the middle of a step for a model that
+    // holds the servo position over the step (time centered instead of one half step late).
+    [[nodiscard]] std::array<Real, 4> advanced(const std::array<Real, 4>& command, Real dt) const noexcept;
 
 private:
     std::array<Real, 4> tau_{};

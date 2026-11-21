@@ -764,7 +764,7 @@ ModelParams make_default_params() noexcept
     p.helicopter.gyro.K_d = Bank3{{0.0001, 0.0001, 0.0001}};
     p.helicopter.gyro.direct_feedthrough_gyroscope = false;
     p.helicopter.flybarless.K_a = Bank3{{240.0, 270.0, 320.0}};
-    p.helicopter.flybarless.K_I = Bank3{{2.5, 2.5, 2.5}};
+    p.helicopter.flybarless.K_I = Bank3{{1.0, 1.0, 1.0}};
     p.helicopter.flybarless.K_p = Bank3{{0.1, 0.1, 0.1}};
     p.helicopter.flybarless.K_d = Bank3{{0.1, 0.1, 0.1}};
     p.helicopter.flybarless.direct_feedthrough_flybarless = false;

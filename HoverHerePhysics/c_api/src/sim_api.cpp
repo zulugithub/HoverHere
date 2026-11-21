@@ -256,6 +256,26 @@ hh_result hh_sim_set_options(hh_sim* const sim, const hh_sim_options* const opti
     });
 }
 
+hh_result hh_sim_update_parameters(hh_sim* const sim)
+{
+    if (sim == nullptr) {
+        return HH_ERROR_INVALID_ARGUMENT;
+    }
+    return guarded([&] {
+        if (!sim->sim.configured()) {
+            sim->message = "no model yet: call hh_sim_reset first";
+            return HH_ERROR_INVALID_STATE;
+        }
+        std::string error;
+        if (!sim->sim.update_parameters(sim->setup, &error)) {
+            sim->message = "parameter update: " + error;
+            return error.find("rebuilt") != std::string::npos ? HH_ERROR_INVALID_STATE : HH_ERROR_MODEL;
+        }
+        sim->dirty = false;
+        return HH_OK;
+    });
+}
+
 hh_result hh_sim_set_ground_mesh(hh_sim* const sim, const float* const vertices_xyz, const uint32_t vertex_count, const uint32_t* const indices,
                                  const uint32_t index_count, const uint32_t flags)
 {

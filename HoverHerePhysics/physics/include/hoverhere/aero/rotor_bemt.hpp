@@ -203,6 +203,12 @@ struct BemtOutputs {
     ElementArray<Real> residual{};      // [N] of the selected solution
     ElementArray<std::uint8_t> iterations{};
 
+    // geometry and forces of the elements in the world frame (debug display of the host application)
+    ElementArray<Vec3> position_O{};        // [m] element position
+    ElementArray<Vec3> induced_velocity_O{};  // [m/s] induced velocity of the element: Vi along the negative disc axis (the green lines of the Unity debug display)
+    ElementArray<Vec3> force_thrust_O{};    // [N] thrust force of the element (all blades of its sector)
+    ElementArray<Vec3> force_torque_O{};    // [N] tangential force of the element
+
     // disc
     Vec3 force_O{{0, 0, 0}};            // [N] rotor force on the disc, world frame (ground effect applied)
     Vec3 force_D{{0, 0, 0}};            // [N] same in the disc frame

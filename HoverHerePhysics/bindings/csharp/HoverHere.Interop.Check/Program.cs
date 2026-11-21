@@ -250,6 +250,27 @@ namespace HoverHere.Interop.Check
                 Check(telemetry.valid == 1 && telemetry.radius[NativeConstants.HH_BEMT_ELEMENTS - 1] > telemetry.radius[0], "BEMT grid radii");
                 Check((outputs.flags & (uint)HoverHereFlags.MechanicsMainrotor) != 0 && outputs.mainrotor_mechanics.valid == 1, "mechanics visuals");
 
+                // debug data of the BEMT grid and of the rotors for the debug display of Unity
+                double hubDistance = Math.Sqrt(Math.Pow(telemetry.position_O[0] - outputs.mainrotor_debug.position_O[0], 2) +
+                                               Math.Pow(telemetry.position_O[1] - outputs.mainrotor_debug.position_O[1], 2) +
+                                               Math.Pow(telemetry.position_O[2] - outputs.mainrotor_debug.position_O[2], 2));
+                Near(hubDistance, telemetry.radius[0], 1e-3, "BEMT element 0 lies on its radius around the hub");
+                Check(outputs.mainrotor_debug.power_profile != 0 || outputs.mainrotor_speed != 0, "rotor debug values");
+
+                // live tuning: new parameters for the running simulation, nothing is reset
+                ulong stepsBefore = outputs.step_count;
+                sim.LoadXml(heli, HoverHereXmlKind.Helicopter);
+                sim.UpdateParameters();
+                sim.StepFixed(ref inputs, ref outputs);
+                Check(outputs.step_count == stepsBefore + 1, "UpdateParameters keeps the simulation running (step count " + outputs.step_count + ")");
+                Check(!double.IsNaN(outputs.mainrotor_speed) && (outputs.flags & (uint)HoverHereFlags.Diverged) == 0, "no divergence after UpdateParameters");
+
+                // steps without the output copy, the state is read afterwards
+                int quiet = sim.StepNoOutputs(0.0025, ref inputs);
+                Check(quiet == 2, "StepNoOutputs: 2.5 ms are two steps, got " + quiet);
+                sim.GetOutputs(ref outputs);
+                Check(outputs.step_count == stepsBefore + 3, "state after StepNoOutputs (step count " + outputs.step_count + ")");
+
                 // physics thread: lock free hand over of inputs and outputs
                 sim.Reset(reset);
                 sim.PostInputs(ref inputs);

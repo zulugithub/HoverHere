@@ -56,6 +56,12 @@ public:
     bool configure(const SimSetup& setup, const hh_sim_options& options, std::string* error = nullptr);
     [[nodiscard]] bool configured() const noexcept;
 
+    // New parameters for the RUNNING simulation (live tuning): the model is recompiled to SI and all configurations are replaced while the
+    // state, the rotor filters, the controller integrators, the servo positions and the contact memory stay. Takes the mutex, so it is safe
+    // while the physics thread runs. Returns false and changes nothing when the parameters are invalid or when the rotor system changed
+    // (tandem or not, BEMT or classic, rotor exists): that needs configure() and reset().
+    bool update_parameters(const SimSetup& setup, std::string* error = nullptr);
+
     // Replaces the flight controller (the FBL controller of the parameter file is the default). Call reset() afterwards.
     void set_flight_controller(std::unique_ptr<control::IFlightController> controller);
 

@@ -93,6 +93,25 @@ namespace HoverHere.Native
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct NativeRotorDebug
+    {
+        public fixed double position_O[3];
+        public fixed double hub_torque_L[3];
+        public double power_profile;
+        public double power_induced;
+        public double power_parasite;
+        public double power_climb;
+        public double flapping_tau;
+        public double vz_scaled;
+        public double vx_scaled;
+        public double vortex_ring_use;
+        public double vortex_ring_strength;
+        public double turbulence;
+        public double collective_pitch;
+        public double horizontal_speed;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct NativeAudio
     {
         public double mainrotor_speed;
@@ -200,6 +219,20 @@ namespace HoverHere.Native
         public fixed double wheel_steering[3];
         public double wheel_brake_strength;
         public fixed double hub_distance_to_ground[2];
+        public NativeRotorDebug mainrotor_debug;
+        public NativeRotorDebug tailrotor_debug;
+        public NativeRotorDebug propeller_debug;
+        public fixed double wind_L[3];
+        public fixed double fuselage_force_O[3];
+        public fixed double surface_force_O[12];  // [4][3]
+        public fixed double controller_integral[3];
+        public fixed double nonground_torque_L[3];
+        public double motor_voltage_terminal;
+        public double motor_efficiency;
+        public int booster_count;
+        public int reserved3;
+        public fixed double booster_force_O[6];  // [2][3]
+        public fixed double booster_position_O[6];  // [2][3]
 
         public NativeContact Get_contacts(int index)
         {
@@ -214,6 +247,10 @@ namespace HoverHere.Native
         public uint struct_size;
         public int valid;
         public double time;
+        public fixed double position_O[120];  // [40][3]
+        public fixed double induced_velocity_O[120];  // [40][3]
+        public fixed double force_thrust_O[120];  // [40][3]
+        public fixed double force_torque_O[120];  // [40][3]
         public fixed double radius[40];
         public fixed double psi[40];
         public fixed double beta[40];

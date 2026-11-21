@@ -117,6 +117,9 @@ namespace HoverHere.Native
         public static extern HoverHereResult hh_sim_set_options(IntPtr sim, ref NativeSimOptions options);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HoverHereResult hh_sim_update_parameters(IntPtr sim);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern unsafe HoverHereResult hh_sim_set_ground_mesh(IntPtr sim, float* vertices, uint vertexCount, uint* indices, uint indexCount, uint flags);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
@@ -127,6 +130,10 @@ namespace HoverHere.Native
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern HoverHereResult hh_sim_step(IntPtr sim, double frameDt, ref NativeSimInputs inputs, ref NativeSimOutputs outputs, out int steps);
+
+        // the same function without the (large) output copy: for the physics steps of a frame whose result is not displayed
+        [DllImport(Library, EntryPoint = "hh_sim_step", CallingConvention = CallingConvention.Cdecl)]
+        public static extern HoverHereResult hh_sim_step_no_outputs(IntPtr sim, double frameDt, ref NativeSimInputs inputs, IntPtr outputs, out int steps);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         public static extern HoverHereResult hh_sim_step_fixed(IntPtr sim, ref NativeSimInputs inputs, ref NativeSimOutputs outputs);
@@ -301,6 +308,15 @@ namespace HoverHere.Native
         }
 
         /// <summary>
+        /// Live tuning: applies the parameter files loaded with LoadXml since the last Reset to the RUNNING simulation (nothing is reset).
+        /// Throws HoverHereException(InvalidState) when the rotor system changed (tandem / BEMT / rotor exists): that needs a rebuild with Reset.
+        /// </summary>
+        public void UpdateParameters()
+        {
+            Check(NativeMethods.hh_sim_update_parameters(Handle), nameof(NativeMethods.hh_sim_update_parameters));
+        }
+
+        /// <summary>
         /// Ground mesh in the RIGHT handed world frame (see HoverHereCoordinates.MeshToPhysics for a Unity mesh): xyz per vertex, three indices per
         /// triangle, counter clockwise seen from the side of the normal.
         /// </summary>
@@ -337,6 +353,13 @@ namespace HoverHere.Native
         {
             outputs.struct_size = (uint)Marshal.SizeOf<NativeSimOutputs>();
             Check(NativeMethods.hh_sim_step(Handle, frameDt, ref inputs, ref outputs, out int steps), nameof(NativeMethods.hh_sim_step));
+            return steps;
+        }
+
+        /// <summary>Advances like Step but does not copy the outputs (cheaper); GetOutputs reads the state afterwards.</summary>
+        public int StepNoOutputs(double frameDt, ref NativeSimInputs inputs)
+        {
+            Check(NativeMethods.hh_sim_step_no_outputs(Handle, frameDt, ref inputs, IntPtr.Zero, out int steps), nameof(NativeMethods.hh_sim_step));
             return steps;
         }
 

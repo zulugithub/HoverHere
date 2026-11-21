@@ -51,6 +51,7 @@ struct RunOptions {
     double log_rate = 100;                     // [Hz] of the state CSV
     double grid_rate = 20;                     // [Hz] of the BEMT grid CSV (0: off)
     std::filesystem::path output_directory;    // empty: no files, only the summary
+    int flight_bank = 0;                       // 0..2: selects the controller gains and the rotor speed
     std::optional<double> trim_collective;     // skip the trim search
     std::ostream* log = nullptr;
 };
@@ -73,7 +74,7 @@ struct RunSummary {
 };
 
 // Collective stick value for which the vertical rotor force holds the weight in a hover at the setpoint rotor speed.
-[[nodiscard]] double find_hover_collective(const simulation::SimSetup& setup, const hh_sim_options& options);
+[[nodiscard]] double find_hover_collective(const simulation::SimSetup& setup, const hh_sim_options& options, int flight_bank = 0);
 
 [[nodiscard]] RunSummary run_maneuver(const Maneuver& maneuver, const RunOptions& options);
 

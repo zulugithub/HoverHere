@@ -74,10 +74,19 @@ FblController::FblController(const FblConfig& config, const std::optional<params
     reset();
 }
 
+void FblController::update_config(const FblConfig& config, const std::optional<params::mechanics::MainrotorMechanics>& mechanics,
+                                  const kinematics::CcpmMixer& fallback_mixer)
+{
+    cfg_ = config;
+    mechanics_ = mechanics;
+    mixer_ = fallback_mixer;
+}
+
 void FblController::reset()
 {
     integral_ = {cfg_.initial_roll_integral, 0, cfg_.initial_pitch_integral};
     error_previous_ = {0, 0, 0};
+    derivative_filtered_ = {0, 0, 0};
     has_previous_ = false;
 }
 
@@ -99,7 +108,13 @@ FblController::Evaluation FblController::compute(const ControllerInputs& in, con
     std::array<Real, 3> pid{};
     for (std::size_t ch = 0; ch < 3; ++ch) {
         e.error[ch] = K_a[ch] * stick[ch] - rate[ch];
-        const Real derivative = has_previous_ && dt > 0 ? (e.error[ch] - error_previous_[ch]) / dt : Real{0};
+        Real derivative = 0;
+        if (has_previous_ && dt > 0) {
+            const Real raw = (e.error[ch] - error_previous_[ch]) / dt;
+            const Real keep = cfg_.d_filter_time_constant > 0 ? std::exp(-dt / cfg_.d_filter_time_constant) : Real{0};
+            derivative = keep * derivative_filtered_[ch] + (1 - keep) * raw;  // PT1, exact for a constant input over the step
+        }
+        e.derivative[ch] = derivative;
         pid[ch] = K_p[ch] * e.error[ch] + K_I[ch] * integral_[ch];
         if (!tandem) {
             pid[ch] += K_d[ch] * Real{0.001} * derivative;  // the tandem controller has no differential part
@@ -183,6 +198,7 @@ void FblController::post_step(const ControllerInputs& in, const Real dt)
         }
     }
     error_previous_ = e.error;
+    derivative_filtered_ = e.derivative;
     has_previous_ = true;
 
     // At low rotor speed (on the ground) the integrators decay, and they are cleared when the rotor stands still.
@@ -207,6 +223,15 @@ void ServoBank::post_step(const std::array<Real, 4>& command, const Real dt) noe
     for (std::size_t i = 0; i < 4; ++i) {
         sigma_[i] = kinematics::pt1_step(sigma_[i], command[i], dt, tau_[i]);
     }
+}
+
+std::array<Real, 4> ServoBank::advanced(const std::array<Real, 4>& command, const Real dt) const noexcept
+{
+    std::array<Real, 4> out = sigma_;
+    for (std::size_t i = 0; i < 4; ++i) {
+        out[i] = kinematics::pt1_step(sigma_[i], command[i], dt, tau_[i]);
+    }
+    return out;
 }
 
 std::array<Real, 4> servo_time_constants(const params::si::ServoDamping& damping) noexcept

@@ -172,6 +172,116 @@ namespace Helicopter_Mainrotor_Mechanics
 
 
 
+        // places the 3D objects (double buffered) from the calculated positions; used by Calculate and Apply_Native_Kinematics
+        private void Update_3D_Object_Poses()
+        {
+            float signum;
+            if (rotor_3d_mechanics_geometry_available == true)
+            {
+                if (ab == 0) ab = 1; else ab = 0; // a => memory block 0,  b => memory block 1 
+
+                // stationary objects (nonrotating)
+                swashpalte_stationary.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
+                swashpalte_stationary.localRotation[ab] = Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(sp_normal_actual),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[0].calculated.r_CiO_O - r_KO_O));
+
+                for (int i = 0; i < 3; i++)
+                {
+                    servoarm_BA[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].parameter.r_AiO_O);
+                    servoarm_BA[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(-mainrotor_mechanics.limb_stationary[i].calculated.normal_servo_axis),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O - mainrotor_mechanics.limb_stationary[i].parameter.r_AiO_O));
+
+                    rod_CB[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O);
+                    rod_CB[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_CiO_O - mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O - r_KO_O));
+                }
+
+                // rotating objects
+                mechanics_rotating.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 0, 0));
+                mechanics_rotating.localRotation[ab] = Helper.ConvertRightHandedToLeftHandedQuaternion(Ay_LR_Omega.transpose.rotation);
+
+                ball.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
+                ball.localRotation[ab] = Helper.ConvertRightHandedToLeftHandedQuaternion(Ay_LR_Omega.transpose.rotation);
+
+                swashpalte_rotating.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
+                swashpalte_rotating.localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(sp_normal_actual),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[0].calculated.r_DiO_O - r_KO_O));
+
+                for (int i = 0; i < 2; i++)
+                {
+                    rod_ED[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O);
+                    rod_ED[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_EiO_O - mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O - r_KO_O));
+
+                    blade[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 0, 0));
+                    blade[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.n_blade_O),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_EiO_O));
+//#if UNITY_EDITOR
+//                    if(i==0)
+//                        UnityEngine.Debug.Log("blade alpha: " + mainrotor_mechanics.limb_rotating[i].calculated.beta * Mathf.Rad2Deg);
+//#endif
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    signum = i == 0 ? -1 : +1;
+                    rotation_driver_FG[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_FiO_O);
+                    rotation_driver_FG[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(Ay_LR_Omega.transpose * new Vector3(0, 0, signum)),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O - mainrotor_mechanics.driver_rotating[i].calculated.r_FiO_O));
+
+                    rotation_driver_GH[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O);
+                    rotation_driver_GH[i].localRotation[ab] =
+                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(Ay_LR_Omega.transpose * new Vector3(0, 0, signum)),
+                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_HiO_O - mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O));
+
+                }
+            }
+        }
+
+        // ##################################################################################
+        // Native physics (hoverhere.dll): takes the kinematics that the C++ library has calculated (same meaning and the same right handed
+        // rotor frame O as the 'calculated' values of Calculate) instead of calculating them here, and moves the 3D objects.
+        // ##################################################################################
+        public void Apply_Native_Kinematics(float[] sigma, Vector3[] r_BiO_O, Vector3[] r_CiO_O, Vector3 r_KO_O_native, Vector3 sp_normal_native,
+                                            Vector3[] r_DiO_O, Vector3[] r_EiO_O, Vector3[] n_blade_O, float[] beta,
+                                            Vector3[] r_FiO_O, Vector3[] r_GiO_O, Vector3[] r_HiO_O, float Omega)
+        {
+            if (rotor_3d_mechanics_geometry_available == false)
+            {
+                return;
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                mainrotor_mechanics.limb_stationary[i].calculated.normal_servo_axis = Helper.QuaternionFromMatrix9x1(mainrotor_mechanics.limb_stationary[i].parameter.A_OLAi) * new Vector3(0, 0, 1);
+                mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O = r_BiO_O[i];
+                mainrotor_mechanics.limb_stationary[i].calculated.r_CiO_O = r_CiO_O[i];
+                mainrotor_mechanics.limb_stationary[i].calculated.sigma_actual = sigma[i];
+                servo_sigma[i] = sigma[i]; // for servo sound
+            }
+            r_KO_O = r_KO_O_native;
+            sp_normal_actual = sp_normal_native;
+            for (int i = 0; i < 2; i++)
+            {
+                mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O = r_DiO_O[i];
+                mainrotor_mechanics.limb_rotating[i].calculated.r_EiO_O = r_EiO_O[i];
+                mainrotor_mechanics.limb_rotating[i].calculated.n_blade_O = n_blade_O[i];
+                mainrotor_mechanics.limb_rotating[i].calculated.beta = beta[i];
+                mainrotor_mechanics.driver_rotating[i].calculated.r_FiO_O = r_FiO_O[i];
+                mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O = r_GiO_O[i];
+                mainrotor_mechanics.driver_rotating[i].calculated.r_HiO_O = r_HiO_O[i];
+            }
+            Ay_LR_Omega = Helper.Ay_LR(Omega);
+            Update_3D_Object_Poses();
+        }
+        // ##################################################################################
+
+
         // [rad], [rad], [m], [rad], [rad], [sec], [-]
         public void Calculate(float roll, float pitch, float collective, float Omega, ref float[] beta, float dtime, int integrator_function_call_number)
         {
@@ -518,72 +628,7 @@ namespace Helicopter_Mainrotor_Mechanics
             // ##################################################################################
             // calculate position and orientation of 3D-objects
             // ##################################################################################
-            if (rotor_3d_mechanics_geometry_available == true)
-            {
-                if (ab == 0) ab = 1; else ab = 0; // a => memory block 0,  b => memory block 1 
-
-                // stationary objects (nonrotating)
-                swashpalte_stationary.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
-                swashpalte_stationary.localRotation[ab] = Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(sp_normal_actual),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[0].calculated.r_CiO_O - r_KO_O));
-
-                for (int i = 0; i < 3; i++)
-                {
-                    servoarm_BA[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].parameter.r_AiO_O);
-                    servoarm_BA[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(-mainrotor_mechanics.limb_stationary[i].calculated.normal_servo_axis),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O - mainrotor_mechanics.limb_stationary[i].parameter.r_AiO_O));
-
-                    rod_CB[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O);
-                    rod_CB[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_CiO_O - mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_stationary[i].calculated.r_BiO_O - r_KO_O));
-                }
-
-                // rotating objects
-                mechanics_rotating.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 0, 0));
-                mechanics_rotating.localRotation[ab] = Helper.ConvertRightHandedToLeftHandedQuaternion(Ay_LR_Omega.transpose.rotation);
-
-                ball.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
-                ball.localRotation[ab] = Helper.ConvertRightHandedToLeftHandedQuaternion(Ay_LR_Omega.transpose.rotation);
-
-                swashpalte_rotating.localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(r_KO_O);
-                swashpalte_rotating.localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(sp_normal_actual),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[0].calculated.r_DiO_O - r_KO_O));
-
-                for (int i = 0; i < 2; i++)
-                {
-                    rod_ED[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O);
-                    rod_ED[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_EiO_O - mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_DiO_O - r_KO_O));
-
-                    blade[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(new Vector3(0, 0, 0));
-                    blade[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.n_blade_O),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.limb_rotating[i].calculated.r_EiO_O));
-//#if UNITY_EDITOR
-//                    if(i==0)
-//                        UnityEngine.Debug.Log("blade alpha: " + mainrotor_mechanics.limb_rotating[i].calculated.beta * Mathf.Rad2Deg);
-//#endif
-                }
-
-                for (int i = 0; i < 2; i++)
-                {
-                    signum = i == 0 ? -1 : +1;
-                    rotation_driver_FG[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_FiO_O);
-                    rotation_driver_FG[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(Ay_LR_Omega.transpose * new Vector3(0, 0, signum)),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O - mainrotor_mechanics.driver_rotating[i].calculated.r_FiO_O));
-
-                    rotation_driver_GH[i].localPosition[ab] = Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O);
-                    rotation_driver_GH[i].localRotation[ab] =
-                    Quaternion.LookRotation(Helper.ConvertRightHandedToLeftHandedVector(Ay_LR_Omega.transpose * new Vector3(0, 0, signum)),
-                                            Helper.ConvertRightHandedToLeftHandedVector(mainrotor_mechanics.driver_rotating[i].calculated.r_HiO_O - mainrotor_mechanics.driver_rotating[i].calculated.r_GiO_O));
-
-                }
-            }
+            Update_3D_Object_Poses();
 
         }
         // ##################################################################################

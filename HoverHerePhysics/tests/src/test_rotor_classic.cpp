@@ -446,6 +446,7 @@ TEST_CASE("turbulence acts on the fuselage only when the flag is set")
     ClassicRotorConfig cfg = main_rotor_config();
     cfg.vortex_ring_state = false;
     cfg.ground_effect = false;
+    cfg.turbulence_config.torque_smooth_time = 0.3;  // quick filter: the effect shows within the 0.7 s of this test
     ClassicRotorFilterState state;
     RotorRng rng(5);
     ClassicRotorInputs in = hover_inputs(cfg, hover_collective_for_weight(cfg));
@@ -466,6 +467,27 @@ TEST_CASE("turbulence acts on the fuselage only when the flag is set")
     cfg.turbulence = false;
     const ClassicRotorOutputs off = classic_rotor_evaluate(cfg, state, in);
     CHECK(qvm::mag(off.force_O - quiet.force_O) < 1e-9);
+}
+
+TEST_CASE("the default turbulence torque has the strength the parameters were tuned for (rms 5 % of the amplitude, as in the Unity code)")
+{
+    const TurbulenceConfig c{};  // defaults: 5 Hz draws, amplitude 50 Nm about x, smoothing time of the legacy behavior
+    TurbulenceState s;
+    RotorRng rng(11);
+    const Real dt = 0.001;
+    Real sum_square = 0;
+    int samples = 0;
+    for (int i = 0; i < 120000; ++i) {
+        const Real time = (i + 1) * dt;
+        turbulence_post_step(c, s, 1, time, dt, rng);
+        if (time > 30) {
+            sum_square += s.torque_L.a[0] * s.torque_L.a[0];
+            ++samples;
+        }
+    }
+    const Real rms = std::sqrt(sum_square / samples) / c.torque_strength.a[0];
+    CHECK(rms > 0.03);
+    CHECK(rms < 0.08);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

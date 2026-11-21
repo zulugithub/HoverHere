@@ -229,6 +229,7 @@ TEST_CASE("the differential part reacts to a change of the error but not on the 
     FblConfig c = simple_config();
     c.fbl_K_p = {0, 0, 0};
     c.fbl_K_d = {1, 1, 1};  // times 0.001 in the output
+    c.d_filter_time_constant = 0;  // the raw difference quotient; the filter has its own test
     FblController fbl = controller(c);
     const Real dt = 0.01;
 
@@ -238,6 +239,24 @@ TEST_CASE("the differential part reacts to a change of the error but not on the 
     CHECK(fbl.evaluate(flying(0.7), dt).normalized.lateral_mr == doctest::Approx(0.04));
     CHECK(fbl.evaluate(flying(0.3), dt).normalized.lateral_mr == doctest::Approx(-0.04));
     CHECK(fbl.evaluate(flying(0.5), dt).normalized.lateral_mr == 0);  // unchanged
+}
+
+TEST_CASE("the differential part is low passed with the time constant of the filter")
+{
+    FblConfig c = simple_config();
+    c.fbl_K_p = {0, 0, 0};
+    c.fbl_K_d = {1, 1, 1};
+    c.d_filter_time_constant = 0.01;
+    FblController fbl = controller(c);
+    const Real dt = 0.01;
+    const Real step = 1 - std::exp(-1.0);  // dt equals the time constant: 63 % of a step per sample
+
+    fbl.post_step(flying(0.5), dt);  // error 1.0 remembered
+    // the error jumps by 0.4: the raw derivative is 40 / s, the filtered one reaches 63 % of it at the first sample
+    CHECK(fbl.evaluate(flying(0.7), dt).normalized.lateral_mr == doctest::Approx(0.04 * step));
+    fbl.post_step(flying(0.7), dt);
+    // the error stays: the raw derivative is 0, the filtered one decays with the same time constant
+    CHECK(fbl.evaluate(flying(0.7), dt).normalized.lateral_mr == doctest::Approx(0.04 * step * std::exp(-1.0)));
 }
 
 TEST_CASE("direct feedthrough passes the sticks and the outputs are limited to one")

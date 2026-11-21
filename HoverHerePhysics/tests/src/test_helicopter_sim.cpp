@@ -404,3 +404,187 @@ TEST_CASE("non finite parameters or a diverging state stop the simulation instea
     sim.fill_outputs(out);
     CHECK((out.flags & HH_FLAG_DIVERGED) == 0);
 }
+
+TEST_CASE("update_parameters changes the model of the running simulation without resetting it")
+{
+    REQUIRE_LOGO(setup);
+    HelicopterSim sim;
+    REQUIRE(sim.configure(setup, options(HH_ROTOR_CLASSIC)));
+    const Ground ground;
+    REQUIRE(sim.set_ground_mesh(std::span<const double>(ground.vertices), std::span<const std::uint32_t>(ground.indices)));
+    sim.reset(on_ground(setup));
+    hh_sim_inputs in = default_sim_inputs();
+    in.collective = -0.2;
+    run(sim, in, 0.2);
+    hh_sim_outputs before;
+    sim.fill_outputs(before);
+    const double mass = sim.model_params().helicopter.mass_total;
+
+    SimSetup heavier = setup;
+    heavier.params.helicopter.mass_total *= 2;
+    std::string error;
+    REQUIRE(sim.update_parameters(heavier, &error));
+    CHECK(sim.model_params().helicopter.mass_total == doctest::Approx(2 * mass));
+    CHECK(sim.step_count() == 200);                        // nothing was reset
+    CHECK(sim.time() == doctest::Approx(0.2));
+    hh_sim_outputs after;
+    sim.fill_outputs(after);
+    CHECK(after.mainrotor_speed == before.mainrotor_speed);   // the state stays as it was
+    CHECK(after.position_O[1] == before.position_O[1]);
+    run(sim, in, 0.1);
+    sim.fill_outputs(after);
+    CHECK(after.step_count == 300);
+    CHECK((after.flags & HH_FLAG_DIVERGED) == 0);
+
+    // a wrong parameter set is refused and nothing changes
+    SimSetup broken = setup;
+    broken.params.helicopter.mass_total = -1;
+    CHECK_FALSE(sim.update_parameters(broken, &error));
+    CHECK_FALSE(error.empty());
+    CHECK(sim.model_params().helicopter.mass_total == doctest::Approx(2 * mass));
+
+    // a different rotor system needs a rebuild
+    SimSetup tandem = setup;
+    tandem.params.helicopter.rotor_systems_configuration = 1;
+    CHECK_FALSE(sim.update_parameters(tandem, &error));
+    CHECK(error.find("rebuilt") != std::string::npos);
+}
+
+TEST_CASE("the BEMT telemetry carries the geometry and forces of the grid elements in the world frame")
+{
+    REQUIRE_LOGO(setup);
+    HelicopterSim sim;
+    REQUIRE(sim.configure(setup, options(HH_ROTOR_BEMT)));
+    hh_reset_params reset = default_reset_params();
+    reset.position_O[1] = 30;
+    sim.reset(reset);
+    hh_sim_inputs in = default_sim_inputs();
+    in.collective = 0.4;
+    run(sim, in, 0.3);
+    hh_bemt_telemetry tele{};
+    tele.struct_size = sizeof(tele);
+    REQUIRE(sim.fill_bemt_telemetry(tele));
+    hh_sim_outputs out;
+    sim.fill_outputs(out);
+    const double* hub = out.mainrotor_debug.position_O;
+    double sum_thrust_y = 0;
+    for (int k = 0; k < HH_BEMT_ELEMENTS; ++k) {
+        const double dx = tele.position_O[k][0] - hub[0];
+        const double dy = tele.position_O[k][1] - hub[1];
+        const double dz = tele.position_O[k][2] - hub[2];
+        CHECK(std::sqrt(dx * dx + dy * dy + dz * dz) == doctest::Approx(tele.radius[k]).epsilon(1e-4));  // on the disc around the hub
+        sum_thrust_y += tele.force_thrust_O[k][1];
+        CHECK(std::isfinite(tele.induced_velocity_O[k][0]));
+        CHECK(tele.induced_velocity_O[k][1] * tele.Vi[k] <= 1e-9);  // along the negative disc axis: opposite to the sign of Vi
+    }
+    CHECK(sum_thrust_y == doctest::Approx(out.mainrotor.force_O[1]).epsilon(0.05));
+    CHECK(out.mainrotor_debug.power_profile > 0);
+}
+
+TEST_CASE("live parameter changes act on rotor, controller and ground physics of the running simulation")
+{
+    REQUIRE_LOGO(setup);
+    for (const int model : {HH_ROTOR_CLASSIC, HH_ROTOR_BEMT}) {
+        INFO("rotor model " << model);
+        const auto thrust_after = [&](const SimSetup& s, const bool update) {
+            HelicopterSim sim;
+            REQUIRE(sim.configure(setup, options(model)));
+            hh_reset_params reset = default_reset_params();
+            reset.position_O[1] = 40;
+            sim.reset(reset);
+            hh_sim_inputs in = default_sim_inputs();
+            in.collective = 0.4;
+            run(sim, in, 0.1);
+            if (update) {
+                std::string error;
+                REQUIRE(sim.update_parameters(s, &error));
+            }
+            run(sim, in, 0.3);
+            hh_sim_outputs out;
+            sim.fill_outputs(out);
+            return out.mainrotor.thrust;
+        };
+        SimSetup bigger = setup;
+        bigger.params.helicopter.mainrotor.c *= 1.5;          // chord of the blades
+        bigger.params.helicopter.mainrotor.K_col *= 1.3;      // collective pitch per stick
+        const double base = thrust_after(setup, true);
+        const double changed = thrust_after(bigger, true);
+        CHECK(std::abs(changed - base) > 0.05 * std::abs(base));
+        // the same as a model that had these values from the beginning (state differs a little, the thrust has to be close)
+        HelicopterSim fresh;
+        REQUIRE(fresh.configure(bigger, options(model)));
+        hh_reset_params reset = default_reset_params();
+        reset.position_O[1] = 40;
+        fresh.reset(reset);
+        hh_sim_inputs in = default_sim_inputs();
+        in.collective = 0.4;
+        run(fresh, in, 0.4);
+        hh_sim_outputs out;
+        fresh.fill_outputs(out);
+        CHECK(changed == doctest::Approx(out.mainrotor.thrust).epsilon(0.25));
+    }
+}
+
+TEST_CASE("the displayed state is interpolated between the last two steps by the rest of the frame time")
+{
+    REQUIRE_LOGO(setup);
+    hh_reset_params reset = default_reset_params();
+    reset.position_O[1] = 40;
+    reset.velocity_O[0] = 25;  // fast fly-by
+    hh_sim_inputs in = default_sim_inputs();
+    in.collective = 0.4;
+
+    HelicopterSim fixed;
+    REQUIRE(fixed.configure(setup, options(HH_ROTOR_CLASSIC)));
+    fixed.reset(reset);
+    hh_sim_outputs o9;
+    hh_sim_outputs o10;
+    for (int i = 0; i < 10; ++i) {
+        fixed.step_fixed(in);
+        if (i == 8) {
+            fixed.fill_outputs(o9);
+        }
+    }
+    fixed.fill_outputs(o10);
+
+    HelicopterSim framed;
+    REQUIRE(framed.configure(setup, options(HH_ROTOR_CLASSIC)));
+    framed.reset(reset);
+    CHECK(framed.advance(0.0105, in) == 10);   // ten steps and half a step left in the clock
+    hh_sim_outputs half;
+    framed.fill_outputs(half);
+    CHECK(half.step_count == 10);
+    for (int k = 0; k < 3; ++k) {
+        CHECK(half.position_O[k] == doctest::Approx(0.5 * (o9.position_O[k] + o10.position_O[k])).epsilon(1e-12));
+    }
+    // the same frame time in two halves gives the same picture (the host calls the physics several times per frame)
+    HelicopterSim split;
+    REQUIRE(split.configure(setup, options(HH_ROTOR_CLASSIC)));
+    split.reset(reset);
+    split.advance(0.0042, in);
+    split.advance(0.0063, in);
+    hh_sim_outputs again;
+    split.fill_outputs(again);
+    CHECK(again.step_count == 10);
+    CHECK(again.position_O[0] == doctest::Approx(half.position_O[0]).epsilon(1e-12));
+
+    // a frame that ends exactly on a step shows the step itself, and consecutive frames of 1.6 ms move smoothly (no step of 0 or 2 mm of 25 m/s * 1 ms)
+    HelicopterSim smooth;
+    REQUIRE(smooth.configure(setup, options(HH_ROTOR_CLASSIC)));
+    smooth.reset(reset);
+    double previous = reset.position_O[0];
+    double smallest = 1e9;
+    double largest = 0;
+    for (int frame = 0; frame < 200; ++frame) {
+        smooth.advance(0.0016, in);
+        hh_sim_outputs o;
+        smooth.fill_outputs(o);
+        const double delta = o.position_O[0] - previous;
+        previous = o.position_O[0];
+        if (frame > 5) {
+            smallest = std::min(smallest, delta);
+            largest = std::max(largest, delta);
+        }
+    }
+    CHECK(largest - smallest < 5e-3);  // without interpolation the delta jumps by one step of 25 mm
+}
