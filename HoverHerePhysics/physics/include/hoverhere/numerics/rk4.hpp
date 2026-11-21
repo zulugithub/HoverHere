@@ -29,15 +29,16 @@ concept OdeState = std::is_trivially_copyable_v<State> && requires(State s, cons
 template <class F, class State>
 concept DerivativeFunction = std::is_invocable_r_v<State, const F&, Real, const State&>;
 
-// One classical Runge-Kutta step of size h: x(t + h) from x(t). Four evaluations of f, order of accuracy 4.
+// One classical Runge-Kutta step of size h: x(t + h) from x(t) when the first stage k1 = f(t, x) is already known (the simulation
+// evaluates the model at the start of a step once and uses that evaluation for k1 and for the once-per-step updates). Three
+// evaluations of f.
 template <OdeState State, DerivativeFunction<State> F>
-[[nodiscard]] State rk4_step(const F& f, const Real t, const State& x, const Real h) noexcept(
+[[nodiscard]] State rk4_step_with_k1(const F& f, const Real t, const State& x, const State& k1, const Real h) noexcept(
     std::is_nothrow_invocable_v<const F&, Real, const State&>)
 {
     const Real half = h / 2;
     const std::size_t n = std::size(x);
 
-    const State k1 = f(t, x);
     State stage = x;
     for (std::size_t i = 0; i < n; ++i) {
         stage[i] = x[i] + half * k1[i];
@@ -57,6 +58,14 @@ template <OdeState State, DerivativeFunction<State> F>
         next[i] = x[i] + h / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
     }
     return next;
+}
+
+// One classical Runge-Kutta step of size h: x(t + h) from x(t). Four evaluations of f, order of accuracy 4.
+template <OdeState State, DerivativeFunction<State> F>
+[[nodiscard]] State rk4_step(const F& f, const Real t, const State& x, const Real h) noexcept(
+    std::is_nothrow_invocable_v<const F&, Real, const State&>)
+{
+    return rk4_step_with_k1(f, t, x, f(t, x), h);
 }
 
 }  // namespace hoverhere::numerics

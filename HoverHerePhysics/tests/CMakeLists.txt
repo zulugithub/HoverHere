@@ -9,6 +9,8 @@ add_executable(hoverhere_tests
     src/test_rotor_classic.cpp
     src/test_aerodynamics.cpp
     src/test_flight_controller.cpp
+    src/test_ground_collision.cpp
+    src/test_helicopter_sim.cpp
     src/test_rigid_body.cpp
     src/test_drivetrain.cpp
     src/test_kinematics.cpp
