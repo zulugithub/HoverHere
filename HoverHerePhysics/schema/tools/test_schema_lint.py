@@ -7,7 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from schema_lint import lint_model  # noqa: E402
+import json  # noqa: E402
+
+from schema_lint import lint_against_seed, lint_model  # noqa: E402
 from schema_model import Model, SchemaError, load_units  # noqa: E402
 
 UNITS = load_units(Path(__file__).resolve().parent.parent / "units.yaml")
@@ -85,6 +87,25 @@ class SchemaLintTest(unittest.TestCase):
         self.assertEqual(codes("a: {type: real, unit: kg, default: '1e-06', min: 0, max: 2, doc: x}"), ["L004"])
         with self.assertRaises(SchemaError):
             lint("a: {type: bool, default: true, doc: x}\na: {type: bool, default: false, doc: y}")
+
+
+    def test_cpp_only_leaves_are_skipped_by_the_csharp_sync_check(self):
+        schema = """
+            wake: {type: real, unit: "-", default: 1, min: 0, max: 10, cpp_only: true, doc: x}
+            both: {type: real, unit: "-", default: 1, min: 0, max: 10, doc: x}
+        """
+        self.assertEqual(lint(schema), [])  # cpp_only is a valid leaf key
+        seed = {"root": {"kind": "group", "name": "root", "children": [{"kind": "group", "name": "g", "children": [
+            {"kind": "float", "name": "both", "unit": "not set", "val": 1.0, "min": 0.0, "max": 10.0, "calculated": False, "xml_ignore": False}]}]}}
+        with tempfile.TemporaryDirectory() as tmp:
+            schema_path = Path(tmp) / "schema.yaml"
+            schema_path.write_text(HEAD + textwrap.indent(textwrap.dedent(schema), "  "), encoding="utf-8")
+            seed_path = Path(tmp) / "seed.json"
+            seed_path.write_text(json.dumps(seed), encoding="utf-8")
+            issues = lint_against_seed(Model(schema_path), UNITS, seed_path)
+            # "both" exists in C#, "wake" does not and is not reported; no warnings besides the (neutral) unit comparison
+            self.assertNotIn("C900", {i.code for i in issues})
+            self.assertFalse([i for i in issues if i.where == "g/wake"])
 
 
 if __name__ == "__main__":

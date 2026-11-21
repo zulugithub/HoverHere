@@ -5,7 +5,8 @@
 #
 # Leaf keys:   type (real|int|bool|enum|vec3|bank3|vec3_list), unit (schema/units.yaml), default, min, max, doc,
 #              options (enum), max_count (vec3_list), calculated (derived value, never read from files), formula (calculated),
-#              xml (element name in the parameter files if it differs from the key).
+#              xml (element name in the parameter files if it differs from the key),
+#              cpp_only (parameter of the C++ port without counterpart in Helicopter_Parameter.cs, skipped by the C# sync check).
 # Group keys:  _type (shared struct type from `types`), _document, _csharp, _xml (top level groups only).
 # Bounds are sanity limits (value is physically plausible), wide enough for all shipped helicopter files; they are not
 # meant as UI slider ranges. Where they differ from Helicopter_Parameter.cs the C# value is noted in a comment.
@@ -86,6 +87,7 @@ types:
   RotorInflowTuning:
     inflow_factor: {type: real, unit: "-", default: 1.2, min: 0.5, max: 3, doc: "Multiplies the inflow velocity"}
     inflow_offset: {type: real, unit: "m/s", default: 2, min: 0, max: 3, doc: "Adds an inflow velocity offset"}
+    wake_inertia_fumble_factor: {type: real, unit: "-", default: 1, min: 0, max: 1000, cpp_only: true, doc: "Multiplies the time constant of the induced velocity lag (Pitt-Peters apparent mass) of the BEMT rotor, 0: no lag"}
 
 simulation:
   _document: simulation

@@ -38,6 +38,7 @@ struct ParamDescriptor {
     ParamDocument document;
     bool calculated;            // derived value: never read from files
     bool required;              // missing element in the file is an error
+    bool cpp_only;              // parameter of the C++ port without counterpart in the C# classes of the Unity application
     std::uint32_t offset;       // byte offset inside the root struct; user and SI struct share the layout
     std::uint32_t capacity;     // list capacity (Vec3List), otherwise 1
     double min;                 // bound for every component (+-kUnbounded when not bounded)

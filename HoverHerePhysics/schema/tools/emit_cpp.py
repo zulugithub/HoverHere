@@ -115,7 +115,7 @@ def descriptor_rows(model: Model, units: dict[str, Unit], root: str) -> tuple[li
         fields = [
             cpp_str(f.path), cpp_str(f.xml_path), cpp_str(leaf.unit or ""), cpp_str(leaf.doc),
             f"ParamType::{leaf.kind['ptype']}", f"ParamDocument::{camel(f.document)}",
-            "true" if leaf.calculated else "false", "true" if leaf.required else "false",
+            "true" if leaf.calculated else "false", "true" if leaf.required else "false", "true" if leaf.cpp_only else "false",
             str(f.offset), str(leaf.max_count if leaf.type == LIST_KIND else 1),
             cpp_real(lo) if lo is not None else "-kUnbounded", cpp_real(hi) if hi is not None else "kUnbounded",
             cpp_real(unit.factor if unit else 1.0), cpp_real(unit.offset if unit else 0.0), opt, str(len(leaf.options))]

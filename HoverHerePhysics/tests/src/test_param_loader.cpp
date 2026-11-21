@@ -444,6 +444,10 @@ TEST_CASE("the shipped helicopter and scenery files give the same values as the 
             }
             // every parameter of the schema exists in the C# classes
             for (const auto& [xml_path, d] : by_xml_path) {
+                if (d->cpp_only) {  // parameters of the C++ port: not in the C# classes, so not in the golden files
+                    CHECK_MESSAGE(in_golden.count(xml_path) == 0, "schema parameter " << xml_path << " is marked cpp_only but exists in the C# classes");
+                    continue;
+                }
                 CHECK_MESSAGE(in_golden.count(xml_path) == 1, "schema parameter " << xml_path << " does not exist in the C# classes");
             }
 

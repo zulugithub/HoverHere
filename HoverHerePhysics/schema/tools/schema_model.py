@@ -24,7 +24,7 @@ SCALAR_KINDS = {
 }
 LIST_KIND = "vec3_list"
 LEAF_TYPES = tuple(SCALAR_KINDS) + (LIST_KIND,)
-LEAF_KEYS = {"type", "unit", "default", "min", "max", "doc", "options", "max_count", "calculated", "xml", "formula", "required"}
+LEAF_KEYS = {"type", "unit", "default", "min", "max", "doc", "options", "max_count", "calculated", "xml", "formula", "required", "cpp_only"}
 GROUP_KEYS = {"_type", "_document", "_csharp", "_xml", "_array", "_struct", "_root"}
 
 CPP_KEYWORDS = set("""alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class
@@ -85,6 +85,7 @@ class Leaf:
     offset: int = 0  # inside the parent struct
     size: int = 0
     align: int = 1
+    cpp_only: bool = False  # exists in the C++ port only, no counterpart in Helicopter_Parameter.cs
 
     @property
     def kind(self) -> dict:
@@ -265,7 +266,7 @@ class Model:
             min=raw.get("min"), max=raw.get("max"), doc=str(raw.get("doc", "")), options=list(raw.get("options", [])),
             max_count=max_count if isinstance(max_count, int) and not isinstance(max_count, bool) else 0,
             calculated=bool(raw.get("calculated", False)), required=bool(raw.get("required", False)),
-            formula=str(raw.get("formula", "")), where=where)
+            formula=str(raw.get("formula", "")), where=where, cpp_only=bool(raw.get("cpp_only", False)))
 
     # ---------------------------------------------------------------------------------------------------------
     @staticmethod

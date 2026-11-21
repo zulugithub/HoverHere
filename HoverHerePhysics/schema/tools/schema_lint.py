@@ -202,6 +202,10 @@ def lint_against_seed(model: Model, units: dict[str, Unit], seed_path: Path, rel
         if not f.csharp_path or f.document not in ("heli", "scenery", "simulation"):
             continue
         s = leaves.get(f.csharp_path)
+        if leaf.cpp_only:
+            if s is not None:
+                out.append(Issue("warning", "C907", f.path, f"is marked cpp_only but exists in Helicopter_Parameter.cs ({f.csharp_path})"))
+            continue
         if s is None:
             out.append(Issue("warning", "C900", f.path, f"not found in Helicopter_Parameter.cs ({f.csharp_path})"))
             continue
