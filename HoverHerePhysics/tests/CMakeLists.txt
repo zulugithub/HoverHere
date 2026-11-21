@@ -5,6 +5,9 @@ add_executable(hoverhere_tests
     src/test_rk4.cpp
     src/test_fixed_step_clock.cpp
     src/test_frames.cpp
+    src/test_rigid_body.cpp
+    src/test_drivetrain.cpp
+    src/test_kinematics.cpp
     src/test_params.cpp
     src/test_param_loader.cpp)
 target_link_libraries(hoverhere_tests PRIVATE hoverhere::io hoverhere::physics hoverhere::doctest hoverhere::warnings)

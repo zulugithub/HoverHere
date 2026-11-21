@@ -5,14 +5,21 @@ add_library(hoverhere_physics STATIC
     include/hoverhere/core/frames.hpp
     include/hoverhere/core/math.hpp
     include/hoverhere/core/types.hpp
+    include/hoverhere/dynamics/drivetrain.hpp
+    include/hoverhere/dynamics/rigid_body.hpp
+    include/hoverhere/kinematics/kinematics.hpp
     include/hoverhere/numerics/fixed_step_clock.hpp
     include/hoverhere/numerics/rk4.hpp
+    include/hoverhere/numerics/smooth_step.hpp
     include/hoverhere/params/mechanics_params.hpp          # generated
     include/hoverhere/params/model_params.hpp              # generated
     include/hoverhere/params/param_documents.hpp           # generated
     include/hoverhere/params/param_types.hpp
     include/hoverhere/params/params.hpp
     include/hoverhere/version.hpp
+    src/dynamics/drivetrain.cpp
+    src/dynamics/rigid_body.cpp
+    src/kinematics/kinematics.cpp
     src/params/mechanics_params.cpp                        # generated
     src/params/model_params.cpp                            # generated
     src/params/model_params_util.cpp
