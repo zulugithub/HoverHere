@@ -139,7 +139,7 @@ helicopter/booster/posLH	0	0	0
 helicopter/booster/oriLH	0	0	270
 helicopter/booster/dirLH	0	0	0
 helicopter/fuselage/S_fxyz	0.05	0.1	0.1
-helicopter/fuselage/downwash_factor_mainrotor	0.5
+helicopter/fuselage/downwash_factor_mainrotor	0.8
 helicopter/fuselage/downwash_factor_tailrotor	0
 helicopter/horizontal_fin/wing_exists	1
 helicopter/horizontal_fin/horizontal0_or_vertical1	0
@@ -239,7 +239,7 @@ tuning/rotor_tuning/mainrotor_tuning/inflow_offset	2
 tuning/rotor_tuning/tailrotor_tuning/inflow_factor	1.3
 tuning/rotor_tuning/tailrotor_tuning/inflow_offset	2
 tuning/rotor_tuning/propeller_tuning/inflow_factor	1
-tuning/rotor_tuning/propeller_tuning/inflow_offset	2
+tuning/rotor_tuning/propeller_tuning/inflow_offset	1
 @calculated
 helicopter/governor/saturation_max	22.2
 helicopter/brushless/Ke	0.017052315

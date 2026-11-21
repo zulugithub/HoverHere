@@ -36,9 +36,10 @@
       <K_p><vect3>    <x>0.08</x><y>0.08</y><z>0.08</z>  </vect3></K_p> <!-- bank 1 2 3 -->
       <K_d><vect3>    <x>0.01</x><y>0.01</y><z>0.01</z>  </vect3></K_d> <!-- bank 1 2 3 -->
       <direct_feadtrough_flybarless>  <val>false</val>  </direct_feadtrough_flybarless>
-    </flybarless>  </helicopter>
+    </flybarless>
     <flapping>
       <hub_stiffness_mr>  <val>250</val>  </hub_stiffness_mr>
       <e>  <val>0.05</val>  </e> 
     </flapping>
+  </helicopter>
 </stru_transmitter_and_helicopter>

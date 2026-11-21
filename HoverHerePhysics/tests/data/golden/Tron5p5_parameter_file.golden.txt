@@ -239,7 +239,7 @@ tuning/rotor_tuning/mainrotor_tuning/inflow_offset	2
 tuning/rotor_tuning/tailrotor_tuning/inflow_factor	1.5
 tuning/rotor_tuning/tailrotor_tuning/inflow_offset	2
 tuning/rotor_tuning/propeller_tuning/inflow_factor	1
-tuning/rotor_tuning/propeller_tuning/inflow_offset	2
+tuning/rotor_tuning/propeller_tuning/inflow_offset	1
 @calculated
 helicopter/governor/saturation_max	22.2
 helicopter/brushless/Ke	0.007957747

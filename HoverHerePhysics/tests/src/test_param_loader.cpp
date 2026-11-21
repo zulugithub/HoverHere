@@ -391,7 +391,9 @@ TEST_CASE("the shipped helicopter and scenery files give the same values as the 
         WARN_MESSAGE(false, "Unity assets not found at " << data.assets.string() << ", test skipped");
         return;
     }
-    CHECK(files.size() == 31);
+    // helicopters that are git-ignored (HoverHere/.gitignore: RAH66_Comanche*) exist on some machines only, so no equality here;
+    // a shipped file without golden fails the REQUIRE below
+    CHECK(files.size() >= 31);
 
     int compared_values = 0;
     int unity_only_values = 0;
@@ -407,6 +409,7 @@ TEST_CASE("the shipped helicopter and scenery files give the same values as the 
             const io::LoadReport report = io::load_parameters_file(file, document, p);
             INFO(report.format());
             CHECK(report.ok());
+            CHECK_MESSAGE(report.count(io::Severity::Warning) == 0, "shipped files must load without warnings");
             // no value of a shipped file may be outside the schema bounds
             for (const io::Diagnostic& d : report.diagnostics) {
                 CHECK_MESSAGE(d.message.find("outside [") == std::string::npos, d.message << " [" << d.element_path << "]");
@@ -465,8 +468,40 @@ TEST_CASE("the shipped helicopter and scenery files give the same values as the 
     (void)unity_only_values;
 }
 
-TEST_CASE("known problems of the shipped parameter files are reported")
+TEST_CASE("misplaced elements are reported, the shipped files are free of the known misplacements")
 {
+    // what the shipped files used to contain: downwash factors inside <S_fxyz>, <propeller> instead of <propeller_tuning>,
+    // <flapping> next to <helicopter>, a second <propeller> below <helicopter>
+    const std::string misplaced = R"(<?xml version="1.0"?>
+<stru_transmitter_and_helicopter>
+  <helicopter>
+    <fuselage>
+      <S_fxyz>
+        <vect3> <x>0.1</x> <y>0.3</y> <z>0.3</z> </vect3>
+        <downwash_factor_mainrotor> <val>0.8</val> </downwash_factor_mainrotor>
+      </S_fxyz>
+    </fuselage>
+    <propeller> <b> <val>0</val> </b> </propeller>
+    <propeller> <b> <val>3</val> </b> <dirL> <vect3> <x>0</x> <y>0</y> <z>0</z> </vect3> </dirL> </propeller>
+  </helicopter>
+  <flapping> <hub_stiffness_mr> <val>250</val> </hub_stiffness_mr> </flapping>
+  <tuning>
+    <rotor_tuning>
+      <propeller> <inflow_factor> <val>1.0</val> </inflow_factor> </propeller>
+    </rotor_tuning>
+  </tuning>
+</stru_transmitter_and_helicopter>)";
+    ModelParams m = make_default_params();
+    const auto bad = load_heli(misplaced, m);
+    CHECK(bad.ok());
+    CHECK(has_diagnostic(bad, io::Severity::Warning, "unknown element <downwash_factor_mainrotor>", "helicopter/fuselage/S_fxyz/downwash_factor_mainrotor"));
+    CHECK(has_diagnostic(bad, io::Severity::Warning, "unknown element <propeller>", "tuning/rotor_tuning/propeller"));
+    CHECK(has_diagnostic(bad, io::Severity::Warning, "unknown element <flapping>", "flapping"));
+    CHECK(has_diagnostic(bad, io::Severity::Warning, "appears more than once", "helicopter/propeller"));
+    CHECK(has_diagnostic(bad, io::Severity::Warning, "unknown element <dirL>", "helicopter/propeller/dirL"));
+    CHECK(m.helicopter.fuselage.downwash_factor_mainrotor == make_default_params().helicopter.fuselage.downwash_factor_mainrotor);  // never took effect
+    CHECK(m.helicopter.propeller.b == 0);  // the first <propeller> is the one that is read
+
     const DataSet data;
     const fs::path bell = data.assets / "Helicopters_Available" / "Bell206" / "Resources" / "Bell206_parameter_file.xml";
     const fs::path logo12s = data.assets / "Helicopters_Available" / "Logo600SE_V3" / "Resources" / "Logo600SE_V3_parameter_file_12S_Setup.xml";
@@ -474,20 +509,21 @@ TEST_CASE("known problems of the shipped parameter files are reported")
         WARN_MESSAGE(false, "Unity assets not found, test skipped");
         return;
     }
+    // fixed by schema/tools/fix_param_xml.py: the values are read from the place the C# classes use
     ModelParams p = make_default_params();
     const auto report = io::load_parameters_file(bell, ParamDocument::Heli, p);
+    INFO(report.format());
     CHECK(report.ok());
-    // downwash factors written inside <S_fxyz>, and <propeller> instead of <propeller_tuning>
-    CHECK(has_diagnostic(report, io::Severity::Warning, "unknown element <downwash_factor_mainrotor>", "helicopter/fuselage/S_fxyz/downwash_factor_mainrotor"));
-    CHECK(has_diagnostic(report, io::Severity::Warning, "unknown element <propeller>", "tuning/rotor_tuning/propeller"));
-    CHECK(p.helicopter.fuselage.downwash_factor_mainrotor == 0.5);
+    CHECK(report.diagnostics.empty());
+    CHECK(p.helicopter.fuselage.downwash_factor_mainrotor == 0.8);
 
     ModelParams q = make_default_params();
     const auto report12 = io::load_parameters_file(logo12s, ParamDocument::Heli, q);
+    INFO(report12.format());
     CHECK(report12.ok());
-    // <flapping> sits outside <helicopter> and therefore never took effect
-    CHECK(has_diagnostic(report12, io::Severity::Warning, "unknown element <flapping>", "flapping"));
-    CHECK(q.helicopter.flapping.hub_stiffness_mr == make_default_params().helicopter.flapping.hub_stiffness_mr);
+    CHECK(report12.diagnostics.empty());
+    CHECK(q.helicopter.flapping.hub_stiffness_mr == 250);  // <flapping> is below <helicopter> now and takes effect
+    CHECK(q.helicopter.flapping.e == 0.05);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

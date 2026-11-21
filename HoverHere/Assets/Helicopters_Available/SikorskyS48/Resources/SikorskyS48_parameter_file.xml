@@ -48,9 +48,9 @@
     <fuselage>
       <S_fxyz>
         <vect3>  <x>0.02</x>  <y>0.08</y>  <z>0.09</z>  </vect3>
-        <downwash_factor_mainrotor>  <val>0.8</val>  </downwash_factor_mainrotor>
-        <downwash_factor_tailrotor>  <val>0.0</val>  </downwash_factor_tailrotor>
       </S_fxyz>
+      <downwash_factor_mainrotor>  <val>0.8</val>  </downwash_factor_mainrotor>
+      <downwash_factor_tailrotor>  <val>0.0</val>  </downwash_factor_tailrotor>
     </fuselage>
     <horizontal_fin>
       <wing_exists>  <val>false</val>  </wing_exists>
@@ -285,10 +285,10 @@
 				<inflow_factor>  <val>1.3</val> </inflow_factor>
 				<inflow_offset>  <val>2.0</val> </inflow_offset>
 			</tailrotor_tuning>
-			<propeller>
+			<propeller_tuning>
 				<inflow_factor>  <val>1.0</val> </inflow_factor>
 				<inflow_offset>  <val>1.0</val> </inflow_offset>
-			</propeller>
+			</propeller_tuning>
 		</rotor_tuning>
 	</tuning>
 </stru_transmitter_and_helicopter>

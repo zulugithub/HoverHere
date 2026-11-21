@@ -162,29 +162,12 @@
         <vect3>  <x>0</x>  <y>0</y>  <z>0</z>  </vect3> 
       </oriLH>  
     </propeller>
-    <propeller>
-      <rotor_exists>  <val>false</val>  </rotor_exists>
-      <b>  <val>0</val>  </b>
-      <R>  <val>0.0</val>  </R>
-      <C_l_alpha>  <val>0.0</val>  </C_l_alpha>
-      <c>  <val>0.0</val>  </c>
-      <J>  <val>0.0</val>  </J>
-      <C_D0>  <val>0.0</val>  </C_D0>
-      <K_col>  <val>0</val>  </K_col>
-      <Theta_col_0>  <val>0.0</val>  </Theta_col_0>
-      <posLH>
-        <vect3>  <x>0</x>  <y>0.0</y>  <z>0.0</z>  </vect3>
-      </posLH>
-      <dirL>
-        <vect3>  <x>0</x>  <y>0</y>  <z>0</z>  </vect3>
-      </dirL>
-    </propeller>
     <fuselage>
       <S_fxyz>
         <vect3>  <x>0.20</x>  <y>1.00</y>  <z>1.00</z>   </vect3>  <!--(2.3m*1.7m)*(0.2scale)^2   (14m*1.7m)*(0.2scale)^2   (14m*1.7m)*(0.2scale)^2 -->
-        <downwash_factor_mainrotor>  <val>0.4</val>  </downwash_factor_mainrotor>
-        <downwash_factor_tailrotor>  <val>0.4</val>  </downwash_factor_tailrotor>
       </S_fxyz>
+      <downwash_factor_mainrotor>  <val>0.4</val>  </downwash_factor_mainrotor>
+      <downwash_factor_tailrotor>  <val>0.4</val>  </downwash_factor_tailrotor>
     </fuselage>
     <horizontal_fin>
       <wing_exists>  <val>false</val>  </wing_exists>
@@ -345,10 +328,10 @@
 				<inflow_factor>  <val>2.0</val> </inflow_factor>
 				<inflow_offset>  <val>2.0</val> </inflow_offset>
 			</tailrotor_tuning>
-			<propeller>
+			<propeller_tuning>
 				<inflow_factor>  <val>1.0</val> </inflow_factor>
 				<inflow_offset>  <val>1.0</val> </inflow_offset>
-			</propeller>
+			</propeller_tuning>
 		</rotor_tuning>
 	</tuning>
 </stru_transmitter_and_helicopter>
