@@ -5,6 +5,10 @@ add_executable(hoverhere_tests
     src/test_rk4.cpp
     src/test_fixed_step_clock.cpp
     src/test_frames.cpp
+    src/test_rotor_bemt.cpp
+    src/test_rotor_classic.cpp
+    src/test_aerodynamics.cpp
+    src/test_flight_controller.cpp
     src/test_rigid_body.cpp
     src/test_drivetrain.cpp
     src/test_kinematics.cpp

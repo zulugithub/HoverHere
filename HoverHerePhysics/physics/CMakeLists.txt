@@ -2,6 +2,11 @@ configure_file(src/core/version.cpp.in "${CMAKE_CURRENT_BINARY_DIR}/generated/ve
 
 # The files marked "generated" are written by schema/tools/generate_params.py and checked in (ctest: schema_up_to_date).
 add_library(hoverhere_physics STATIC
+    include/hoverhere/aero/aerodynamics.hpp
+    include/hoverhere/aero/rotor_bemt.hpp
+    include/hoverhere/aero/rotor_classic.hpp
+    include/hoverhere/aero/rotor_common.hpp
+    include/hoverhere/control/flight_controller.hpp
     include/hoverhere/core/frames.hpp
     include/hoverhere/core/math.hpp
     include/hoverhere/core/types.hpp
@@ -10,6 +15,7 @@ add_library(hoverhere_physics STATIC
     include/hoverhere/kinematics/kinematics.hpp
     include/hoverhere/numerics/fixed_step_clock.hpp
     include/hoverhere/numerics/rk4.hpp
+    include/hoverhere/numerics/smooth_damp.hpp
     include/hoverhere/numerics/smooth_step.hpp
     include/hoverhere/params/mechanics_params.hpp          # generated
     include/hoverhere/params/model_params.hpp              # generated
@@ -17,6 +23,11 @@ add_library(hoverhere_physics STATIC
     include/hoverhere/params/param_types.hpp
     include/hoverhere/params/params.hpp
     include/hoverhere/version.hpp
+    src/aero/aerodynamics.cpp
+    src/aero/rotor_bemt.cpp
+    src/aero/rotor_classic.cpp
+    src/aero/rotor_common.cpp
+    src/control/flight_controller.cpp
     src/dynamics/drivetrain.cpp
     src/dynamics/rigid_body.cpp
     src/kinematics/kinematics.cpp
