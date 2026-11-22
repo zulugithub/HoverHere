@@ -30,3 +30,6 @@ if errorlevel 1 (
 :: Plot state and BEMT grid telemetry
 echo [2/2] Generating plots...
 py -3 tools\headless\plot_example.py "out\%MANEUVER%_states.csv" "out\%MANEUVER%_bemt_grid.csv"
+py -3 tools\headless\plot_airfoil.py "out\airfoil.csv"
+py -3 tools\headless\animation_example.py "out\%MANEUVER%_states.csv" "out\%MANEUVER%_bemt_grid.csv"
+

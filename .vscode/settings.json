@@ -1,3 +1,12 @@
 {
-    "cmake.sourceDirectory": "C:/Users/zoltgrad/Documents/HoverHere/HoverHerePhysics"
+    "cmake.sourceDirectory": "C:/Users/zoltgrad/Documents/HoverHere/HoverHerePhysics",
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true
+    },
+    "C_Cpp.clang_format_style": "file"
 }

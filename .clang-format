@@ -1,0 +1,26 @@
+# Base style closest to K&R / 1TBS
+BasedOnStyle: LLVM
+
+# Indentation & Line Length 
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 140
+
+# Braces (1TBS: opening brace on same line for if/for, next line for functions)
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: Never
+  AfterStruct: false
+  AfterEnum: false
+  BeforeElse: false
+
+# Pointers & Spacing (e.g., uint8_t* ptr, space after 'if')
+PointerAlignment: Left
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+
+# Your custom addition: Vertically align '=' signs
+AlignConsecutiveAssignments: Consecutive
+
+AllowShortFunctionsOnASingleLine: None
