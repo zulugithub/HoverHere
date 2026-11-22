@@ -486,6 +486,7 @@ TEST_CASE("live parameter changes act on rotor, controller and ground physics of
     REQUIRE_LOGO(setup);
     for (const int model : {HH_ROTOR_CLASSIC, HH_ROTOR_BEMT}) {
         INFO("rotor model " << model);
+        const double duration = model == HH_ROTOR_BEMT ? 0.8 : 0.3;  // the BEMT inflow lag is a few 100 ms
         const auto thrust_after = [&](const SimSetup& s, const bool update) {
             HelicopterSim sim;
             REQUIRE(sim.configure(setup, options(model)));
@@ -499,7 +500,7 @@ TEST_CASE("live parameter changes act on rotor, controller and ground physics of
                 std::string error;
                 REQUIRE(sim.update_parameters(s, &error));
             }
-            run(sim, in, 0.3);
+            run(sim, in, duration);
             hh_sim_outputs out;
             sim.fill_outputs(out);
             return out.mainrotor.thrust;
@@ -518,7 +519,7 @@ TEST_CASE("live parameter changes act on rotor, controller and ground physics of
         fresh.reset(reset);
         hh_sim_inputs in = default_sim_inputs();
         in.collective = 0.4;
-        run(fresh, in, 0.4);
+        run(fresh, in, duration + 0.1);
         hh_sim_outputs out;
         fresh.fill_outputs(out);
         CHECK(changed == doctest::Approx(out.mainrotor.thrust).epsilon(0.25));

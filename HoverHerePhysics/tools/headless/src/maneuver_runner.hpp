@@ -10,7 +10,7 @@
 #include "hoverhere/simulation/helicopter_sim.hpp"
 
 // Headless maneuver runner: flies a stick profile through the complete simulation (synchronous, deterministic fixed steps) and writes
-// every state to CSV files that can be loaded straight into pandas / matplotlib (see tools/headless/plot_example.py).
+// every state to CSV files that can be loaded straight into pandas / plotly (see tools/headless/plot_example.py).
 namespace hoverhere::headless {
 
 struct Sticks {
@@ -49,7 +49,7 @@ struct RunOptions {
     std::vector<std::uint32_t> ground_indices;
     double duration = 0;                       // [s], 0: the duration of the maneuver
     double log_rate = 100;                     // [Hz] of the state CSV
-    double grid_rate = 20;                     // [Hz] of the BEMT grid CSV (0: off)
+    double grid_rate = 100;                    // [Hz] of the BEMT grid CSV (0: off)
     std::filesystem::path output_directory;    // empty: no files, only the summary
     int flight_bank = 0;                       // 0..2: selects the controller gains and the rotor speed
     std::optional<double> trim_collective;     // skip the trim search

@@ -1105,7 +1105,7 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
         from_vec(e.main_force_O, mr.force_O);
         from_vec(e.main_torque_L, mr.torque_L);
         mr.ground_effect_factor = e.bemt_out.ground_effect_factor;
-        mr.vortex_ring_strength = e.bemt_out.strength_vrs * e.bemt_out.use_vrs;
+        mr.vortex_ring_strength = e.bemt_out.vrs_strength;
         mr.turbulence_strength = e.bemt_out.turbulence_strength;
     } else if (main_exists) {
         fill_rotor_output_classic(e.main_out, fm, mr);

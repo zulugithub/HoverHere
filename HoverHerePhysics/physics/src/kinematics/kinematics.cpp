@@ -269,7 +269,7 @@ std::array<DriverLimb, kRotatingLimbCount> step4_driver_visuals(const MainrotorM
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// ideal linear CCPM mixer
+// ideal linear CCPM mixer (Cyclic and Collective Pitch Mixing)
 // ---------------------------------------------------------------------------------------------------------------
 CcpmMixer make_default_ccpm_mixer() noexcept
 {

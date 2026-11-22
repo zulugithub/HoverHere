@@ -164,18 +164,22 @@ Real johnson_table3(const Real Vz_scaled, const Real Vx_scaled, const JohnsonVrs
     return baseline + p.zeta * p.f * correction;  // zeta scales only the unstable correction, not the physical baseline
 }
 
-void johnson_time_lag(const Real v_current, const Real v_previous, const Real omega_mr, const Real tau_rotor_revolutions, const Real dt, Real& dv_lag_state,
-                      Real& v_lagged) noexcept
+Real first_order_lag_step(const Real x, const Real target, const Real dt, const Real tau) noexcept
+{
+    if (!(tau > 0)) {
+        return target;
+    }
+    const Real a = dt / tau;
+    return (x + a * target) / (1 + a);
+}
+
+Real johnson_time_lag(const Real v_target, const Real v_previous, const Real omega_mr, const Real tau_rotor_revolutions, const Real dt) noexcept
 {
     if (std::abs(omega_mr) < 0.1) {
-        v_lagged = v_current;
-        return;
+        return v_target;
     }
     const Real tau = std::clamp(tau_rotor_revolutions * (2 * kPi) / std::abs(omega_mr), Real{0.05}, Real{5});
-    const Real error = v_current - v_previous;
-    dv_lag_state += (error - dv_lag_state) / tau * dt;
-    dv_lag_state = std::clamp(dv_lag_state, Real{-10}, Real{10});
-    v_lagged = v_previous + dv_lag_state;
+    return first_order_lag_step(v_previous, v_target, dt, tau);
 }
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -292,6 +296,7 @@ BemtConfig make_bemt_config(const params::si::ModelParams& p) noexcept
     c.hub_stiffness = p.helicopter.flapping.hub_stiffness_mr; // what about tailrotor? (Unity uses the same value for both rotors)
     c.gravity = p.scenery.gravity;
     c.wake_inertia_fumble_factor = p.tuning.rotor_tuning.mainrotor_tuning.wake_inertia_fumble_factor;
+    c.vrs.tau_strength = p.tuning.rotor_tuning.mainrotor_tuning.vrs_time_constant;
     c.turbulence_config = make_turbulence_config(p.tuning.turbulence);
     return c;
 }
@@ -331,19 +336,19 @@ void normalize_disc_orientation(RotorDiscStateVector& x) noexcept
     x[disc::q3] = q.a[3];
 }
 
-Real pitt_peters_time_constant(const Real fumble_factor, const Real rotor_radius, const Real V2, const Real Vi_lag, const Real Vc) noexcept
+Real pitt_peters_time_constant(const Real fumble_factor, const Real rotor_radius, const Real horizontal_speed, const Real Vi_lag, const Real Vc) noexcept
 {
-    const Real U_local = std::max(std::sqrt(V2 * V2 + (Vi_lag + Vc) * (Vi_lag + Vc)), Real{0.1});
+    // The apparent mass is the air column that is pushed through the disc: its reference speed is the through flow of the disc (the
+    // translational inflow in the disc plane and the axial flow Vi + Vc), not the blade speed Omega r (V2): that one is 60..80 m/s and
+    // would shrink tau to about 10 ms, so that the air column could be reversed without any damping.
+    const Real axial = Vi_lag + Vc;
+    const Real U_local = std::max(std::sqrt(horizontal_speed * horizontal_speed + axial * axial), Real{0.5});
     return fumble_factor * (8 / (3 * kPi)) * rotor_radius / U_local;
 }
 
 Real pitt_peters_step(const Real Vi_lag, const Real Vi_target, const Real dt, const Real tau) noexcept
 {
-    if (!(tau > 0)) {  // no inertia: the induced velocity follows instantly
-        return Vi_target;
-    }
-    const Real a = dt / tau;
-    return (Vi_lag + a * Vi_target) / (1 + a);
+    return first_order_lag_step(Vi_lag, Vi_target, dt, tau);  // tau <= 0: no inertia, the induced velocity follows instantly
 }
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -445,6 +450,9 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     out.Vx_scaled = v_h > 0.1 ? out.horizontal_speed / v_h : 0;
     const Real v_quasi_static = johnson_table3(out.Vz_scaled, out.Vx_scaled, cfg.vrs, out.strength_vrs);
     out.v_johnson_target = polarity * v_quasi_static * v_h;
+    // A vortex ring builds up and decays over several revolutions: what is reported and what excites the wake turbulence is the
+    // PT1 lagged strength, never the instantaneous one that follows the sink rate. The blade inflow itself stays fast (Pitt-Peters).
+    out.vrs_strength = (cfg.quasi_static || !state.lag_initialized || !(cfg.vrs.tau_strength > 0)) ? out.strength_vrs * out.use_vrs : state.vrs_strength;
     out.v_johnson_lagged = (cfg.quasi_static || !state.lag_initialized) ? out.v_johnson_target : state.v_johnson_lagged;
 
     // The Johnson inflow is blended in smoothly over the whole descent (none at Vz/vh = 0, full at Vz/vh <= -2), in flight
@@ -547,7 +555,7 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     out.torque_D = torque_D;
     out.thrust = qvm::mag(force_O);
     out.shaft_torque = torque_D.a[1];
-    out.turbulence_strength = turbulence_strength(cfg.turbulence_config, in.body.omega_L, hub_speed, cfg.vortex_ring_state ? out.strength_vrs * out.use_vrs : Real{0});
+    out.turbulence_strength = turbulence_strength(cfg.turbulence_config, in.body.omega_L, hub_speed, cfg.vortex_ring_state ? out.vrs_strength : Real{0});
     return out;
 }
 
@@ -564,20 +572,20 @@ void bemt_post_step(const BemtConfig& cfg, BemtFilterState& state, const BemtInp
     }
     else {
         for (std::size_t i = 0; i < kBemtElementCount; ++i) {
-            const Real tau = pitt_peters_time_constant(cfg.wake_inertia_fumble_factor, cfg.rotor.R, out.V2[i], state.Vi_lag[i], out.Vc[i]);
+            const Real tau = pitt_peters_time_constant(cfg.wake_inertia_fumble_factor, cfg.rotor.R, out.horizontal_speed, state.Vi_lag[i], out.Vc[i]);
             state.Vi_lag[i] = pitt_peters_step(state.Vi_lag[i], out.Vi_target[i], dt, tau);
         }
     }
 
-    // time lag of the vortex ring development
+    // time lag of the vortex ring development: the inflow of the Johnson model and the strength follow their instantaneous values with PT1 lags
+    const Real vrs_instantaneous = out.strength_vrs * out.use_vrs;
     if (cfg.quasi_static || !state.lag_initialized) {
         state.v_johnson_lagged = out.v_johnson_target;
-        state.v_johnson_dv_lag = 0;
+        state.vrs_strength = vrs_instantaneous;
     }
     else {
-        Real lagged = state.v_johnson_lagged;
-        johnson_time_lag(out.v_johnson_target, state.v_johnson_lagged, in.omega_shaft, cfg.vrs.tau_rotor_revolutions, dt, state.v_johnson_dv_lag, lagged);
-        state.v_johnson_lagged = lagged;
+        state.v_johnson_lagged = johnson_time_lag(out.v_johnson_target, state.v_johnson_lagged, in.omega_shaft, cfg.vrs.tau_rotor_revolutions, dt);
+        state.vrs_strength = clamp01(first_order_lag_step(state.vrs_strength, vrs_instantaneous, dt, cfg.vrs.tau_strength));
     }
     state.lag_initialized = true;
 

@@ -17,8 +17,8 @@
 //   Time structure
 //   bemt_evaluate()    pure function of (config, filter state, inputs): safe in every RK4 stage. Contains the Newton solver
 //                      for the induced velocity of every element. It reads, but never writes, the filter state.
-//   bemt_post_step()   once per full step: Pitt-Peters inflow lag, the time lag of the Johnson vortex ring model, the Newton
-//                      warm start and the turbulence random numbers. Nothing else changes the filter state.
+//   bemt_post_step()   once per full step: Pitt-Peters inflow lag, the time lag of the Johnson vortex ring model and of the vortex
+//                      ring strength (both PT1, implicit Euler), the Newton warm start and the turbulence random numbers. Nothing else changes the filter state.
 //
 //   Sign convention of the induced velocity: Vi > 0 is wake flow along the negative rotor axis (downwash of a lifting main
 //   rotor, thrust along +axis); V0 = Vi + Vc is the axial flow through the disc relative to the blade. A rotor with inverted
@@ -60,6 +60,7 @@ struct JohnsonVrsParams {
     Real zeta = 0.5;        // scales the correction term only
     Real f = 1.0;           // suppression factor of the correction
     Real tau_rotor_revolutions = 10;  // time lag of the development in rotor revolutions
+    Real tau_strength = 0.4;          // [s] build-up / decay of the reported vortex ring strength (a ring needs several revolutions); 0: none
     Real transition_min_width = 0.4;
     Real transition_blend = 0.1;
 };
@@ -69,8 +70,13 @@ struct JohnsonVrsParams {
 [[nodiscard]] Real johnson_vrs_correction(Real Vz_scaled, Real Vx_scaled, const JohnsonVrsParams& p, Real& strength_vrs) noexcept;
 // Normalized induced velocity (baseline + zeta f correction); strength_vrs in [0, 1] is the weight of the correction region.
 [[nodiscard]] Real johnson_table3(Real Vz_scaled, Real Vx_scaled, const JohnsonVrsParams& p, Real& strength_vrs) noexcept;
-// First-order dynamics of the vortex ring development (Johnson, Helicopter_Rotor.ApplyTimeLag), advanced by dt.
-void johnson_time_lag(Real v_current, Real v_previous, Real omega_mr, Real tau_rotor_revolutions, Real dt, Real& dv_lag_state, Real& v_lagged) noexcept;
+// First-order dynamics of the vortex ring development, advanced by dt: PT1 with the time constant tau_rotor_revolutions revolutions of
+// the rotor (clamped to 0.05 .. 5 s), implicit Euler, unconditionally stable and independent of the step size. (The Unity version,
+// Helicopter_Rotor.ApplyTimeLag, integrates its lag state once per call: that is a poorly damped oscillator of sqrt(1 / (tau dt))
+// that rings at about 6 Hz for dt = 1 ms and switches the vortex ring on and off.)
+[[nodiscard]] Real johnson_time_lag(Real v_target, Real v_previous, Real omega_mr, Real tau_rotor_revolutions, Real dt) noexcept;
+// One implicit Euler step of a first-order lag x' = (target - x) / tau; tau <= 0: x follows the target instantly.
+[[nodiscard]] Real first_order_lag_step(Real x, Real target, Real dt, Real tau) noexcept;
 
 // ----------------------------------------------------------------------------------------------------------------
 // airfoil: continuous cl / cd curves (documentation 5.2): linear / alpha^3 close to zero, sinusoidal stall behavior
@@ -155,7 +161,7 @@ struct BemtFilterState {
     ElementArray<Real> Vi_lag{};            // [m/s] Pitt-Peters lagged induced velocity of every element
     bool lag_initialized = false;
     Real v_johnson_lagged = 0;              // [m/s] lagged Johnson vortex ring inflow
-    Real v_johnson_dv_lag = 0;              // [m/s] state of the lag filter
+    Real vrs_strength = 0;                  // [0, 1] PT1 lagged vortex ring strength (strength_vrs * use_vrs)
     TurbulenceState turbulence{};
     Real wake_velocity = 0;                 // [m/s] mean induced velocity of the last step, published for the fuselage aerodynamics (one step delay)
 };
@@ -226,7 +232,8 @@ struct BemtOutputs {
     Real Vz_scaled = 0;
     Real Vx_scaled = 0;
     Real use_vrs = 0;                   // [0, 1] coherence of the descent over the disc
-    Real strength_vrs = 0;              // [0, 1] weight of the Johnson correction
+    Real strength_vrs = 0;              // [0, 1] weight of the Johnson correction (instantaneous, follows the sink rate)
+    Real vrs_strength = 0;              // [0, 1] strength_vrs * use_vrs through the PT1 build-up / decay lag: reported strength and wake turbulence
     Real descent_blend_weight = 0;
     Real v_johnson_target = 0;          // [m/s] quasi static Johnson inflow (input of the lag filter)
     Real v_johnson_lagged = 0;          // [m/s] lagged value that is blended in
@@ -246,8 +253,9 @@ struct BemtOutputs {
 // the end of the step.
 void bemt_post_step(const BemtConfig& cfg, BemtFilterState& state, const BemtInputs& in, const BemtOutputs& out, Real time, Real dt, RotorRng& rng) noexcept;
 
-// Time constant of the Pitt-Peters inflow lag of one element: tau = k 8 / (3 pi) R / U_local, U_local = max(|V_local|, 0.1).
-[[nodiscard]] Real pitt_peters_time_constant(Real fumble_factor, Real rotor_radius, Real V2, Real Vi_lag, Real Vc) noexcept;
+// Time constant of the Pitt-Peters inflow lag of one element: tau = k 8 / (3 pi) R / U_local, with the through flow of the disc
+// U_local = max(sqrt(horizontal_speed^2 + (Vi_lag + Vc)^2), 0.5 m/s). The blade speed V2 = Omega r is not part of it.
+[[nodiscard]] Real pitt_peters_time_constant(Real fumble_factor, Real rotor_radius, Real horizontal_speed, Real Vi_lag, Real Vc) noexcept;
 
 // Implicit Euler step of the inflow lag: unconditionally stable.
 [[nodiscard]] Real pitt_peters_step(Real Vi_lag, Real Vi_target, Real dt, Real tau) noexcept;

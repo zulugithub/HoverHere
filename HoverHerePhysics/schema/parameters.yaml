@@ -88,6 +88,7 @@ types:
     inflow_factor: {type: real, unit: "-", default: 1.2, min: 0.5, max: 3, doc: "Multiplies the inflow velocity"}
     inflow_offset: {type: real, unit: "m/s", default: 2, min: 0, max: 3, doc: "Adds an inflow velocity offset"}
     wake_inertia_fumble_factor: {type: real, unit: "-", default: 1, min: 0, max: 1000, cpp_only: true, doc: "Multiplies the time constant of the induced velocity lag (Pitt-Peters apparent mass) of the BEMT rotor, 0: no lag"}
+    vrs_time_constant: {type: real, unit: "s", default: 0.4, min: 0, max: 5, cpp_only: true, doc: "Time constant of the first order build-up and decay of the vortex ring strength (reported strength and wake turbulence) of the BEMT rotor, 0: no lag"}
 
 simulation:
   _document: simulation

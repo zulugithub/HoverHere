@@ -95,7 +95,7 @@ std::vector<ReferenceRow> read_reference()
 bool same(const BemtFilterState& a, const BemtFilterState& b)
 {
     return a.Vi_raw_previous == b.Vi_raw_previous && a.Vi_lag == b.Vi_lag && a.lag_initialized == b.lag_initialized &&
-           a.v_johnson_lagged == b.v_johnson_lagged && a.v_johnson_dv_lag == b.v_johnson_dv_lag && a.wake_velocity == b.wake_velocity &&
+           a.v_johnson_lagged == b.v_johnson_lagged && a.vrs_strength == b.vrs_strength && a.wake_velocity == b.wake_velocity &&
            a.turbulence.force_L.a[0] == b.turbulence.force_L.a[0] && a.turbulence.force_L.a[1] == b.turbulence.force_L.a[1] &&
            a.turbulence.force_L.a[2] == b.turbulence.force_L.a[2] && a.turbulence.torque_L.a[0] == b.turbulence.torque_L.a[0] &&
            a.turbulence.torque_L.a[2] == b.turbulence.torque_L.a[2] && a.turbulence.torque_velocity.a[0] == b.turbulence.torque_velocity.a[0] &&
@@ -454,17 +454,162 @@ TEST_CASE("the descent coherence gate only passes a descent that is coherent ove
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// vortex ring development: slow, unconditionally stable lags (no limit cycle at the edge of the vortex ring window)
+// ---------------------------------------------------------------------------------------------------------------------
+TEST_CASE("the Johnson time lag is a first order lag: monotone, without overshoot and independent of the step size")
+{
+    const Real target = 5;
+    const Real tau = 10 * 2 * kPi / kRotorSpeed;  // 10 revolutions, 0.4 s at 1500 rpm
+    CHECK(tau == doctest::Approx(0.4).epsilon(0.01));
+
+    Real at_tau[2]{};
+    int index = 0;
+    for (const Real dt : {0.001, 0.01}) {
+        Real v = 0, previous = 0, peak = 0;
+        bool monotone = true;
+        const int steps = static_cast<int>(std::lround(3.0 / dt));
+        for (int i = 1; i <= steps; ++i) {
+            v = johnson_time_lag(target, v, kRotorSpeed, 10, dt);
+            monotone = monotone && v >= previous;
+            previous = v;
+            peak = std::max(peak, v);
+            if (i == static_cast<int>(std::lround(tau / dt))) {
+                at_tau[index] = v;
+            }
+        }
+        INFO("dt = " << dt);
+        CHECK(monotone);
+        CHECK(peak <= target);  // the old integrator + lag overshot and rang at about sqrt(1 / (tau dt))
+        CHECK(v == doctest::Approx(target).epsilon(0.01));
+        CHECK(at_tau[index] == doctest::Approx(target * (1 - std::exp(-1.0))).epsilon(0.03));
+        ++index;
+    }
+    CHECK(std::abs(at_tau[0] - at_tau[1]) < 0.05);
+
+    // a (nearly) stopped rotor has no lag, and the generic step handles tau = 0
+    CHECK(johnson_time_lag(target, 0, 0.05, 10, 0.01) == target);
+    CHECK(first_order_lag_step(1, 3, 0.01, 0) == 3);
+}
+
+TEST_CASE("the vortex ring strength builds up and decays with the PT1 lag instead of switching")
+{
+    const BemtConfig cfg = logo600();  // flight mode with the coherence gate, vrs.tau_strength = 0.4 s
+    const BemtGrid grid = make_bemt_grid(cfg);
+    const Real dt = 0.005;
+    RotorRng rng;
+
+    BemtFilterState state;
+    settle(cfg, grid, state, hover_inputs(4 * kDeg, 0));
+    REQUIRE(state.vrs_strength == 0);
+
+    // sink rate jumps into the vortex ring window: the instantaneous strength is 1 at once, the reported one rises like 1 - exp(-t / tau)
+    const BemtInputs in = hover_inputs(4 * kDeg, -3.1);
+    Real previous = 0, at_tau = 0;
+    bool monotone = true;
+    for (int i = 1; i <= static_cast<int>(std::lround(3.0 / dt)); ++i) {
+        const BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
+        REQUIRE(out.strength_vrs * out.use_vrs > 0.9);
+        CHECK(out.vrs_strength == state.vrs_strength);  // evaluate reports the lagged state, it does not write it
+        bemt_post_step(cfg, state, in, out, i * dt, dt, rng);
+        monotone = monotone && state.vrs_strength >= previous - 1e-12;
+        previous = state.vrs_strength;
+        if (i == static_cast<int>(std::lround(cfg.vrs.tau_strength / dt))) {
+            at_tau = state.vrs_strength;
+        }
+    }
+    CHECK(monotone);
+    CHECK(at_tau > 0.5);
+    CHECK(at_tau < 0.75);
+    CHECK(previous > 0.95);
+
+    // quasi static physics and tau = 0 report the instantaneous strength
+    BemtConfig steady = cfg;
+    steady.quasi_static = true;
+    BemtFilterState steady_state;
+    const BemtOutputs steady_out = settle(steady, grid, steady_state, in);
+    CHECK(steady_out.vrs_strength == doctest::Approx(steady_out.strength_vrs * steady_out.use_vrs));
+    BemtConfig instant = cfg;
+    instant.vrs.tau_strength = 0;
+    BemtFilterState instant_state;
+    settle(instant, grid, instant_state, hover_inputs(4 * kDeg, 0));
+    const BemtOutputs instant_out = bemt_evaluate(instant, grid, instant_state, in);
+    CHECK(instant_out.vrs_strength == doctest::Approx(instant_out.strength_vrs * instant_out.use_vrs));
+}
+
+TEST_CASE("a sink rate that chatters in and out of the vortex ring window at 5 Hz does not make the strength or the inflow ring")
+{
+    const BemtConfig cfg = logo600();
+    const BemtGrid grid = make_bemt_grid(cfg);
+    const Real dt = 0.002;
+
+    struct Ripple {
+        Real strength_min = 1, strength_max = 0, instant_min = 1, instant_max = 0;
+        Real johnson_min = 1e9, johnson_max = -1e9, johnson_target_min = 1e9, johnson_target_max = -1e9;
+        Real Vi_min = 1e9, Vi_max = -1e9;
+    };
+    // worst case input: the sink rate flips between "in the window" (-3.1 m/s, Vz / vh = -1) and "out" (-0.1 m/s) every 0.09 s,
+    // about 5.5 Hz like the limit cycle of the headless run (vrs_descent, t = 4.3 .. 6.7 s)
+    const auto run = [&](const BemtConfig& c) {
+        RotorRng rng;
+        BemtFilterState state;
+        settle(c, grid, state, hover_inputs(4 * kDeg, 0));
+        Ripple r;
+        const int steps = static_cast<int>(std::lround(4.0 / dt));
+        for (int i = 0; i < steps; ++i) {
+            const Real t = i * dt;
+            const bool inside = static_cast<int>(t / 0.09) % 2 == 0;
+            const BemtInputs in = hover_inputs(4 * kDeg, inside ? -3.1 : -0.1);
+            const BemtOutputs out = bemt_evaluate(c, grid, state, in);
+            bemt_post_step(c, state, in, out, t + dt, dt, rng);
+            if (t > 2) {  // after the build-up
+                const Real instant = out.strength_vrs * out.use_vrs;
+                r.strength_min = std::min(r.strength_min, out.vrs_strength);
+                r.strength_max = std::max(r.strength_max, out.vrs_strength);
+                r.instant_min = std::min(r.instant_min, instant);
+                r.instant_max = std::max(r.instant_max, instant);
+                r.johnson_min = std::min(r.johnson_min, out.v_johnson_lagged);
+                r.johnson_max = std::max(r.johnson_max, out.v_johnson_lagged);
+                r.johnson_target_min = std::min(r.johnson_target_min, out.v_johnson_target);
+                r.johnson_target_max = std::max(r.johnson_target_max, out.v_johnson_target);
+                r.Vi_min = std::min(r.Vi_min, out.Vi_mean);
+                r.Vi_max = std::max(r.Vi_max, out.Vi_mean);
+            }
+        }
+        return r;
+    };
+    const Ripple with = run(cfg);
+    BemtConfig pure_cfg = cfg;
+    pure_cfg.vortex_ring_state = false;
+    const Ripple pure = run(pure_cfg);
+
+    // the input really switches ...
+    REQUIRE(with.instant_max - with.instant_min > 0.9);
+    REQUIRE(with.johnson_target_max - with.johnson_target_min > 1.5);
+    // ... but the reported strength and the Johnson inflow only ripple slightly around their mean (a 0.4 s lag against a 0.09 s half period)
+    CHECK(with.strength_max - with.strength_min < 0.25);
+    CHECK(with.johnson_max - with.johnson_min < 0.3 * (with.johnson_target_max - with.johnson_target_min));
+    // The fast Pitt-Peters inflow is not smoothed: it follows the physical swing of the flow like the pure blade element rotor, the
+    // vortex ring state adds no ripple of its own on top of it.
+    CHECK(with.Vi_max - with.Vi_min < 1.1 * (pure.Vi_max - pure.Vi_min) + 0.1);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 // dynamic inflow (Pitt-Peters apparent mass)
 // ---------------------------------------------------------------------------------------------------------------------
-TEST_CASE("the Pitt-Peters time constant uses the local flow and the fumble factor")
+TEST_CASE("the Pitt-Peters time constant uses the through flow of the disc and the fumble factor")
 {
     const Real R = 0.75;
-    const Real tau = pitt_peters_time_constant(1.0, R, -60, 3, 1);  // U_local = sqrt(V2^2 + (Vi + Vc)^2)
-    CHECK(tau == doctest::Approx((8 / (3 * kPi)) * R / std::sqrt(60.0 * 60.0 + 16.0)));
-    CHECK(pitt_peters_time_constant(5.0, R, -60, 3, 1) == doctest::Approx(5 * tau));
-    CHECK(pitt_peters_time_constant(0.0, R, -60, 3, 1) == 0);
-    CHECK(pitt_peters_time_constant(1.0, R, 0, 0, 0) == doctest::Approx((8 / (3 * kPi)) * R / 0.1));  // the local flow has a floor of 0.1 m/s
-    CHECK(pitt_peters_time_constant(1.0, R, -20, 3, 0) > pitt_peters_time_constant(1.0, R, -60, 3, 0));  // slower flow, slower inflow
+    const Real k = 8 / (3 * kPi);
+    const Real tau = pitt_peters_time_constant(1.0, R, 3, 3, 1);  // U_local = sqrt(Vh^2 + (Vi + Vc)^2), no blade speed
+    CHECK(tau == doctest::Approx(k * R / 5.0));
+    CHECK(pitt_peters_time_constant(5.0, R, 3, 3, 1) == doctest::Approx(5 * tau));
+    CHECK(pitt_peters_time_constant(0.0, R, 3, 3, 1) == 0);
+    CHECK(pitt_peters_time_constant(1.0, R, 0, 0, 0) == doctest::Approx(k * R / 0.5));  // the through flow has a floor of 0.5 m/s
+    CHECK(pitt_peters_time_constant(1.0, R, 0, -3, 3) == doctest::Approx(k * R / 0.5));  // a reversing column passes through the floor
+    CHECK(pitt_peters_time_constant(1.0, R, 0, 3, 0) > pitt_peters_time_constant(1.0, R, 0, 6, 0));  // slower flow, slower inflow
+    // hover of the Logo 600: Vi is about 3 m/s, so tau is a fraction of a second, not the 10 ms of the blade speed
+    CHECK(pitt_peters_time_constant(1.0, R, 0, 3, 0) > 0.1);
+    CHECK(pitt_peters_time_constant(1.0, R, 0, 3, 0) < 0.3);
 }
 
 TEST_CASE("the implicit Euler step of the inflow lag is unconditionally stable and first order accurate")
@@ -499,7 +644,7 @@ TEST_CASE("the induced velocity follows its target with the Pitt-Peters lag and 
     BemtFilterState state;
     Real time = 0;
     BemtInputs in = hover_inputs(2 * kDeg);
-    for (int i = 0; i < 400; ++i) {  // settle at 2 degrees
+    for (int i = 0; i < 3000; ++i) {  // settle at 2 degrees (tau is a few 100 ms)
         const BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
         bemt_post_step(cfg, state, in, out, time += dt, dt, rng);
     }
@@ -516,8 +661,8 @@ TEST_CASE("the induced velocity follows its target with the Pitt-Peters lag and 
     CHECK(after_step.Vi[probe] == doctest::Approx(settled_low.Vi[probe]).epsilon(1e-3));
     const Real thrust_just_after = after_step.thrust;
 
-    // the lag closes the gap with the local time constant (about 8 ms at this rotor speed)
-    const Real tau = pitt_peters_time_constant(cfg.wake_inertia_fumble_factor, cfg.rotor.R, after_step.V2[probe], state.Vi_lag[probe], after_step.Vc[probe]);
+    // the lag closes the gap with the local time constant (a few 100 ms, set by the through flow of the disc)
+    const Real tau = pitt_peters_time_constant(cfg.wake_inertia_fumble_factor, cfg.rotor.R, after_step.horizontal_speed, state.Vi_lag[probe], after_step.Vc[probe]);
     const Real gap_start = after_step.Vi_target[probe] - state.Vi_lag[probe];
     BemtOutputs out = after_step;
     const int steps = static_cast<int>(std::lround(tau / dt));
@@ -527,9 +672,9 @@ TEST_CASE("the induced velocity follows its target with the Pitt-Peters lag and 
     }
     const Real closed = (state.Vi_lag[probe] - settled_low.Vi[probe]) / gap_start;
     CHECK(closed > 0.5);
-    CHECK(closed < 0.75);
+    CHECK(closed < 0.85);
 
-    for (int i = 0; i < 400; ++i) {
+    for (int i = 0; i < 3000; ++i) {
         out = bemt_evaluate(cfg, grid, state, in);
         bemt_post_step(cfg, state, in, out, time += dt, dt, rng);
     }
@@ -537,6 +682,56 @@ TEST_CASE("the induced velocity follows its target with the Pitt-Peters lag and 
     CHECK(steady.Vi[probe] == doctest::Approx(steady.Vi_target[probe]).epsilon(1e-3));
     CHECK(thrust_just_after > steady.thrust);  // inflow lag: the thrust overshoots before the wake adjusts
     CHECK(steady.thrust > settled_low.thrust);
+}
+
+TEST_CASE("braking a fast tilt rate to zero does not make the induced velocity jump")
+{
+    // tick-tock: the disc tilts so fast that one half of it climbs (Vc > 0) and the other descends; at the reversal point the rate ends
+    BemtConfig cfg = logo600();
+    cfg.turbulence = false;
+    cfg.ground_effect = false;
+    const BemtGrid grid = make_bemt_grid(cfg);
+    RotorRng rng;
+    const Real dt = 0.001;
+    const Real collective = 5 * kDeg;
+
+    for (const Real rate : {4.0, 8.0, 12.0}) {
+        BemtFilterState state;
+        BemtInputs in = hover_inputs(collective);
+        Real time = 0;
+        for (int i = 0; i < 2000; ++i) {  // hover, then
+            const BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
+            bemt_post_step(cfg, state, in, out, time += dt, dt, rng);
+        }
+        in.disc = make_rotor_disc_state(frames::quat_identity(), rate, 0);
+        for (int i = 0; i < 1000; ++i) {  // tilt about the x-axis of the disc
+            const BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
+            bemt_post_step(cfg, state, in, out, time += dt, dt, rng);
+        }
+        BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
+        Real Vc_max = -1e9, Vc_min = 1e9;
+        for (std::size_t i = 0; i < kBemtElementCount; ++i) {
+            Vc_max = std::max(Vc_max, out.Vc[i]);
+            Vc_min = std::min(Vc_min, out.Vc[i]);
+        }
+        REQUIRE(Vc_max > 0.5 * rate * cfg.rotor.R);  // really a climbing and a descending half
+        REQUIRE(Vc_min < -0.5 * rate * cfg.rotor.R);
+
+        // the rate ends at once: no element of the lagged inflow may jump from one step to the next
+        in.disc = make_rotor_disc_state(frames::quat_identity(), 0, 0);
+        std::array<Real, kBemtElementCount> previous = out.Vi;
+        Real max_jump = 0;
+        for (int i = 0; i < 1500; ++i) {
+            bemt_post_step(cfg, state, in, out, time += dt, dt, rng);
+            out = bemt_evaluate(cfg, grid, state, in);
+            for (std::size_t e = 0; e < kBemtElementCount; ++e) {
+                max_jump = std::max(max_jump, std::abs(out.Vi[e] - previous[e]));
+            }
+            previous = out.Vi;
+        }
+        INFO("rate = " << rate << " rad/s, max step of Vi " << max_jump << " m/s");
+        CHECK(max_jump < 0.1);  // [m/s per ms]; with the blade speed in tau (10 ms) the step is about 0.5
+    }
 }
 
 TEST_CASE("the inflow lag can be switched off and a zero fumble factor removes the inertia")
@@ -799,6 +994,7 @@ TEST_CASE("the BEMT configuration comes from the compiled parameters and the fum
     CHECK(cfg.disc_inertia_tilt == p.helicopter.flapping.I_flapping);
     CHECK(cfg.disc_inertia_spin == p.helicopter.mainrotor.J);
     CHECK(cfg.wake_inertia_fumble_factor == 1.0);  // default of the schema
+    CHECK(cfg.vrs.tau_strength == 0.4);            // vrs_time_constant, default of the schema
     CHECK(cfg.vortex_ring_state);
     CHECK(cfg.dynamic_inflow);
     CHECK_FALSE(cfg.quasi_static);
@@ -870,4 +1066,38 @@ TEST_CASE("a rotor that turns the other way (inverted rotation direction) is the
     CHECK(b.shaft_torque > 0);                    // resists the negative rotation
     CHECK(b.shaft_torque == doctest::Approx(-a.shaft_torque).epsilon(1e-6));
     CHECK(b.Vi_mean == doctest::Approx(a.Vi_mean).epsilon(1e-6));
+}
+
+TEST_CASE("the element solution is continuous in the axial velocity through the zero crossing of Vc")
+{
+    // local climb <-> local descent (and the sign change of the induced velocity of an element that sees an upwash): the Newton solver with
+    // its warm start must stay on one solution branch; sweep Vc slowly up and down and look for jumps of the raw solution
+    BemtConfig cfg = logo600();
+    cfg.turbulence = false;
+    cfg.ground_effect = false;
+    const BemtGrid grid = make_bemt_grid(cfg);
+    RotorRng rng;
+    const std::size_t probe = bemt_index(3, 0);
+    for (const Real collective : {2 * kDeg, 5 * kDeg, 9 * kDeg}) {
+        for (const int direction : {+1, -1}) {
+            BemtFilterState state;
+            Real time = 0;
+            Real previous = 0;
+            bool first = true;
+            Real max_jump = 0;
+            for (int k = 0; k <= 400; ++k) {
+                const Real vz = direction > 0 ? -5 + 0.05 * k : 15 - 0.05 * k;  // Vc = vz, the zero crossing is inside
+                const BemtInputs in = hover_inputs(collective, vz);
+                const BemtOutputs out = bemt_evaluate(cfg, grid, state, in);
+                bemt_post_step(cfg, state, in, out, time += 0.001, 0.001, rng);
+                if (!first) {
+                    max_jump = std::max(max_jump, std::abs(out.Vi_raw[probe] - previous));
+                }
+                first = false;
+                previous = out.Vi_raw[probe];
+            }
+            INFO("collective " << collective / kDeg << " deg, direction " << direction);
+            CHECK(max_jump < 0.3);  // [m/s per 0.05 m/s of Vc]
+        }
+    }
 }

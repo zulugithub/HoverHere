@@ -30,7 +30,7 @@ constexpr Real kRpm = hoverhere::frames::kRpmToRadPerSec;
 TEST_CASE("generated descriptor tables are complete and consistent")
 {
     const auto table = model_param_descriptors();
-    CHECK(table.size() == 222);
+    CHECK(table.size() == 225);
     CHECK(mechanics::mainrotor_mechanics_descriptors().size() == 2 + 3 * 6 + 2 * 5 + 2 * 4);
     CHECK(mechanics::tailrotor_mechanics_descriptors().size() == 1 + 13 + 2 * 11);
 
