@@ -1,10 +1,12 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <numbers>
 #include <optional>
@@ -12,6 +14,7 @@
 #include <string_view>
 #include <vector>
 
+#include "hoverhere/aero/rotor_bemt.hpp"
 #include "hoverhere/core/math.hpp"
 #include "hoverhere/io/param_loader.hpp"
 #include "hoverhere/params/params.hpp"
@@ -87,6 +90,7 @@ const char* const kUsage =
     "  hoverhere_headless_test list\n"
     "  hoverhere_headless_test run <maneuver> --heli <parameter_file.xml> [options]\n"
     "  hoverhere_headless_test run --profile <sticks.csv> --heli <parameter_file.xml> [options]\n"
+    "  hoverhere_headless_test airfoil --heli <parameter_file.xml> --out <polar.csv>\n"
     "\n"
     "options of run:\n"
     "  --heli FILE            helicopter parameter file (required)\n"
@@ -329,6 +333,62 @@ int run_command(const std::vector<std::string>& args)
     return summary.ok ? 0 : 1;
 }
 
+// Evaluates the airfoil polar of the BEMT configuration of a loaded helicopter over -180 ... +180 deg with the real
+// airfoil_coefficients(): the single source of the curves (tools/headless/plot_airfoil.py only plots this CSV).
+// Only the main rotor runs the BEMT; the tail rotor uses the classic model without airfoil curves, so its columns
+// come from the same BEMT configuration and are identical to the main rotor columns.
+int airfoil_command(const std::vector<std::string>& args)
+{
+    namespace fs = std::filesystem;
+    std::optional<fs::path> heli;
+    std::optional<fs::path> out;
+    for (std::size_t i = 0; i < args.size(); ++i) {
+        if ((args[i] == "--heli" || args[i] == "--out") && i + 1 < args.size()) {
+            (args[i] == "--heli" ? heli : out) = args[i + 1];
+            ++i;
+        } else {
+            std::cerr << "unknown argument " << args[i] << "\n" << kUsage;
+            return 2;
+        }
+    }
+    if (!heli || !out) {
+        std::cerr << "--heli and --out are required\n" << kUsage;
+        return 2;
+    }
+    hoverhere::params::ModelParams params = hoverhere::params::make_default_params();
+    if (!load_report_ok(hoverhere::io::load_parameters_file(*heli, hoverhere::params::ParamDocument::Heli, params))) {
+        return 3;
+    }
+    const hoverhere::params::ModelParamsSI si = hoverhere::params::compile_to_si(params);
+    const hoverhere::aero::BemtConfig main_config = hoverhere::aero::make_bemt_config(si);
+    const hoverhere::aero::BemtConfig tail_config = hoverhere::aero::make_bemt_config(si);  // same airfoil, see above
+
+    if (out->has_parent_path()) {
+        std::error_code ec;
+        fs::create_directories(out->parent_path(), ec);
+    }
+    std::ofstream file(*out);
+    if (!file) {
+        std::cerr << "cannot write " << out->string() << "\n";
+        return 3;
+    }
+    file << "alpha_deg,cl_mr,cd_mr,cl_tr,cd_tr\n";
+    constexpr int steps_per_degree = 2;
+    for (int k = -180 * steps_per_degree; k <= 180 * steps_per_degree; ++k) {
+        const hoverhere::Real alpha_deg = static_cast<hoverhere::Real>(k) / steps_per_degree;
+        const hoverhere::Real alpha = alpha_deg * std::numbers::pi_v<hoverhere::Real> / 180;
+        hoverhere::Real cl_mr = 0, cd_mr = 0, cl_tr = 0, cd_tr = 0;
+        hoverhere::aero::airfoil_coefficients(main_config.airfoil, alpha, cl_mr, cd_mr);
+        hoverhere::aero::airfoil_coefficients(tail_config.airfoil, alpha, cl_tr, cd_tr);
+        std::array<char, 160> row{};
+        std::snprintf(row.data(), row.size(), "%.1f,%.9g,%.9g,%.9g,%.9g\n", alpha_deg, cl_mr, cd_mr, cl_tr, cd_tr);
+        file << row.data();
+    }
+    file.close();
+    std::printf("airfoil polar: %s\n", out->string().c_str());
+    return 0;
+}
+
 int list_command()
 {
     for (const hoverhere::headless::Maneuver& m : hoverhere::headless::builtin_maneuvers()) {
@@ -344,6 +404,9 @@ int main(const int argc, char** const argv)
     const std::vector<std::string> args(argv + 1, argv + argc);
     if (!args.empty() && args[0] == "list") {
         return list_command();
+    }
+    if (!args.empty() && args[0] == "airfoil") {
+        return airfoil_command(std::vector<std::string>(args.begin() + 1, args.end()));
     }
     if (!args.empty() && args[0] == "run") {
         return run_command(std::vector<std::string>(args.begin() + 1, args.end()));

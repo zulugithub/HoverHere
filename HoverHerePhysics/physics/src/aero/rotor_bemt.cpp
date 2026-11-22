@@ -185,10 +185,16 @@ Real johnson_time_lag(const Real v_target, const Real v_previous, const Real ome
 // ----------------------------------------------------------------------------------------------------------------
 // airfoil and blade element balance
 // ----------------------------------------------------------------------------------------------------------------
+// Lift and drag coefficient over the angle of attack alpha [rad], valid for the full circle -pi ... +pi.
+// Both curves are blended from a small-angle model to a post-stall model with a weight s (1: small-angle, 0: post-stall):
+//   cl: linear (cl_slope * alpha) near zero, a sine over the full circle beyond stall (flat plate like, first maximum at cl_first_max);
+//   cd: cd_offset + cd_slope * alpha^3 near zero, a shifted cosine beyond stall (about 2 * cd_amplitude_or_offset at +-90 deg).
+// The curves are built for |alpha| and mirrored: cl is odd in alpha, cd is even. s falls smoothly from 1 to 0 between the
+// *_trans_start and *_trans_end angles, so the 360 deg model has no kink or jump.
 void airfoil_coefficients(const AirfoilCurves& a, const Real alpha, Real& cl, Real& cd) noexcept
 {
     const Real abs_alpha = std::abs(alpha);
-    Real s = smooth_step(abs_alpha, a.cl_trans_start, 1, a.cl_trans_end, 0);
+    Real s = smooth_step(abs_alpha, a.cl_trans_start, 1, a.cl_trans_end, 0);  // blending weight of the small-angle lift
     cl = (s * (a.cl_slope * abs_alpha) +
           (1 - s) * (+std::sin((Real{3} / 2) / (1 - (a.cl_first_max / 180)) * (abs_alpha - kPi)) * a.cl_amplitude)) *
          unity_sign(alpha);
@@ -204,22 +210,30 @@ struct ElementPhysics {
     Real cl, cd, phi, alpha;
 };
 
+// Blade element momentum balance of one element for a trial induced velocity Vi (NACA 0012 like airfoil, see airfoil_coefficients).
+//   Vi      [m/s] trial induced velocity (axial, through the disc)      Vc [m/s] axial air velocity of the element (climb)
+//   V2      [m/s] tangential air velocity of the element (Omega r + forward flight part)
+//   beta    [rad] blade pitch angle against the rotor plane             factor1: 0.5 rho * blades * chord / azimuth count
+//   factor2: 4 pi r rho / azimuth count: mass flow factor of the annulus sector of this element (momentum theory)
+// The residual is zero when the blade element thrust equals the momentum theory thrust; solve_element drives it to zero by Vi.
 ElementPhysics element_function(const BemtConfig& cfg, const Real Vi, const Real Vc, Real V2, const Real beta, const Real factor1, const Real factor2) noexcept
 {
-    V2 = smooth_step(std::abs(V2), 0.01, 0.01, 0.10, std::abs(V2));
-    const Real V0 = Vi + Vc;
+    V2 = smooth_step(std::abs(V2), 0.01, 0.01, 0.10, std::abs(V2));  // keep |V2| >= 0.01 m/s: atan2 and V_local stay defined
+    const Real V0 = Vi + Vc;                                         // [m/s] total axial flow through the element
     ElementPhysics e{};
-    e.phi = std::atan2(V0, V2);
-    e.alpha = beta - e.phi;
-    if (e.alpha >= kPi) {  // wrap into the range of the curves
+    e.phi = std::atan2(V0, V2);   // [rad] inflow angle: angle of the resulting air velocity against the rotor plane
+    e.alpha = beta - e.phi;       // [rad] angle of attack = pitch minus inflow angle
+    if (e.alpha >= kPi) {         // wrap into -pi ... +pi, the range of the 360 deg airfoil curves
         e.alpha -= 2 * kPi;
     }
     if (e.alpha <= -kPi) {
         e.alpha += 2 * kPi;
     }
     airfoil_coefficients(cfg.airfoil, e.alpha, e.cl, e.cd);
-    const Real Vlocal_squared = V0 * V0 + V2 * V2;
+    const Real Vlocal_squared = V0 * V0 + V2 * V2;  // squared magnitude of the air velocity seen by the blade section
+    // blade element thrust dT/dr per radial length [N/m]: the lift cl and drag cd of the section projected on the rotor axis
     const Real DtDr = factor1 * Vlocal_squared * (e.cl * std::cos(e.phi) - e.cd * std::sin(e.phi));
+    // residual [N]: momentum thrust (factor2 * Vi * |V0|, product form, no singularity at V0 = 0) minus blade element thrust
     e.residual = factor2 * Vi * std::abs(V0) - DtDr;
     return e;
 }

@@ -16,5 +16,8 @@ if(HOVERHERE_BUILD_TESTS)
         add_test(NAME headless_hover
             COMMAND hoverhere_headless_test run hover --heli "${_logo_resources}/Logo600SE_V3_parameter_file.xml"
                 --rotor classic --duration 1 --trim 0.41 --grid-rate 0 --out "${CMAKE_CURRENT_BINARY_DIR}/hover_out")
+        add_test(NAME headless_airfoil
+            COMMAND hoverhere_headless_test airfoil --heli "${_logo_resources}/Logo600SE_V3_parameter_file.xml"
+                --out "${CMAKE_CURRENT_BINARY_DIR}/airfoil_out/airfoil.csv")
     endif()
 endif()
