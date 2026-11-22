@@ -85,7 +85,7 @@ FblConfig simple_config()
     c.gyro_K_I = {0, 0, 0};
     c.gyro_K_d = {0, 0, 0};
     c.target_rpm = {150, 170, 190};
-    c.speed_below_which_integrators_decay = 0.7 * 150;
+    c.speed_below_which_integrators_decay = 0.1 * 150;
     return c;
 }
 
@@ -329,7 +329,7 @@ TEST_CASE("the integrators decay at low rotor speed and are cleared when the rot
     CHECK(fbl.integrals()[0] == doctest::Approx(0.2));
 
     ControllerInputs spinning_up = flying();
-    spinning_up.omega_mr = 0.4 * 150;  // below 70 % of the setpoint
+    spinning_up.omega_mr = 0.05 * 150;  // below 10 % of the setpoint (flybarless.integrator_decay_rpm_ratio)
     for (int i = 0; i < 10; ++i) {
         fbl.post_step(spinning_up, 0.001);
     }
@@ -353,6 +353,36 @@ TEST_CASE("the integrators decay at low rotor speed and are cleared when the rot
     CHECK(fbl.integrals() == std::array<Real, 3>{0.2, 0, -0.2});
 }
 
+TEST_CASE("the integrators stay active at 50 % of the nominal speed (autorotation) and decay at 2 % (on the ground)")
+{
+    const auto& p = default_params();
+    FblConfig c = make_fbl_config(p);
+    const Real nominal = c.target_rpm[0];
+    c.initial_roll_integral = 0.2;
+    c.initial_pitch_integral = -0.2;
+    FblController fbl = controller(c);
+
+    ControllerInputs autorotation = flying();
+    autorotation.omega_mr = 0.5 * nominal;
+    for (int i = 0; i < 100; ++i) {
+        fbl.post_step(autorotation, 0.001);
+    }
+    CHECK(fbl.integrals()[0] == doctest::Approx(0.2));  // untouched, the controller keeps its full authority
+    CHECK(fbl.integrals()[2] == doctest::Approx(-0.2));
+
+    ControllerInputs ground = flying();
+    ground.omega_mr = 0.02 * nominal;  // on the ground (below 60 rpm the integrators are cleared completely)
+    fbl.post_step(ground, 0.001);
+    CHECK(fbl.integrals()[0] == 0);
+    CHECK(fbl.integrals()[2] == 0);
+
+    // between the clearing limit and the decay ratio the integrators decay: raise the ratio to include 50 %
+    c.speed_below_which_integrators_decay = 0.7 * nominal;
+    FblController decaying = controller(c);
+    decaying.post_step(autorotation, 0.001);
+    CHECK(std::abs(decaying.integrals()[0]) < 0.2);
+}
+
 TEST_CASE("the configuration is built from the helicopter parameters")
 {
     const auto& p = default_params();
@@ -360,7 +390,9 @@ TEST_CASE("the configuration is built from the helicopter parameters")
     CHECK(c.fbl_K_p[0] == p.helicopter.flybarless.K_p[0]);
     CHECK(c.gyro_K_a[2] == p.helicopter.gyro.K_a[2]);
     CHECK(c.target_rpm[1] == p.helicopter.governor.target_rpm[1]);
-    CHECK(c.speed_below_which_integrators_decay == doctest::Approx(0.7 * p.helicopter.governor.target_rpm[0]));
+    CHECK(c.speed_below_which_integrators_decay ==
+          doctest::Approx(p.helicopter.flybarless.integrator_decay_rpm_ratio * p.helicopter.governor.target_rpm[0]));
+    CHECK(p.helicopter.flybarless.integrator_decay_rpm_ratio == doctest::Approx(0.10));
     CHECK(c.collective_stroke_offset == doctest::Approx(c.collective_stroke * p.helicopter.mainrotor.Theta_col_0 / p.helicopter.mainrotor.K_col));
     CHECK(c.cyclic_throw_roll == doctest::Approx(15 * kDeg));
     CHECK(c.tail_throw == doctest::Approx(30 * kDeg));

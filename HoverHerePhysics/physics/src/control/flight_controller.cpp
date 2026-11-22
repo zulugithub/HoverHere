@@ -52,7 +52,7 @@ FblConfig make_fbl_config(const params::si::ModelParams& p) noexcept
     c.initial_roll_integral = h.flybarless.initial_roll_angle;
     c.initial_pitch_integral = h.flybarless.initial_pitch_angle;
     c.collective_stroke_offset = h.mainrotor.K_col != 0 ? c.collective_stroke * h.mainrotor.Theta_col_0 / h.mainrotor.K_col : Real{0};
-    c.speed_below_which_integrators_decay = Real{0.7} * h.governor.target_rpm[0];
+    c.speed_below_which_integrators_decay = h.flybarless.integrator_decay_rpm_ratio * h.governor.target_rpm[0];
     return c;
 }
 

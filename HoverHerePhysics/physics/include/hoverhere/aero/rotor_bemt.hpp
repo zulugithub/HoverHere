@@ -126,9 +126,9 @@ struct BemtConfig {
     Real hub_damping = 3.5;            // [Nm s/rad]
     Real wake_inertia_fumble_factor = 1.0;  // [-] multiplies the Pitt-Peters time constant
     Real gravity = 9.81;               // [m/s^2] (hover induced velocity of the vortex ring scaling)
-    Real low_rpm_pitch = 15 * 3.14159265358979323846 / 180;  // [rad] pitch used at (very) low rotor speed instead of the commanded one
-    Real low_rpm_start = 100 * 3.14159265358979323846 / 30;  // [rad/s] below: low_rpm_pitch
-    Real low_rpm_end = 200 * 3.14159265358979323846 / 30;    // [rad/s] above: the commanded pitch
+    Real low_rpm_pitch = 0 * 3.14159265358979323846 / 180;  // [rad] pitch used at (very) low rotor speed instead of the commanded one
+    Real low_rpm_start = 30 * 3.14159265358979323846 / 30;  // [rad/s] below: low_rpm_pitch
+    Real low_rpm_end = 80 * 3.14159265358979323846 / 30;    // [rad/s] above: the commanded pitch
     AirfoilCurves airfoil{};
     JohnsonVrsParams vrs{};
     NewtonSettings newton{};

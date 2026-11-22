@@ -305,7 +305,7 @@ ClassicRotorOutputs classic_rotor_evaluate(const ClassicRotorConfig& cfg, const 
         out.dflapping[flap::b_s] = -omega_R.a[0] + cfg.hub.B_a_s * in.flapping[flap::a_s] - (1 / tau) * in.flapping[flap::b_s] +
                                    (1 / tau) * in.control.Theta_cyc_b_s - cfg.hub.B_a_r * v_hub_R.a[2];
         // for low rotor speeds the effect of flapping is reduced
-        const Real reduce = smooth_step(std::abs(in.omega_shaft), cfg.omega_reference * Real{0.1}, 0, cfg.omega_reference * Real{0.7}, 1);
+        const Real reduce = smooth_step(std::abs(in.omega_shaft), cfg.omega_reference * cfg.hub.low_rpm_flapping_fade_lower, 0, cfg.omega_reference * cfg.hub.low_rpm_flapping_fade_upper, 1);
         out.dflapping[flap::a_s] *= reduce;
         out.dflapping[flap::b_s] *= reduce;
     }
@@ -354,10 +354,11 @@ void classic_rotor_post_step(const ClassicRotorConfig& cfg, ClassicRotorFilterSt
     }
 }
 
-void limit_flapping_at_low_rpm(FlappingState& flapping, const Real omega_shaft, const Real omega_reference, const Real dt) noexcept
+void limit_flapping_at_low_rpm(FlappingState& flapping, const Real omega_shaft, const Real omega_reference, const Real fade_upper_ratio,
+                               const Real fade_lower_ratio, const Real dt) noexcept
 {
-    const Real below = omega_reference * Real{0.7};
-    const Real completely = omega_reference * Real{0.1};
+    const Real below = omega_reference * fade_upper_ratio;
+    const Real completely = omega_reference * fade_lower_ratio;
     const Real speed = std::abs(omega_shaft);
     if (speed < below) {
         const Real decay = smooth_step(speed, completely, 0.003, below, 0) * (dt / kUnityReferenceStep);  // [rad]

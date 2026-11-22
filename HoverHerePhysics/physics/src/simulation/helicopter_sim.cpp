@@ -893,8 +893,9 @@ void HelicopterSim::Impl::post_step(const StageEvaluation& e0, const StepHold& h
     aero::FlappingState fm = take<2>(x, idx::flap_main);
     aero::FlappingState ft = take<2>(x, idx::flap_tail);
     const Real omega_mr = dr[drv::omega_mr];
-    aero::limit_flapping_at_low_rpm(fm, omega_mr, cfg_main.omega_reference, dt);
-    aero::limit_flapping_at_low_rpm(ft, drive_p.n_mr2tr != 0 ? omega_mr / drive_p.n_mr2tr : Real{0}, cfg_tail.omega_reference, dt);
+    aero::limit_flapping_at_low_rpm(fm, omega_mr, cfg_main.omega_reference, cfg_main.hub.low_rpm_flapping_fade_upper, cfg_main.hub.low_rpm_flapping_fade_lower, dt);
+    aero::limit_flapping_at_low_rpm(ft, drive_p.n_mr2tr != 0 ? omega_mr / drive_p.n_mr2tr : Real{0}, cfg_tail.omega_reference,
+                                   cfg_tail.hub.low_rpm_flapping_fade_upper, cfg_tail.hub.low_rpm_flapping_fade_lower, dt);
     put<2>(x, idx::flap_main, fm);
     put<2>(x, idx::flap_tail, ft);
 

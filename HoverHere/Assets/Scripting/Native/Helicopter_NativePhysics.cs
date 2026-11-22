@@ -641,8 +641,8 @@ namespace Helisimulator
                             d.BEMT_blade_segment_position[r][c] = Lh(V(t->position_O, k));
                             // the green line is the induced velocity Vi along the rotor axis, scaled by 0.1 like the C# debug display
                             d.BEMT_blade_segment_velocity[r][c] = Lh(V(t->induced_velocity_O, k) * 0.1f);
-                            d.BEMT_blade_segment_thrust[r][c] = Lh(V(t->force_thrust_O, k));
-                            d.BEMT_blade_segment_torque[r][c] = Lh(V(t->force_torque_O, k));
+                            d.BEMT_blade_segment_thrust[r][c] = Lh(V(t->force_thrust_O, k) * 0.1f);
+                            d.BEMT_blade_segment_torque[r][c] = Lh(V(t->force_torque_O, k) * 1.0f);
                         }
                     }
                 }

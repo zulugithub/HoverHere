@@ -101,7 +101,7 @@ struct FblConfig {
     Real collective_stroke = 0.0065;       // [m] swashplate stroke at full collective deflection
     Real collective_stroke_offset = 0;     // [m] stroke at zero collective deflection (collective_stroke * Theta_col_0 / K_col)
     Real tail_throw = 30 * 3.14159265358979323846 / 180;          // [rad] tail servo angle at full yaw deflection
-    Real speed_below_which_integrators_decay = 0;  // [rad/s] 70 % of the setpoint of bank 0
+    Real speed_below_which_integrators_decay = 0;  // [rad/s] flybarless.integrator_decay_rpm_ratio times the setpoint of bank 0
     // First order low pass on the differentiated error (exact discretization): the numerical derivative of a gyro signal amplifies the
     // noise of the sample by 1 / dt. 0: no filter (the raw difference quotient). 4 ms is a corner frequency of about 40 Hz, far above the
     // control bandwidth of the loop (a few Hz), and well below the shaft frequency.

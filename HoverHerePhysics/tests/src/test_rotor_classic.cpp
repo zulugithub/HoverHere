@@ -332,6 +332,33 @@ TEST_CASE("a body rotation drags the flapping angles along and forward flight ti
     CHECK(forward.hub_speed == doctest::Approx(15));
 }
 
+TEST_CASE("the flapping stays fully effective at 50 % of the nominal speed and fades out only near standstill")
+{
+    ClassicRotorConfig cfg = main_rotor_config();
+    const ClassicRotorFilterState state{};
+    ClassicRotorInputs in = hover_inputs(cfg, 4 * kDeg);
+    in.control.Theta_cyc_b_s = 0.1;
+    CHECK(cfg.hub.low_rpm_flapping_fade_upper == doctest::Approx(0.10));
+    CHECK(cfg.hub.low_rpm_flapping_fade_lower == doctest::Approx(0.03));
+    in.omega_shaft = cfg.omega_reference;
+    const ClassicRotorOutputs full = classic_rotor_evaluate(cfg, state, in);
+    in.omega_shaft = 0.5 * cfg.omega_reference;  // autorotation: the commanded tilt is reached as at nominal speed
+    const ClassicRotorOutputs autorotation = classic_rotor_evaluate(cfg, state, in);
+    CHECK(autorotation.dflapping[flap::b_s] * autorotation.flapping_tau == doctest::Approx(full.dflapping[flap::b_s] * full.flapping_tau).epsilon(1e-9));
+    FlappingState angles{0.05, -0.04};
+    limit_flapping_at_low_rpm(angles, 0.5 * cfg.omega_reference, cfg.omega_reference, cfg.hub.low_rpm_flapping_fade_upper,
+                              cfg.hub.low_rpm_flapping_fade_lower, 0.001);
+    CHECK(angles[0] == 0.05);
+    CHECK(angles[1] == -0.04);
+    in.omega_shaft = 0.02 * cfg.omega_reference;  // on the ground: switched off
+    CHECK(classic_rotor_evaluate(cfg, state, in).dflapping[flap::b_s] == 0);
+    // a raised upper ratio brings the old behavior (fade below 70 %) back
+    cfg.hub.low_rpm_flapping_fade_upper = 0.7;
+    in.omega_shaft = 0.5 * cfg.omega_reference;
+    const ClassicRotorOutputs faded = classic_rotor_evaluate(cfg, state, in);
+    CHECK(std::abs(faded.dflapping[flap::b_s]) * faded.flapping_tau < std::abs(full.dflapping[flap::b_s]) * full.flapping_tau);
+}
+
 TEST_CASE("the flapping fades out at low rotor speed")
 {
     ClassicRotorConfig cfg = main_rotor_config();
@@ -340,22 +367,24 @@ TEST_CASE("the flapping fades out at low rotor speed")
     in.control.Theta_cyc_b_s = 0.1;
     in.omega_shaft = cfg.omega_reference;
     const Real full = classic_rotor_evaluate(cfg, state, in).dflapping[flap::b_s] * classic_rotor_evaluate(cfg, state, in).flapping_tau;
-    in.omega_shaft = 0.4 * cfg.omega_reference;
+    in.omega_shaft = 0.06 * cfg.omega_reference;
     const ClassicRotorOutputs partial = classic_rotor_evaluate(cfg, state, in);
-    // the commanded value is the same but its derivative is reduced between 10 % and 70 % of the nominal speed
+    // the commanded value is the same but its derivative is reduced between the lower and upper fade ratio (3 % and 10 %) of the nominal speed
     CHECK(std::abs(partial.dflapping[flap::b_s]) * partial.flapping_tau < full);
-    in.omega_shaft = 0.05 * cfg.omega_reference;
+    in.omega_shaft = 0.02 * cfg.omega_reference;
     const ClassicRotorOutputs slow = classic_rotor_evaluate(cfg, state, in);
     CHECK(std::abs(slow.dflapping[flap::b_s]) <= std::abs(partial.dflapping[flap::b_s]) + 1e-12);
 
+    const Real up = cfg.hub.low_rpm_flapping_fade_upper;
+    const Real lo = cfg.hub.low_rpm_flapping_fade_lower;
     FlappingState angles{0.05, -0.04};
-    limit_flapping_at_low_rpm(angles, cfg.omega_reference, cfg.omega_reference, 0.001);
+    limit_flapping_at_low_rpm(angles, cfg.omega_reference, cfg.omega_reference, up, lo, 0.001);
     CHECK(angles[0] == 0.05);  // nominal speed: untouched
-    limit_flapping_at_low_rpm(angles, 0.4 * cfg.omega_reference, cfg.omega_reference, 0.001);
+    limit_flapping_at_low_rpm(angles, 0.06 * cfg.omega_reference, cfg.omega_reference, up, lo, 0.001);
     CHECK(std::abs(angles[0]) < 0.05);  // decays
     CHECK(angles[0] > 0);               // towards zero from the same side
     CHECK(angles[1] < 0);
-    limit_flapping_at_low_rpm(angles, 30 * frames::kRpmToRadPerSec, cfg.omega_reference, 0.001);
+    limit_flapping_at_low_rpm(angles, 30 * frames::kRpmToRadPerSec, cfg.omega_reference, up, lo, 0.001);
     CHECK(angles[0] == 0);
     CHECK(angles[1] == 0);
 }

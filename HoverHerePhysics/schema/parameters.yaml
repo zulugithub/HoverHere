@@ -143,6 +143,7 @@ helicopter:
     K_I: {type: bank3, unit: "1/s", default: [1.0, 1.0, 1.0], doc: "Flybarless integral gain (per flight bank)"}
     K_p: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless proportional gain (per flight bank)"}
     K_d: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless differential gain (per flight bank)"}
+    integrator_decay_rpm_ratio: {type: real, unit: "-", default: 0.10, min: 0, max: 1, cpp_only: true, doc: "Below this fraction of the target rotational speed of flight bank 0 the flybarless integrators decay (on the ground); above it they are fully active, e.g. in an autorotation. They are cleared below 60 rpm"}
     direct_feedthrough_flybarless: {type: bool, xml: direct_feadtrough_flybarless, default: false, doc: "Turn off the flybarless controller (stick commands go straight to the servos)"}
     initial_roll_angle: {type: real, unit: "deg", default: 0, min: -10, max: 10, doc: "Initial roll angle after reset"}
     initial_pitch_angle: {type: real, unit: "deg", default: 0, min: -10, max: 10, doc: "Initial pitch angle after reset"}
@@ -209,6 +210,8 @@ helicopter:
     B_a_r: {type: real, unit: "rad/m", default: 0.015, min: 0, max: 100, doc: "Fast sideward flight (large advance ratio) tilts the rotor disc side up"}
     e: {type: real, unit: "m", default: 0.07, min: 0.001, max: 1, doc: "Effective hinge offset of the mainrotor blade"}  # C# min 0.01, max 0.2
     I_flapping: {type: real, unit: "kg m^2", default: 0.03487, min: 0.0001, max: 20, doc: "Inertia of one rotor blade w.r.t. its effective hinge offset axis"}  # C# min 0.001, max 1
+    low_rpm_flapping_fade_upper: {type: real, unit: "-", default: 0.10, min: 0, max: 1, cpp_only: true, doc: "Rotor speed as a fraction of the nominal rotor speed (governor target of bank 0) above which the flapping dynamics is fully active; below it the effect fades out towards low_rpm_flapping_fade_lower (also decay of the flapping angles between two steps). Applies to the main and the tail rotor"}
+    low_rpm_flapping_fade_lower: {type: real, unit: "-", default: 0.03, min: 0, max: 1, cpp_only: true, doc: "Rotor speed as a fraction of the nominal rotor speed below which the flapping dynamics is switched off completely (must not exceed low_rpm_flapping_fade_upper). The flapping angles are cleared below 60 rpm"}
   tailrotor:
     _type: Rotor
     b: {max: 16}  # C# max 6

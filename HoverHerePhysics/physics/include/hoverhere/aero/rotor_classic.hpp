@@ -60,7 +60,7 @@ struct ClassicRotorConfig {
     bool ground_effect = true;
     Real mass_total = 0;               // [kg] part of the helicopter mass this rotor carries (climb power); half for tandem rotors
     Real gravity = 9.81;               // [m/s^2]
-    Real omega_reference = 0;          // [rad/s] nominal rotor speed (governor target of bank 0): flapping fades out below 70 %, is off below 10 %
+    Real omega_reference = 0;          // [rad/s] nominal rotor speed (governor target of bank 0): flapping fades out between hub.low_rpm_flapping_fade_upper and _lower times this speed
     params::si::Rotor rotor{};
     params::si::Flapping hub{};
     params::si::RotorInflowTuning inflow{};
@@ -115,6 +115,7 @@ void classic_rotor_post_step(const ClassicRotorConfig& cfg, ClassicRotorFilterSt
                              const ClassicRotorOutputs& out, Real time, Real dt, RotorRng& rng) noexcept;
 
 // Between two steps: at low rotor speed the flapping angles decay linearly to zero (0.003 rad per 1 ms), and are zero below 60 rpm.
-void limit_flapping_at_low_rpm(FlappingState& flapping, Real omega_shaft, Real omega_reference, Real dt) noexcept;
+void limit_flapping_at_low_rpm(FlappingState& flapping, Real omega_shaft, Real omega_reference, Real fade_upper_ratio, Real fade_lower_ratio,
+                               Real dt) noexcept;
 
 }  // namespace hoverhere::aero
