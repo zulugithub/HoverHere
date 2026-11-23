@@ -183,7 +183,7 @@ Real johnson_time_lag(const Real v_target, const Real v_previous, const Real ome
 }
 
 // ----------------------------------------------------------------------------------------------------------------
-// airfoil and blade element balance
+// airfoil and blade element balance (NACA0012)
 // ----------------------------------------------------------------------------------------------------------------
 // Lift and drag coefficient over the angle of attack alpha [rad], valid for the full circle -pi ... +pi.
 // Both curves are blended from a small-angle model to a post-stall model with a weight s (1: small-angle, 0: post-stall):

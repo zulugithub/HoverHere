@@ -81,7 +81,7 @@ struct JohnsonVrsParams {
 // ----------------------------------------------------------------------------------------------------------------
 // airfoil: continuous cl / cd curves (documentation 5.2): linear / alpha^3 close to zero, sinusoidal stall behavior
 // ----------------------------------------------------------------------------------------------------------------
-struct AirfoilCurves {
+struct AirfoilCurves { // (NACA0012)
     Real cl_trans_start = 12 * 3.14159265358979323846 / 180;  // [rad] begin of the transition from linear to sinus
     Real cl_trans_end = 26 * 3.14159265358979323846 / 180;    // [rad]
     Real cd_trans_start = 20 * 3.14159265358979323846 / 180;  // [rad]
