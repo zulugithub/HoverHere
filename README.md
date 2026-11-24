@@ -50,7 +50,7 @@ Following calculations are done in a separate thread with a high update frequenc
 
 ### Calculation Kernel 
 
-The core of the code are the ordinary differential equations (ODE) of a rigid body, given in `Helicopter_ODE.cs`. The use of quaternions for the orientations result in thirteen first order ODEs. Additional differential equations arise from the main rotor flapping dynamics, the dynamics of the rotating parts (brushless motor, shafts and blades) and from the control routines of the flybareless-, gyro and governor controllers. This results in sum in over 30 ODEs.
+The core of the code are the ordinary differential equations (ODE) of a rigid body, see [Phyiscs Readme](HoverHerePhysics/README.md). The use of quaternions for the orientations result in thirteen first order ODEs. Additional differential equations arise from the main rotor flapping dynamics, the dynamics of the rotating parts (brushless motor, shafts and blades) and from the control routines of the flybareless-, gyro and governor controllers. This results in sum in over 30 ODEs.
 
 This coupled ordinary differential equations are solved with an explicit Runge�Kutta method which preserves the quaternion unit norm sufficiently.
 
