@@ -133,16 +133,16 @@ helicopter:
     position: {type: vec3, unit: "m", default: [0, 0.275, 0], doc: "Reference point of the model to the center of mass in the helicopter's local coordinate system (right handed)"}
     orientation: {type: vec3, unit: "deg", default: [0, 0, -3], doc: "Center of mass coordinate system orientation relative to the initial frame (right handed, extrinsic z-y-x, B321 or S123)"}
   gyro:
-    K_a: {type: bank3, unit: "deg/s", default: [430, 480, 500], doc: "Tailrotor maximum rotation velocity (per flight bank)"}
-    K_I: {type: bank3, unit: "1/s", default: [2, 2, 2], doc: "Tailrotor integral gain, heading hold (per flight bank)"}
-    K_p: {type: bank3, unit: "-", default: [0.2, 0.2, 0.2], doc: "Tailrotor proportional gain (per flight bank)"}
-    K_d: {type: bank3, unit: "-", default: [0.0001, 0.0001, 0.0001], doc: "Tailrotor differential gain (per flight bank)"}
+    K_a: {type: bank3, unit: "deg/s", default: [430, 480, 600], doc: "Tailrotor maximum rotation velocity (per flight bank)"}
+    K_I: {type: bank3, unit: "1/s", default: [1.0, 1.0, 1.0], doc: "Tailrotor integral gain, heading hold (per flight bank)"}
+    K_p: {type: bank3, unit: "-", default: [1.0, 1.0, 1.0], doc: "Tailrotor proportional gain (per flight bank)"}
+    K_d: {type: bank3, unit: "-", default: [1.0, 1.0, 1.0], doc: "Tailrotor differential gain (per flight bank)"}
     direct_feedthrough_gyroscope: {type: bool, xml: direct_feadtrough_gyroscope, default: false, doc: "Turn off the gyro (stick commands go straight to the servo)"}
   flybarless:
     K_a: {type: bank3, unit: "deg/s", default: [240, 270, 320], doc: "Flybarless maximum rotation velocity (should be smaller than what the helicopter can perform, otherwise the stick range is not fully used; per flight bank)"}
     K_I: {type: bank3, unit: "1/s", default: [1.0, 1.0, 1.0], doc: "Flybarless integral gain (per flight bank)"}
-    K_p: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless proportional gain (per flight bank)"}
-    K_d: {type: bank3, unit: "-", default: [0.1, 0.1, 0.1], doc: "Flybarless differential gain (per flight bank)"}
+    K_p: {type: bank3, unit: "-", default: [0.5, 0.5, 0.5], doc: "Flybarless proportional gain (per flight bank)"}
+    K_d: {type: bank3, unit: "-", default: [6.0, 7.0, 7.0], doc: "Flybarless differential gain (per flight bank)"}
     integrator_decay_rpm_ratio: {type: real, unit: "-", default: 0.10, min: 0, max: 1, cpp_only: true, doc: "Below this fraction of the target rotational speed of flight bank 0 the flybarless integrators decay (on the ground); above it they are fully active, e.g. in an autorotation. They are cleared below 60 rpm"}
     direct_feedthrough_flybarless: {type: bool, xml: direct_feadtrough_flybarless, default: false, doc: "Turn off the flybarless controller (stick commands go straight to the servos)"}
     initial_roll_angle: {type: real, unit: "deg", default: 0, min: -10, max: 10, doc: "Initial roll angle after reset"}

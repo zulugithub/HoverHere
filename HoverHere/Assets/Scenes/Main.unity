@@ -6230,7 +6230,7 @@ PrefabInstance:
     - target: {fileID: 1750257031914802154, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.41799998
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1750257031930362345, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
@@ -6245,7 +6245,22 @@ PrefabInstance:
     - target: {fileID: 1750257032349432890, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
       propertyPath: m_ScrollSensitivity
-      value: 2000
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1750257032701782155, guid: 27a5d865dbb59184bb15772caf4754bf,
+        type: 3}
+      propertyPath: m_Size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1750257032701782155, guid: 27a5d865dbb59184bb15772caf4754bf,
+        type: 3}
+      propertyPath: m_Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1750257032701782155, guid: 27a5d865dbb59184bb15772caf4754bf,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1851779848862216423, guid: 27a5d865dbb59184bb15772caf4754bf,
         type: 3}
@@ -134696,7 +134711,7 @@ PrefabInstance:
     - target: {fileID: 768176325781189338, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.142645
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 768176325864573410, guid: f00c717362536ff4d8239ad7b36defc3,
         type: 3}

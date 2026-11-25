@@ -3430,28 +3430,28 @@ namespace Parameter
             K_d = new stru_Vector3();
             direct_feadtrough_gyroscope = new stru_bool();
 
-            K_a.vect3 = new Vector3 { x = 430, y = 480, z = 500 }; // bank 1 2 3
+            K_a.vect3 = new Vector3 { x = 430, y = 480, z = 600 }; // bank 1 2 3
             //K_a.min = 100f;
             //K_a.max = 2000f;
             K_a.hint = "Tailrotor maximum rotation velocity.";
             K_a.comment = "";
             K_a.unit = "deg/sec";
 
-            K_I.vect3 = new Vector3 { x = 2, y = 2, z = 2 }; // bank 1 2 3
+            K_I.vect3 = new Vector3 { x = 1.0f, y = 1.0f, z = 1.0f }; // bank 1 2 3
             //K_I.min = 0.01f;
             //K_I.max = 100f;
             K_I.hint = "Tailrotor integral gain (Heading Hold)";
             K_I.comment = "";
             K_I.unit = "1/sec";
 
-            K_p.vect3 = new Vector3 { x = 0.20f, y = 0.20f, z = 0.20f }; // bank 1 2 3
+            K_p.vect3 = new Vector3 { x = 1.0f, y = 1.0f, z = 1.0f }; // bank 1 2 3
             //K_p.min = 0.01f;
             //K_p.max = 100f;
             K_p.hint = "Tailrotor proportional gain";
             K_p.comment = "";
             K_p.unit = "-";
 
-            K_d.vect3 = new Vector3 { x = 0.0001f, y = 0.0001f, z = 0.0001f }; // bank 1 2 3
+            K_d.vect3 = new Vector3 { x = 1.0f, y = 1.0f, z = 1.0f }; // bank 1 2 3
             //K_d.min = 0.0001f;
             //K_d.max = 100f;
             K_d.hint = "Tailrotor differential gain";
@@ -3508,14 +3508,14 @@ namespace Parameter
             K_I.comment = "";
             K_I.unit = "1/sec";
 
-            K_p.vect3 = new Vector3 { x = 0.1f, y = 0.1f, z = 0.1f }; // bank 1 2 3
+            K_p.vect3 = new Vector3 { x = 0.5f, y = 0.5f, z = 0.5f }; // bank 1 2 3
             //K_p.min = 0.01f;
             //K_p.max = 10f;
             K_p.hint = "Flybarless proportional gain";
             K_p.comment = "";
             K_p.unit = "-";
 
-            K_d.vect3 = new Vector3 { x = 0.1f, y = 0.1f, z = 0.1f }; // bank 1 2 3
+            K_d.vect3 = new Vector3 { x = 6.0f, y = 7.0f, z = 7.0f  }; // bank 1 2 3
             //K_d.min = 0.00001f;
             //K_d.max = 100f;
             K_d.hint = "Flybarless differential gain";
