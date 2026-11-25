@@ -99,6 +99,7 @@ helicopter/mainrotor/Theta_col_0	7
 helicopter/mainrotor/posLH	0.029706601	0.42482552	0
 helicopter/mainrotor/oriLH	0	0	-4
 helicopter/mainrotor/dirLH	0	0	0
+helicopter/mainrotor/airfoil	0
 helicopter/flapping/hub_stiffness_mr	50
 helicopter/flapping/A_lon	9.5
 helicopter/flapping/B_lat	9.5

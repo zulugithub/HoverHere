@@ -200,6 +200,8 @@ helicopter:
     n_mo2pr: {type: real, unit: "-", default: 0, calculated: true, formula: "n_mr2pr * n_mo2mr", doc: "Gear ratio motor to propeller"}
   mainrotor:
     _type: Rotor
+    _struct: Mainrotor
+    airfoil: {type: enum, default: 0, options: ["NACA0012", "NACA0009sm-il (Selig-modified)", "NACA23012", "NACA8H12", "VR-7"], doc: "Airfoil polar used by the BEMT mainrotor"}
   flapping:
     hub_stiffness_mr: {type: real, unit: "Nm/rad", default: 120, min: 0.001, max: 10000, doc: "Hub stiffness in the rotor head (O-ring)"}  # C# max 1000
     A_lon: {type: real, unit: "deg", default: 10, min: 0.001, max: 100, doc: "Linkage gain ratio of the cyclic pitch (a_s) to the longitudinal stick"}  # C# max 1, default 10

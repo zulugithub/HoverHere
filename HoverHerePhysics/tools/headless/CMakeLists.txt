@@ -19,5 +19,10 @@ if(HOVERHERE_BUILD_TESTS)
         add_test(NAME headless_airfoil
             COMMAND hoverhere_headless_test airfoil --heli "${_logo_resources}/Logo600SE_V3_parameter_file.xml"
                 --out "${CMAKE_CURRENT_BINARY_DIR}/airfoil_out/airfoil.csv")
+        add_test(NAME headless_airfoil_profile_override
+            COMMAND hoverhere_headless_test airfoil --airfoil-polar vr7-il_polar.xml
+                --out "${CMAKE_CURRENT_BINARY_DIR}/airfoil_profile_override/vr7.csv")
+        set_tests_properties(headless_airfoil headless_airfoil_profile_override
+            PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
     endif()
 endif()

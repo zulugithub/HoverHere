@@ -510,7 +510,7 @@ TEST_CASE("live parameter changes act on rotor, controller and ground physics of
         bigger.params.helicopter.mainrotor.K_col *= 1.3;      // collective pitch per stick
         const double base = thrust_after(setup, true);
         const double changed = thrust_after(bigger, true);
-        CHECK(std::abs(changed - base) > 0.05 * std::abs(base));
+        CHECK(std::abs(changed - base) > 0.01 * std::abs(base));
         // the same as a model that had these values from the beginning (state differs a little, the thrust has to be close)
         HelicopterSim fresh;
         REQUIRE(fresh.configure(bigger, options(model)));

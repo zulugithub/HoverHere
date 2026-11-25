@@ -311,6 +311,53 @@ py -3 tools/headless/plot_example.py out/vrs_descent_states.csv out/vrs_descent_
 py -3 tools/headless/animation_example.py out/vrs_descent_states.csv out/vrs_descent_bemt_grid.csv   # animation of states and grid
 ```
 
+The BEMT airfoil plot uses the Re/Ncrit lookup table from `data/airfoil_polars/`. From the
+`HoverHerePhysics` directory, rebuild the headless executable and export a fresh CSV before plotting:
+
+```bash
+build/msvc/bin/Release/hoverhere_headless_test.exe airfoil --heli ../HoverHere/Assets/Helicopters_Available/Logo600SE_V3/Resources/Logo600SE_V3_parameter_file.xml --out out/airfoil.csv
+py -3 tools/headless/plot_airfoil.py out/airfoil.csv
+```
+
+To plot a specific built-in profile instead of the profile selected in the helicopter file, omit `--heli` and pass
+its polar filename. For example:
+
+```bash
+build/msvc/bin/Release/hoverhere_headless_test.exe airfoil --airfoil-polar vr7-il_polar.xml --out out/airfoil.csv
+py -3 tools/headless/plot_airfoil.py out/airfoil.csv
+```
+
+The exported CSV records the selected profile name, which the plotter includes in the figure title.
+
+For an interactive profile picker, run `build_mscv_headless_and_plot_selected_airfoil_curves.bat`; you can also
+pass a profile name directly, for example `build_mscv_headless_and_plot_selected_airfoil_curves.bat VR-7`.
+
+The CSV contains the runtime-interpolated Re=50k, 100k, 200k and 500k curves at Ncrit=9, plus Re=200k at
+Ncrit=1, 5 and 9. Existing CSV files with only `cl_mr` / `cd_mr` columns predate the lookup-table export;
+regenerate them with the rebuilt executable. The XML files document their AirfoilTools source, resampling,
+and the estimated (not directly measured) Ncrit=1 slice. They can be regenerated with
+`py -3 tools/fetch_airfoil_polars.py data/airfoil_polars` (requires numpy, pandas and internet access).
+
+Each BEMT blade element computes its Reynolds number from its local relative speed and chord, then interpolates the
+polar table at that Re. Ncrit is also evaluated per element; it is an engineering blend of the turbulence and
+vortex-ring strengths, not a separately measured flow quantity:
+
+```text
+disturbance = clamp01(0.5 * turbulence_strength + vrs_strength)
+Ncrit = 9 - 8 * disturbance
+```
+
+Thus undisturbed flow uses Ncrit 9, maximum turbulence alone gives Ncrit 5, and a fully developed vortex ring
+can drive the value to Ncrit 1. Lower Ncrit represents earlier boundary-layer transition. The lookup interpolates
+between the available Ncrit 1, 5 and 9 slices; note that Ncrit 1 is extrapolated from XFOIL's Ncrit 5 and 9
+polars, so it is an estimate rather than a direct XFOIL run.
+
+The Unity parameter panel exposes the BEMT airfoil under **Mainrotor > airfoil**. The Logo600SE defaults to
+NACA0012. NACA0009sm-il (Selig-modified), NACA23012, NACA8H12 and VR-7 are also available. Their Re/Ncrit polar
+slices retain signed angles of attack, so camber lift at zero angle and different positive/negative stall behavior
+are not mirrored away. The selected mainrotor parameter chooses the matching XML polar table; a missing or invalid
+table prevents BEMT configuration rather than silently reverting to an old analytic polar.
+
 `run_maneuver.bat vrs_descent` does all of it: it runs the maneuver on the Logo 600 SE v3 (path in the batch file) and then calls
 `plot_example.py`. (The error message of `run_maneuver.bat` mentions `build_headless.bat`, the file is `build_msvc_headless.bat`.)
 

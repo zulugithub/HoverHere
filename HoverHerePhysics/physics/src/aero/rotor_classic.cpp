@@ -197,7 +197,7 @@ ClassicRotorConfig make_classic_rotor_config(const params::si::ModelParams& p, c
 
     switch (kind) {
     case RotorKind::Mainrotor:
-        c.rotor = p.helicopter.mainrotor;
+        c.rotor = as_rotor(p.helicopter.mainrotor);
         c.inflow = p.tuning.rotor_tuning.mainrotor_tuning;
         c.flapping = c.vortex_ring_state = c.turbulence = c.ground_effect = true;
         c.mass_total = tandem ? p.helicopter.mass_total / 2 : p.helicopter.mass_total;

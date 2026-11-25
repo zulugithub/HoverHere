@@ -50,4 +50,4 @@ target_include_directories(hoverhere_physics PUBLIC include ${CMAKE_CURRENT_SOUR
 target_compile_features(hoverhere_physics PUBLIC cxx_std_20)
 target_link_libraries(hoverhere_physics
     PUBLIC hoverhere::qvm
-    PRIVATE hoverhere::warnings)
+    PRIVATE hoverhere::warnings hoverhere::pugixml)

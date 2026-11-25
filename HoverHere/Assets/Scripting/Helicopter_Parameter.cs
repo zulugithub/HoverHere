@@ -1589,8 +1589,17 @@ namespace Parameter
     [Serializable]
     public class stru_mainrotor : stru_rotor
     {
+        public stru_list airfoil { get; set; }
+
         public stru_mainrotor()
         {
+            airfoil = new stru_list();
+            airfoil.val = 0;
+            airfoil.str = new List<string> { "NACA0012", "NACA0009sm-il (Selig-modified)", "NACA23012", "NACA8H12", "VR-7" };
+            airfoil.hint = "Airfoil polar used by the BEMT mainrotor";
+            airfoil.comment = "";
+            airfoil.unit = "";
+
             rotor_exists.val = true;
             rotor_exists.hint = "Mainrotor exists";
             rotor_exists.comment = "";

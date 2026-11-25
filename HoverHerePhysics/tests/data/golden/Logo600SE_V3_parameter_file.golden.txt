@@ -29,15 +29,15 @@ helicopter/motor_sound_recorded_rpm	1000
 helicopter/stall_sound_recorded_rpm	1160
 helicopter/reference_to_masscentrum/position	0	0.275	0
 helicopter/reference_to_masscentrum/orientation	0	0	-3
-helicopter/gyro/K_a	430	480	500
-helicopter/gyro/K_I	2	2	2
-helicopter/gyro/K_p	0.2	0.2	0.2
-helicopter/gyro/K_d	0.0001	0.0001	0.0001
+helicopter/gyro/K_a	430	480	600
+helicopter/gyro/K_I	1	1	1
+helicopter/gyro/K_p	1	1	1
+helicopter/gyro/K_d	1	1	1
 helicopter/gyro/direct_feadtrough_gyroscope	0
 helicopter/flybarless/K_a	240	270	320
-helicopter/flybarless/K_I	1.0	1.0	1.0
-helicopter/flybarless/K_p	0.1	0.1	0.1
-helicopter/flybarless/K_d	0.1	0.1	0.1
+helicopter/flybarless/K_I	1	1	1
+helicopter/flybarless/K_p	0.5	0.5	0.5
+helicopter/flybarless/K_d	6	7	7
 helicopter/flybarless/direct_feadtrough_flybarless	0
 helicopter/flybarless/initial_roll_angle	-0
 helicopter/flybarless/initial_pitch_angle	0
@@ -99,6 +99,7 @@ helicopter/mainrotor/Theta_col_0	0
 helicopter/mainrotor/posLH	0	0.182387	0
 helicopter/mainrotor/oriLH	0	0	0
 helicopter/mainrotor/dirLH	0	0	0
+helicopter/mainrotor/airfoil	0
 helicopter/flapping/hub_stiffness_mr	120
 helicopter/flapping/A_lon	10
 helicopter/flapping/B_lat	10

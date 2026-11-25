@@ -2,6 +2,11 @@
 <stru_transmitter_and_helicopter xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <helicopter>
     <sound_volume>  <val>100</val>  </sound_volume> <!-- LOGO600SE is the default model and its parameter are set in "Helicopter_Parameter.cs"-->
+    <mainrotor>
+      <airfoil>
+        <val>0</val>
+      </airfoil>
+    </mainrotor>
     <collision>
       <positions_left>
         <vect3>

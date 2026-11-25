@@ -4,7 +4,20 @@
 #include <cmath>
 #include <limits>
 #include <cstdio>
+#include <fstream>
 #include <numbers>
+#include <stdexcept>
+#include <string>
+
+#include <pugixml.hpp>
+#include <sstream>
+
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 #include "hoverhere/numerics/smooth_step.hpp"
 
@@ -17,6 +30,25 @@ using numerics::smooth_step;
 namespace {
 
 constexpr Real kPi = std::numbers::pi_v<Real>;
+
+#if defined(_WIN32)
+char kModuleLocationAnchor = 0;
+
+std::filesystem::path module_directory()
+{
+    HMODULE module = nullptr;
+    const DWORD flags = GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT;
+    if (!GetModuleHandleExW(flags, reinterpret_cast<LPCWSTR>(&kModuleLocationAnchor), &module)) {
+        return {};
+    }
+    std::array<wchar_t, 32768> path{};
+    const DWORD length = GetModuleFileNameW(module, path.data(), static_cast<DWORD>(path.size()));
+    if (length == 0 || length >= path.size()) {
+        return {};
+    }
+    return std::filesystem::path(std::wstring(path.data(), length)).parent_path();
+}
+#endif
 
 // UnityEngine.Mathf helpers
 Real clamp01(const Real x) noexcept
@@ -182,25 +214,228 @@ Real johnson_time_lag(const Real v_target, const Real v_previous, const Real ome
     return first_order_lag_step(v_previous, v_target, dt, tau);
 }
 
-// ----------------------------------------------------------------------------------------------------------------
-// airfoil and blade element balance (NACA0012)
-// ----------------------------------------------------------------------------------------------------------------
-// Lift and drag coefficient over the angle of attack alpha [rad], valid for the full circle -pi ... +pi.
-// Both curves are blended from a small-angle model to a post-stall model with a weight s (1: small-angle, 0: post-stall):
-//   cl: linear (cl_slope * alpha) near zero, a sine over the full circle beyond stall (flat plate like, first maximum at cl_first_max);
-//   cd: cd_offset + cd_slope * alpha^3 near zero, a shifted cosine beyond stall (about 2 * cd_amplitude_or_offset at +-90 deg).
-// The curves are built for |alpha| and mirrored: cl is odd in alpha, cd is even. s falls smoothly from 1 to 0 between the
-// *_trans_start and *_trans_end angles, so the 360 deg model has no kink or jump.
-void airfoil_coefficients(const AirfoilCurves& a, const Real alpha, Real& cl, Real& cd) noexcept
+Real endpoint_slope(const Real d0, const Real d1) noexcept
 {
-    const Real abs_alpha = std::abs(alpha);
-    Real s = smooth_step(abs_alpha, a.cl_trans_start, 1, a.cl_trans_end, 0);  // blending weight of the small-angle lift
-    cl = (s * (a.cl_slope * abs_alpha) +
-          (1 - s) * (+std::sin((Real{3} / 2) / (1 - (a.cl_first_max / 180)) * (abs_alpha - kPi)) * a.cl_amplitude)) *
-         unity_sign(alpha);
-    s = smooth_step(abs_alpha, a.cd_trans_start, 1, a.cd_trans_end, 0);
-    cd = s * (a.cd_slope * std::abs(alpha * alpha * alpha) + a.cd_offset) +
-         (1 - s) * (-std::cos((Real{4} / 2) / (1 - (a.cd_first_min / 180)) * (abs_alpha - kPi)) * a.cd_amplitude_or_offset + a.cd_amplitude_or_offset);
+    Real slope = (Real{3} * d0 - d1) / 2;
+    if ((d0 > 0 && slope < 0) || (d0 < 0 && slope > 0)) {
+        return 0;
+    }
+    if (((d0 > 0) != (d1 > 0)) && std::abs(slope) > Real{3} * std::abs(d0)) {
+        slope = Real{3} * d0;
+    }
+    return slope;
+}
+
+template <std::size_t N>
+Real monotone_slope(const std::array<Real, N>& y, const std::size_t i) noexcept
+{
+    if (i == 0) {
+        return endpoint_slope(y[1] - y[0], y[2] - y[1]);
+    }
+    if (i == N - 1) {
+        return endpoint_slope(y[N - 1] - y[N - 2], y[N - 2] - y[N - 3]);
+    }
+    const Real left = y[i] - y[i - 1];
+    const Real right = y[i + 1] - y[i];
+    if (left * right <= 0) {
+        return 0;
+    }
+    return (2 * left * right) / (left + right);
+}
+
+template <std::size_t N>
+Real eval_monotone_cubic_uniform(const std::array<Real, N>& y, const Real pos) noexcept
+{
+    if (pos <= Real{0}) {
+        return y[0];
+    }
+    if (pos >= static_cast<Real>(N - 1)) {
+        return y[N - 1];
+    }
+    const std::size_t i = static_cast<std::size_t>(pos);
+    const Real t = pos - static_cast<Real>(i);
+    const Real m0 = monotone_slope(y, i);
+    const Real m1 = monotone_slope(y, i + 1);
+    const Real t2 = t * t;
+    const Real t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * y[i] + (t3 - 2 * t2 + t) * m0 +
+           (-2 * t3 + 3 * t2) * y[i + 1] + (t3 - t2) * m1;
+}
+
+static void post_stall_coefficients(const PostStallModel& model, const Real alpha, Real& cl, Real& cd) noexcept
+{
+    const bool positive_alpha = alpha >= 0;
+    const Real side_alpha = std::abs(alpha);
+    const Real cl_peak_deg = positive_alpha ? model.cl_positive_peak_deg : model.cl_negative_peak_deg;
+    const Real cl_amplitude = positive_alpha ? model.cl_positive_amplitude : model.cl_negative_amplitude;
+    const Real cd_first_min_deg = positive_alpha ? model.cd_positive_first_min_deg : model.cd_negative_first_min_deg;
+    const Real cd_amplitude = positive_alpha ? model.cd_positive_amplitude_or_offset : model.cd_negative_amplitude_or_offset;
+    cl = (positive_alpha ? Real{1} : Real{-1}) *
+         std::sin((Real{3} / 2) / (1 - (cl_peak_deg / 180)) * (side_alpha - kPi)) * cl_amplitude;
+    cd = -std::cos((Real{4} / 2) / (1 - (cd_first_min_deg / 180)) * (side_alpha - kPi)) * cd_amplitude + cd_amplitude;
+}
+
+AirfoilSlice make_airfoil_slice(const AirfoilPolarTable& table, const Real re, const Real ncrit) noexcept
+{
+    std::size_t r0, n0;
+    Real tr, tn;
+    find_grid_bracket(table.re_grid, re, r0, tr);
+    find_grid_bracket(table.ncrit_grid, ncrit, n0, tn);
+    const std::size_t r1 = r0 + 1;
+    const std::size_t n1 = n0 + 1;
+    const Real w00 = (1 - tr) * (1 - tn);
+    const Real w10 = tr * (1 - tn);
+    const Real w01 = (1 - tr) * tn;
+    const Real w11 = tr * tn;
+
+    AirfoilSlice slice{};
+    for (std::size_t a = 0; a < AirfoilPolarTable::kAlphaCount; ++a) {
+        const std::size_t i00 = AirfoilPolarTable::index(r0, n0, a);
+        const std::size_t i10 = AirfoilPolarTable::index(r1, n0, a);
+        const std::size_t i01 = AirfoilPolarTable::index(r0, n1, a);
+        const std::size_t i11 = AirfoilPolarTable::index(r1, n1, a);
+        slice.cl[a] = w00 * table.cl_table[i00] + w10 * table.cl_table[i10] + w01 * table.cl_table[i01] + w11 * table.cl_table[i11];
+        slice.cd[a] = w00 * table.cd_table[i00] + w10 * table.cd_table[i10] + w01 * table.cd_table[i01] + w11 * table.cd_table[i11];
+    }
+    return slice;
+}
+
+void evaluate_airfoil_polar(const PostStallModel& post_stall, const AirfoilSlice& slice, const Real alpha,
+                            Real& cl, Real& cd) noexcept
+{
+    if (alpha <= AirfoilPolarTable::kAlphaMinRad || alpha >= AirfoilPolarTable::kAlphaMaxRad) {
+        post_stall_coefficients(post_stall, alpha, cl, cd);
+        return;
+    }
+    const Real pos = std::clamp((alpha - AirfoilPolarTable::kAlphaMinRad) * AirfoilPolarTable::kInvAlphaStep, Real{0},
+                                static_cast<Real>(AirfoilPolarTable::kAlphaCount - 1));
+    cl = eval_monotone_cubic_uniform(slice.cl, pos);
+    cd = eval_monotone_cubic_uniform(slice.cd, pos);
+}
+
+bool load_airfoil_polar_xml(const std::filesystem::path& file, AirfoilPolarTable& table, PostStallModel& post_stall) noexcept
+{
+    pugi::xml_document doc;
+    if (doc.load_file(file.c_str()).status != pugi::status_ok) {
+        return false;
+    }
+    AirfoilPolarTable loaded{};
+    const pugi::xml_node root = doc.document_element();
+    const pugi::xml_node re_node = root.child("ReGrid");
+    const pugi::xml_node ncrit_node = root.child("NcritGrid");
+    if (!re_node || !ncrit_node) {
+        return false;
+    }
+    const pugi::xml_node post_stall_node = root.child("PostStall");
+    if (!post_stall_node) {
+        return false;
+    }
+
+    PostStallModel loaded_post_stall{};
+    const auto read_post_stall_value = [&post_stall_node](const char* name, Real& value) {
+        const pugi::xml_attribute attribute = post_stall_node.attribute(name);
+        if (!attribute) {
+            return false;
+        }
+        value = attribute.as_float();
+        return std::isfinite(value);
+    };
+    if (!read_post_stall_value("cl_positive_peak_deg", loaded_post_stall.cl_positive_peak_deg) ||
+        !read_post_stall_value("cl_negative_peak_deg", loaded_post_stall.cl_negative_peak_deg) ||
+        !read_post_stall_value("cl_positive_amplitude", loaded_post_stall.cl_positive_amplitude) ||
+        !read_post_stall_value("cl_negative_amplitude", loaded_post_stall.cl_negative_amplitude) ||
+        !read_post_stall_value("cd_positive_first_min_deg", loaded_post_stall.cd_positive_first_min_deg) ||
+        !read_post_stall_value("cd_negative_first_min_deg", loaded_post_stall.cd_negative_first_min_deg) ||
+        !read_post_stall_value("cd_positive_amplitude_or_offset", loaded_post_stall.cd_positive_amplitude_or_offset) ||
+        !read_post_stall_value("cd_negative_amplitude_or_offset", loaded_post_stall.cd_negative_amplitude_or_offset) ||
+        loaded_post_stall.cl_positive_peak_deg <= 0 || loaded_post_stall.cl_positive_peak_deg >= 180 ||
+        loaded_post_stall.cl_negative_peak_deg <= 0 || loaded_post_stall.cl_negative_peak_deg >= 180 ||
+        loaded_post_stall.cl_positive_amplitude <= 0 || loaded_post_stall.cl_negative_amplitude <= 0 ||
+        loaded_post_stall.cd_positive_amplitude_or_offset <= 0 || loaded_post_stall.cd_negative_amplitude_or_offset <= 0) {
+        return false;
+    }
+
+    std::istringstream re_stream(re_node.child_value());
+    std::istringstream ncrit_stream(ncrit_node.child_value());
+    for (Real& re : loaded.re_grid) {
+        if (!(re_stream >> re)) {
+            return false;
+        }
+    }
+    for (Real& ncrit : loaded.ncrit_grid) {
+        if (!(ncrit_stream >> ncrit)) {
+            return false;
+        }
+    }
+
+    std::array<bool, AirfoilPolarTable::kPolarCount> loaded_slices{};
+    for (const pugi::xml_node slice : root.child("Slices").children("Slice")) {
+        const Real re = slice.attribute("re").as_float(0);
+        const Real ncrit = slice.attribute("ncrit").as_float(0);
+        std::size_t r = 0, n = 0;
+        while (r < loaded.re_grid.size() && loaded.re_grid[r] != re) ++r;
+        while (n < loaded.ncrit_grid.size() && loaded.ncrit_grid[n] != ncrit) ++n;
+        if (r == loaded.re_grid.size() || n == loaded.ncrit_grid.size()) {
+            continue;
+        }
+        const std::size_t polar = AirfoilPolarTable::polar_index(r, n);
+        if (loaded_slices[polar]) {
+            return false;
+        }
+        const Real alpha_min = slice.attribute("alpha_min_deg").as_float(AirfoilPolarTable::kAlphaMinDeg);
+        const Real alpha_max = slice.attribute("alpha_max_deg").as_float(AirfoilPolarTable::kAlphaMaxDeg);
+        if (!(alpha_min < 0 && alpha_max > 0) || alpha_min < AirfoilPolarTable::kAlphaMinDeg ||
+            alpha_max > AirfoilPolarTable::kAlphaMaxDeg || !std::isfinite(alpha_min) || !std::isfinite(alpha_max)) {
+            return false;
+        }
+        loaded.alpha_min_deg[polar] = alpha_min;
+        loaded.alpha_max_deg[polar] = alpha_max;
+        std::istringstream cl_stream(slice.child("Cl").child_value());
+        std::istringstream cd_stream(slice.child("Cd").child_value());
+        for (std::size_t a = 0; a < AirfoilPolarTable::kAlphaCount; ++a) {
+            Real cl, cd;
+            if (!(cl_stream >> cl) || !(cd_stream >> cd)) {
+                return false;
+            }
+            loaded.cl_table[AirfoilPolarTable::index(r, n, a)] = cl;
+            loaded.cd_table[AirfoilPolarTable::index(r, n, a)] = cd;
+        }
+        loaded_slices[polar] = true;
+    }
+    if (!std::all_of(loaded_slices.begin(), loaded_slices.end(), [](const bool loaded_slice) { return loaded_slice; })) {
+        return false;
+    }
+
+    for (std::size_t r = 0; r < AirfoilPolarTable::kReCount; ++r) {
+        for (std::size_t n = 0; n < AirfoilPolarTable::kNcritCount; ++n) {
+            const std::size_t polar = AirfoilPolarTable::polar_index(r, n);
+            const Real alpha_max_end = std::min(loaded.alpha_max_deg[polar], Real{21.5});
+            const Real alpha_max_start = std::min(Real{16}, alpha_max_end - Real{3});
+            const Real alpha_min_end = std::max(loaded.alpha_min_deg[polar], Real{-21.5});
+            const Real alpha_min_start = std::max(Real{-16}, alpha_min_end + Real{3});
+            for (std::size_t a = 0; a < AirfoilPolarTable::kAlphaCount; ++a) {
+                const Real alpha_deg = AirfoilPolarTable::kAlphaMinDeg + static_cast<Real>(a) * AirfoilPolarTable::kAlphaStepDeg;
+                const Real alpha = alpha_deg * kPi / Real{180};
+                const Real lut_weight = alpha_deg >= 0
+                                            ? smooth_step(alpha_deg, alpha_max_start, 1, alpha_max_end, 0)
+                                            : smooth_step(-alpha_deg, -alpha_min_start, 1, -alpha_min_end, 0);
+                Real cl_post, cd_post;
+                post_stall_coefficients(loaded_post_stall, alpha, cl_post, cd_post);
+                const std::size_t i = AirfoilPolarTable::index(r, n, a);
+                loaded.cl_table[i] = lut_weight * loaded.cl_table[i] + (1 - lut_weight) * cl_post;
+                loaded.cd_table[i] = lut_weight * loaded.cd_table[i] + (1 - lut_weight) * cd_post;
+            }
+        }
+    }
+    table = loaded;
+    post_stall = loaded_post_stall;
+    return true;
+}
+
+bool load_airfoil_polar_xml(const std::filesystem::path& file, AirfoilPolarTable& table) noexcept
+{
+    PostStallModel post_stall{};
+    return load_airfoil_polar_xml(file, table, post_stall);
 }
 
 namespace {
@@ -210,30 +445,19 @@ struct ElementPhysics {
     Real cl, cd, phi, alpha;
 };
 
-// Blade element momentum balance of one element for a trial induced velocity Vi (NACA 0012 like airfoil, see airfoil_coefficients).
-//   Vi      [m/s] trial induced velocity (axial, through the disc)      Vc [m/s] axial air velocity of the element (climb)
-//   V2      [m/s] tangential air velocity of the element (Omega r + forward flight part)
-//   beta    [rad] blade pitch angle against the rotor plane             factor1: 0.5 rho * blades * chord / azimuth count
-//   factor2: 4 pi r rho / azimuth count: mass flow factor of the annulus sector of this element (momentum theory)
-// The residual is zero when the blade element thrust equals the momentum theory thrust; solve_element drives it to zero by Vi.
-ElementPhysics element_function(const BemtConfig& cfg, const Real Vi, const Real Vc, Real V2, const Real beta, const Real factor1, const Real factor2) noexcept
+ElementPhysics element_function(const BemtConfig& cfg, const AirfoilSlice& slice, const Real Vi, const Real Vc, Real V2,
+                                const Real beta, const Real factor1, const Real factor2) noexcept
 {
-    V2 = smooth_step(std::abs(V2), 0.01, 0.01, 0.10, std::abs(V2));  // keep |V2| >= 0.01 m/s: atan2 and V_local stay defined
-    const Real V0 = Vi + Vc;                                         // [m/s] total axial flow through the element
+    V2 = smooth_step(std::abs(V2), 0.01, 0.01, 0.10, std::abs(V2));
+    const Real V0 = Vi + Vc;
     ElementPhysics e{};
-    e.phi = std::atan2(V0, V2);   // [rad] inflow angle: angle of the resulting air velocity against the rotor plane
-    e.alpha = beta - e.phi;       // [rad] angle of attack = pitch minus inflow angle
-    if (e.alpha >= kPi) {         // wrap into -pi ... +pi, the range of the 360 deg airfoil curves
-        e.alpha -= 2 * kPi;
-    }
-    if (e.alpha <= -kPi) {
-        e.alpha += 2 * kPi;
-    }
-    airfoil_coefficients(cfg.airfoil, e.alpha, e.cl, e.cd);
-    const Real Vlocal_squared = V0 * V0 + V2 * V2;  // squared magnitude of the air velocity seen by the blade section
-    // blade element thrust dT/dr per radial length [N/m]: the lift cl and drag cd of the section projected on the rotor axis
+    e.phi = std::atan2(V0, V2);
+    e.alpha = beta - e.phi;
+    if (e.alpha >= kPi) e.alpha -= 2 * kPi;
+    if (e.alpha <= -kPi) e.alpha += 2 * kPi;
+    evaluate_airfoil_polar(cfg.post_stall, slice, e.alpha, e.cl, e.cd);
+    const Real Vlocal_squared = V0 * V0 + V2 * V2;
     const Real DtDr = factor1 * Vlocal_squared * (e.cl * std::cos(e.phi) - e.cd * std::sin(e.phi));
-    // residual [N]: momentum thrust (factor2 * Vi * |V0|, product form, no singularity at V0 = 0) minus blade element thrust
     e.residual = factor2 * Vi * std::abs(V0) - DtDr;
     return e;
 }
@@ -245,7 +469,8 @@ struct ElementSolution {
 };
 
 // Damped Newton iteration with central differences; the best iterate of the whole path is returned.
-ElementSolution solve_element(const BemtConfig& cfg, const Real Vi_start, const Real Vc, const Real V2, const Real beta, const Real factor1, const Real factor2) noexcept
+ElementSolution solve_element(const BemtConfig& cfg, const AirfoilSlice& slice, const Real Vi_start, const Real Vc, const Real V2,
+                             const Real beta, const Real factor1, const Real factor2) noexcept
 {
     const NewtonSettings& n = cfg.newton;
     Real Vi = Vi_start;
@@ -254,7 +479,7 @@ ElementSolution solve_element(const BemtConfig& cfg, const Real Vi_start, const 
     int sum = 0;
     bool finished = false;
     while (!finished) {
-        const Real residual = element_function(cfg, Vi, Vc, V2, beta, factor1, factor2).residual;
+        const Real residual = element_function(cfg, slice, Vi, Vc, V2, beta, factor1, factor2).residual;
         if (std::abs(residual) < best_residual) {
             best_residual = std::abs(residual);
             best_Vi = Vi;
@@ -263,8 +488,8 @@ ElementSolution solve_element(const BemtConfig& cfg, const Real Vi_start, const 
             finished = true;
             break;
         }
-        const Real residual_plus = element_function(cfg, Vi + n.delta, Vc, V2, beta, factor1, factor2).residual;
-        const Real residual_minus = element_function(cfg, Vi - n.delta, Vc, V2, beta, factor1, factor2).residual;
+        const Real residual_plus = element_function(cfg, slice, Vi + n.delta, Vc, V2, beta, factor1, factor2).residual;
+        const Real residual_minus = element_function(cfg, slice, Vi - n.delta, Vc, V2, beta, factor1, factor2).residual;
         const Real slope = (residual_plus - residual_minus) / (2 * n.delta);
         if (std::abs(slope) < n.min_slope || !std::isfinite(slope)) {
             break;
@@ -279,7 +504,7 @@ ElementSolution solve_element(const BemtConfig& cfg, const Real Vi_start, const 
             break;
         }
     }
-    const Real final_residual = element_function(cfg, Vi, Vc, V2, beta, factor1, factor2).residual;
+    const Real final_residual = element_function(cfg, slice, Vi, Vc, V2, beta, factor1, factor2).residual;
     if (std::abs(final_residual) < best_residual) {
         best_residual = std::abs(final_residual);
         best_Vi = Vi;
@@ -301,10 +526,10 @@ Real hover_induced_velocity(const Real thrust, const Real rotor_radius, const Re
 // ----------------------------------------------------------------------------------------------------------------
 // configuration, grid, disc state
 // ----------------------------------------------------------------------------------------------------------------
-BemtConfig make_bemt_config(const params::si::ModelParams& p) noexcept
+BemtConfig make_bemt_config(const params::si::ModelParams& p)
 {
     BemtConfig c{};
-    c.rotor = p.helicopter.mainrotor;
+    c.rotor = as_rotor(p.helicopter.mainrotor);
     c.disc_inertia_tilt = p.helicopter.flapping.I_flapping;
     c.disc_inertia_spin = p.helicopter.mainrotor.J;
     c.hub_stiffness = p.helicopter.flapping.hub_stiffness_mr; // what about tailrotor? (Unity uses the same value for both rotors)
@@ -312,6 +537,50 @@ BemtConfig make_bemt_config(const params::si::ModelParams& p) noexcept
     c.wake_inertia_fumble_factor = p.tuning.rotor_tuning.mainrotor_tuning.wake_inertia_fumble_factor;
     c.vrs.tau_strength = p.tuning.rotor_tuning.mainrotor_tuning.vrs_time_constant;
     c.turbulence_config = make_turbulence_config(p.tuning.turbulence);
+    const std::int32_t airfoil = p.helicopter.mainrotor.airfoil;
+    if (airfoil < 0 || static_cast<std::size_t>(airfoil) >= kMainrotorAirfoilProfiles.size()) {
+        throw std::invalid_argument("invalid mainrotor airfoil selection");
+    }
+    const std::filesystem::path polar_file{
+        std::string(kMainrotorAirfoilProfiles[static_cast<std::size_t>(airfoil)].polar_filename)};
+    bool loaded = false;
+    const auto try_load = [&](const std::filesystem::path& candidate) {
+        return load_airfoil_polar_xml(candidate, c.airfoil_polar, c.post_stall);
+    };
+#if defined(_WIN32)
+    std::filesystem::path ancestor = module_directory();
+    for (int depth = 0; depth < 6 && !ancestor.empty(); ++depth) {
+        for (const std::filesystem::path& candidate : {
+                 ancestor / "Assets/StreamingAssets/AirfoilPolars" / polar_file,
+                 ancestor / "StreamingAssets/AirfoilPolars" / polar_file,
+                 ancestor / "data/airfoil_polars" / polar_file}) {
+            if (try_load(candidate)) {
+                loaded = true;
+                break;
+            }
+        }
+        if (loaded) {
+            break;
+        }
+        ancestor = ancestor.parent_path();
+    }
+#endif
+    for (const std::filesystem::path& candidate : {
+             std::filesystem::path{"data/airfoil_polars"} / polar_file,
+             std::filesystem::path{"../data/airfoil_polars"} / polar_file,
+             std::filesystem::path{"../../data/airfoil_polars"} / polar_file}) {
+        if (loaded) {
+            break;
+        }
+        if (try_load(candidate)) {
+            loaded = true;
+            break;
+        }
+    }
+    if (!loaded) {
+        throw std::runtime_error("could not load mainrotor airfoil polar '" + polar_file.string() +
+                                 "' from Unity StreamingAssets or data/airfoil_polars");
+    }
     return c;
 }
 
@@ -468,6 +737,8 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     // PT1 lagged strength, never the instantaneous one that follows the sink rate. The blade inflow itself stays fast (Pitt-Peters).
     out.vrs_strength = (cfg.quasi_static || !state.lag_initialized || !(cfg.vrs.tau_strength > 0)) ? out.strength_vrs * out.use_vrs : state.vrs_strength;
     out.v_johnson_lagged = (cfg.quasi_static || !state.lag_initialized) ? out.v_johnson_target : state.v_johnson_lagged;
+    out.turbulence_strength = turbulence_strength(cfg.turbulence_config, in.body.omega_L, hub_speed,
+                                                  cfg.vortex_ring_state ? out.vrs_strength : Real{0});
 
     // The Johnson inflow is blended in smoothly over the whole descent (none at Vz/vh = 0, full at Vz/vh <= -2), in flight
     // gated by how coherent the descent is over the disc.
@@ -509,7 +780,15 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
                 const Real bridge = johnson_baseline(local_Vz, local_Vx, cfg.vrs) + cfg.vrs.zeta * cfg.vrs.f * johnson_vrs_correction(local_Vz, local_Vx, cfg.vrs, unused);
                 Vi_start = polarity * bridge * v_h;
             }
-            const ElementSolution solution = solve_element(cfg, Vi_start, out.Vc[i], rotation_sign * out.V2[i], out.beta[i], factor1, factor2);
+            const Real V0_est = use_lag ? state.Vi_lag[i] + out.Vc[i] : out.Vi_target[i] + out.Vc[i];
+            const Real V_local_est = std::sqrt(V0_est * V0_est + out.V2[i] * out.V2[i]);
+            const Real re = cfg.kinematic_viscosity > 0
+                                 ? (V_local_est * chord) / cfg.kinematic_viscosity
+                                 : Real{200000};
+            const Real ncrit = 9 - 8 * clamp01(out.turbulence_strength * Real{0.5} + out.vrs_strength);
+            const AirfoilSlice slice = make_airfoil_slice(cfg.airfoil_polar, re, ncrit);
+            const ElementSolution solution = solve_element(cfg, slice, Vi_start, out.Vc[i], rotation_sign * out.V2[i],
+                                                           out.beta[i], factor1, factor2);
             out.Vi_raw[i] = solution.Vi;
             out.residual[i] = solution.residual;
             out.iterations[i] = static_cast<std::uint8_t>(std::min(solution.iterations, 255));
@@ -525,7 +804,8 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
             out.Vi[i] = use_lag ? state.Vi_lag[i] : out.Vi_target[i];
 
             // blade forces with the induced velocity that is actually in the flow
-            const ElementPhysics e = element_function(cfg, out.Vi[i], out.Vc[i], rotation_sign * out.V2[i], out.beta[i], factor1, factor2);
+            const ElementPhysics e = element_function(cfg, slice, out.Vi[i], out.Vc[i], rotation_sign * out.V2[i],
+                                                      out.beta[i], factor1, factor2);
             out.phi[i] = e.phi;
             out.alpha[i] = e.alpha;
             out.cl[i] = e.cl;
@@ -569,7 +849,6 @@ BemtOutputs bemt_evaluate(const BemtConfig& cfg, const BemtGrid& grid, const Bem
     out.torque_D = torque_D;
     out.thrust = qvm::mag(force_O);
     out.shaft_torque = torque_D.a[1];
-    out.turbulence_strength = turbulence_strength(cfg.turbulence_config, in.body.omega_L, hub_speed, cfg.vortex_ring_state ? out.vrs_strength : Real{0});
     return out;
 }
 

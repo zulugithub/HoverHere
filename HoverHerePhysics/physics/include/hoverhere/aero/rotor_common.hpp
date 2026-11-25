@@ -23,6 +23,8 @@ using math::Vec3;
 
 enum class RotorKind : int { Mainrotor = 0, Tailrotor = 1, Propeller = 2 };
 
+[[nodiscard]] params::si::Rotor as_rotor(const params::si::Mainrotor& rotor) noexcept;
+
 // Fuselage kinematics as the rotors and the aerodynamics see them.
 struct BodyKinematics {
     Vec3 position_O;    // [m]   centre of mass

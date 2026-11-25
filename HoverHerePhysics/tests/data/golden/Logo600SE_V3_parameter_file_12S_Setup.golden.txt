@@ -35,7 +35,7 @@ helicopter/gyro/K_p	0.19	0.22	0.25
 helicopter/gyro/K_d	0.01	0.01	0.01
 helicopter/gyro/direct_feadtrough_gyroscope	0
 helicopter/flybarless/K_a	300	310	330
-helicopter/flybarless/K_I	1.0	1.0	1.0
+helicopter/flybarless/K_I	1	1	1
 helicopter/flybarless/K_p	0.08	0.08	0.08
 helicopter/flybarless/K_d	0.01	0.01	0.01
 helicopter/flybarless/direct_feadtrough_flybarless	0
@@ -99,6 +99,7 @@ helicopter/mainrotor/Theta_col_0	0
 helicopter/mainrotor/posLH	0	0.182387	0
 helicopter/mainrotor/oriLH	0	0	0
 helicopter/mainrotor/dirLH	0	0	0
+helicopter/mainrotor/airfoil	0
 helicopter/flapping/hub_stiffness_mr	120
 helicopter/flapping/A_lon	10
 helicopter/flapping/B_lat	10

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <exception>
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -385,6 +386,16 @@ bool HelicopterSim::Impl::derive(const SimSetup& s, std::string* error)
         return fail("the rotor system changed, the model has to be rebuilt with a reset");
     }
 
+    aero::BemtConfig new_cfg_bemt{};
+    try {
+        new_cfg_bemt = aero::make_bemt_config(new_p);
+    } catch (const std::exception& e) {
+        if (error != nullptr) {
+            *error = e.what();
+        }
+        return false;
+    }
+
     setup = s;
     p = new_p;
     body_p = new_body;
@@ -395,14 +406,14 @@ bool HelicopterSim::Impl::derive(const SimSetup& s, std::string* error)
     cfg_main = aero::make_classic_rotor_config(p, aero::RotorKind::Mainrotor);
     cfg_tail = aero::make_classic_rotor_config(p, aero::RotorKind::Tailrotor);
     cfg_prop = aero::make_classic_rotor_config(p, aero::RotorKind::Propeller);
-    cfg_bemt = aero::make_bemt_config(p);
+    cfg_bemt = std::move(new_cfg_bemt);
     cfg_bemt.vortex_ring_state = (options.bemt_flags & HH_BEMT_NO_VORTEX_RING) == 0;
     cfg_bemt.ground_effect = (options.bemt_flags & HH_BEMT_NO_GROUND_EFFECT) == 0;
     cfg_bemt.turbulence = (options.bemt_flags & HH_BEMT_NO_TURBULENCE) == 0;
     cfg_bemt.dynamic_inflow = (options.bemt_flags & HH_BEMT_NO_DYNAMIC_INFLOW) == 0;
     cfg_bemt.quasi_static = (options.bemt_flags & HH_BEMT_QUASI_STATIC) != 0;
     bemt_grid = aero::make_bemt_grid(cfg_bemt);
-    geo_main = aero::make_rotor_geometry(h.mainrotor);
+    geo_main = aero::make_rotor_geometry(aero::as_rotor(h.mainrotor));
     geo_tail = aero::make_rotor_geometry(h.tailrotor);
     geo_prop = aero::make_rotor_geometry(h.propeller);
     aero_cfg = aero::make_aerodynamics_config(h);
@@ -1145,7 +1156,7 @@ void HelicopterSim::Impl::fill_outputs(hh_sim_outputs& out) const
         Real stall = 0;
         for (std::size_t i = 0; i < aero::kBemtElementCount; ++i) {
             noise += numerics::smooth_step(std::abs(e.bemt_out.cd[i]), 0.005, 0, 0.12, 1) / static_cast<Real>(aero::kBemtElementCount) * 10;
-            stall += numerics::smooth_step(std::abs(e.bemt_out.alpha[i]), cfg_bemt.airfoil.cl_trans_start, 0, cfg_bemt.airfoil.cl_trans_end, 1) /
+            stall += numerics::smooth_step(std::abs(e.bemt_out.alpha[i]), 12 * frames::kDegToRad, 0, 26 * frames::kDegToRad, 1) /
                      static_cast<Real>(aero::kBemtElementCount);
         }
         a.mainrotor_noise = std::clamp(noise, Real{0.15}, Real{1});

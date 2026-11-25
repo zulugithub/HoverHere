@@ -26,3 +26,4 @@ target_compile_definitions(hoverhere_tests PRIVATE
     HOVERHERE_UNITY_ASSETS_DIR="${PROJECT_SOURCE_DIR}/../HoverHere/Assets")
 
 add_test(NAME unit_tests COMMAND hoverhere_tests)
+set_tests_properties(unit_tests PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")

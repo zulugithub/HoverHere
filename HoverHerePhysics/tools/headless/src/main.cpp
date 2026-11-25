@@ -12,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "hoverhere/aero/rotor_bemt.hpp"
@@ -90,7 +91,7 @@ const char* const kUsage =
     "  hoverhere_headless_test list\n"
     "  hoverhere_headless_test run <maneuver> --heli <parameter_file.xml> [options]\n"
     "  hoverhere_headless_test run --profile <sticks.csv> --heli <parameter_file.xml> [options]\n"
-    "  hoverhere_headless_test airfoil --heli <parameter_file.xml> --out <polar.csv>\n"
+    "  hoverhere_headless_test airfoil [--heli <parameter_file.xml>] [--airfoil-polar <profile.xml>] --out <polar.csv>\n"
     "\n"
     "options of run:\n"
     "  --heli FILE            helicopter parameter file (required)\n"
@@ -113,7 +114,13 @@ const char* const kUsage =
     "                         helicopter/flybarless/K_p[1]=0.2 (component of a 3 value parameter), tuning/turbulence/frequency=2; repeatable\n"
     "  --dt SECONDS           physics step (default 0.001)\n"
     "  --seed N               random seed of the turbulence\n"
-    "  --no-vrs --no-ground-effect --no-turbulence --no-dynamic-inflow --quasi-static   switch off parts of the BEMT model\n";
+    "  --no-vrs --no-ground-effect --no-turbulence --no-dynamic-inflow --quasi-static   switch off parts of the BEMT model\n"
+    "\n"
+    "options of airfoil:\n"
+    "  --heli FILE            optional helicopter parameter file; defaults to schema parameters\n"
+    "  --airfoil-polar FILE   optional built-in profile filename; overrides the file's Mainrotor > airfoil selection\n"
+    "  --out FILE             output CSV file (required)\n"
+    "  built-in profile filenames: n0012-il_polar.xml, n0009sm-il_polar.xml, naca23012-il_polar.xml, n8h12-il_polar.xml, vr7-il_polar.xml\n";
 
 [[nodiscard]] bool load_report_ok(const hoverhere::io::LoadReport& report)
 {
@@ -333,35 +340,65 @@ int run_command(const std::vector<std::string>& args)
     return summary.ok ? 0 : 1;
 }
 
-// Evaluates the airfoil polar of the BEMT configuration of a loaded helicopter over -180 ... +180 deg with the real
-// airfoil_coefficients(): the single source of the curves (tools/headless/plot_airfoil.py only plots this CSV).
-// Only the main rotor runs the BEMT; the tail rotor uses the classic model without airfoil curves, so its columns
-// come from the same BEMT configuration and are identical to the main rotor columns.
+// Exports the actual Re/Ncrit-interpolated BEMT polar over -180 ... +180 deg. The plotter consumes these samples
+// directly, so it displays the same lookup/interpolation path used by the element solver.
 int airfoil_command(const std::vector<std::string>& args)
 {
     namespace fs = std::filesystem;
     std::optional<fs::path> heli;
     std::optional<fs::path> out;
+    std::optional<std::size_t> airfoil_override;
     for (std::size_t i = 0; i < args.size(); ++i) {
-        if ((args[i] == "--heli" || args[i] == "--out") && i + 1 < args.size()) {
-            (args[i] == "--heli" ? heli : out) = args[i + 1];
-            ++i;
+        const std::string& option = args[i];
+        if (option == "--heli" || option == "--out" || option == "--airfoil-polar") {
+            if (i + 1 >= args.size()) {
+                std::cerr << "missing value for " << option << "\n";
+                return 2;
+            }
+            const std::string value = args[++i];
+            if (option == "--heli") {
+                heli = value;
+            } else if (option == "--out") {
+                out = value;
+            } else {
+                const std::string filename = fs::path(value).filename().string();
+                for (std::size_t profile = 0; profile < hoverhere::aero::kMainrotorAirfoilProfiles.size(); ++profile) {
+                    if (filename == hoverhere::aero::kMainrotorAirfoilProfiles[profile].polar_filename) {
+                        airfoil_override = profile;
+                        break;
+                    }
+                }
+                if (!airfoil_override) {
+                    std::cerr << "unknown built-in airfoil polar filename: " << filename << "\n" << kUsage;
+                    return 2;
+                }
+            }
         } else {
             std::cerr << "unknown argument " << args[i] << "\n" << kUsage;
             return 2;
         }
     }
-    if (!heli || !out) {
-        std::cerr << "--heli and --out are required\n" << kUsage;
+    if (!out) {
+        std::cerr << "--out is required\n" << kUsage;
         return 2;
     }
     hoverhere::params::ModelParams params = hoverhere::params::make_default_params();
-    if (!load_report_ok(hoverhere::io::load_parameters_file(*heli, hoverhere::params::ParamDocument::Heli, params))) {
+    if (heli && !load_report_ok(hoverhere::io::load_parameters_file(*heli, hoverhere::params::ParamDocument::Heli, params))) {
         return 3;
     }
+    if (airfoil_override) {
+        params.helicopter.mainrotor.airfoil = static_cast<std::int32_t>(*airfoil_override);
+    }
+    const std::int32_t airfoil_selection = params.helicopter.mainrotor.airfoil;
+    if (airfoil_selection < 0 ||
+        static_cast<std::size_t>(airfoil_selection) >= hoverhere::aero::kMainrotorAirfoilProfiles.size()) {
+        std::cerr << "invalid mainrotor airfoil selection: " << airfoil_selection << "\n";
+        return 3;
+    }
+    const std::string_view airfoil_name =
+        hoverhere::aero::kMainrotorAirfoilProfiles[static_cast<std::size_t>(airfoil_selection)].name;
     const hoverhere::params::ModelParamsSI si = hoverhere::params::compile_to_si(params);
     const hoverhere::aero::BemtConfig main_config = hoverhere::aero::make_bemt_config(si);
-    const hoverhere::aero::BemtConfig tail_config = hoverhere::aero::make_bemt_config(si);  // same airfoil, see above
 
     if (out->has_parent_path()) {
         std::error_code ec;
@@ -372,20 +409,35 @@ int airfoil_command(const std::vector<std::string>& args)
         std::cerr << "cannot write " << out->string() << "\n";
         return 3;
     }
-    file << "alpha_deg,cl_mr,cd_mr,cl_tr,cd_tr\n";
+    file << "airfoil,alpha_deg,re,ncrit,curve_style,cl,cd\n";
+    struct PolarCase {
+        hoverhere::Real re;
+        hoverhere::Real ncrit;
+        const char* curve_style;
+    };
+    const std::array<PolarCase, 7> polar_cases{{
+        {50000, 9, "solid"}, {100000, 9, "solid"}, {200000, 9, "solid"}, {500000, 9, "solid"},
+        {200000, 1, "dash"}, {200000, 5, "dash"}, {200000, 9, "dash"},
+    }};
     constexpr int steps_per_degree = 2;
-    for (int k = -180 * steps_per_degree; k <= 180 * steps_per_degree; ++k) {
-        const hoverhere::Real alpha_deg = static_cast<hoverhere::Real>(k) / steps_per_degree;
-        const hoverhere::Real alpha = alpha_deg * std::numbers::pi_v<hoverhere::Real> / 180;
-        hoverhere::Real cl_mr = 0, cd_mr = 0, cl_tr = 0, cd_tr = 0;
-        hoverhere::aero::airfoil_coefficients(main_config.airfoil, alpha, cl_mr, cd_mr);
-        hoverhere::aero::airfoil_coefficients(tail_config.airfoil, alpha, cl_tr, cd_tr);
-        std::array<char, 160> row{};
-        std::snprintf(row.data(), row.size(), "%.1f,%.9g,%.9g,%.9g,%.9g\n", alpha_deg, cl_mr, cd_mr, cl_tr, cd_tr);
-        file << row.data();
+    for (const PolarCase& polar_case : polar_cases) {
+        const hoverhere::Real re = polar_case.re;
+        const hoverhere::Real ncrit = polar_case.ncrit;
+        const hoverhere::aero::AirfoilSlice slice = hoverhere::aero::make_airfoil_slice(main_config.airfoil_polar, re, ncrit);
+        for (int k = -180 * steps_per_degree; k <= 180 * steps_per_degree; ++k) {
+            const hoverhere::Real alpha_deg = static_cast<hoverhere::Real>(k) / steps_per_degree;
+            const hoverhere::Real alpha = alpha_deg * std::numbers::pi_v<hoverhere::Real> / 180;
+            hoverhere::Real cl = 0, cd = 0;
+            hoverhere::aero::evaluate_airfoil_polar(main_config.post_stall, slice, alpha, cl, cd);
+            std::array<char, 160> row{};
+            std::snprintf(row.data(), row.size(), "%.1f,%.0f,%.1f,%s,%.9g,%.9g\n", alpha_deg, re, ncrit,
+                          polar_case.curve_style, cl, cd);
+            file << airfoil_name << ',' << row.data();
+        }
     }
     file.close();
-    std::printf("airfoil polar: %s\n", out->string().c_str());
+    std::printf("airfoil polar (%.*s): %s\n", static_cast<int>(airfoil_name.size()), airfoil_name.data(),
+                out->string().c_str());
     return 0;
 }
 

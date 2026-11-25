@@ -21,6 +21,24 @@ BodyKinematics body_kinematics(const dynamics::RigidBodyState& x) noexcept
     return k;
 }
 
+params::si::Rotor as_rotor(const params::si::Mainrotor& source) noexcept
+{
+    params::si::Rotor rotor{};
+    rotor.rotor_exists = source.rotor_exists;
+    rotor.b = source.b;
+    rotor.R = source.R;
+    rotor.C_l_alpha = source.C_l_alpha;
+    rotor.c = source.c;
+    rotor.J = source.J;
+    rotor.C_D0 = source.C_D0;
+    rotor.K_col = source.K_col;
+    rotor.Theta_col_0 = source.Theta_col_0;
+    rotor.posLH = source.posLH;
+    rotor.oriLH = source.oriLH;
+    rotor.dirLH = source.dirLH;
+    return rotor;
+}
+
 RotorGeometry make_rotor_geometry(const params::si::Rotor& rotor) noexcept
 {
     RotorGeometry g{};

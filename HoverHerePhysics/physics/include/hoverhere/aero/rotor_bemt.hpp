@@ -3,7 +3,9 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <string>
+#include <string_view>
 
 #include "hoverhere/aero/rotor_common.hpp"
 #include "hoverhere/kinematics/kinematics.hpp"
@@ -31,6 +33,19 @@ namespace hoverhere::aero {
 inline constexpr std::size_t kBemtRadialCount = 4;
 inline constexpr std::size_t kBemtAzimuthCount = kinematics::kVirtualBladeCount;  // 10 virtual blades, psi_c = c * 36 deg
 inline constexpr std::size_t kBemtElementCount = kBemtRadialCount * kBemtAzimuthCount;
+
+struct MainrotorAirfoilProfile {
+    std::string_view name;
+    std::string_view polar_filename;
+};
+
+inline constexpr std::array<MainrotorAirfoilProfile, 5> kMainrotorAirfoilProfiles{{
+    {"NACA0012", "n0012-il_polar.xml"},
+    {"NACA0009sm-il", "n0009sm-il_polar.xml"},
+    {"NACA23012", "naca23012-il_polar.xml"},
+    {"NACA8H12", "n8h12-il_polar.xml"},
+    {"VR-7", "vr7-il_polar.xml"},
+}};
 
 // Index of grid point (radial station r, virtual blade c); the azimuth index runs fastest.
 [[nodiscard]] constexpr std::size_t bemt_index(const std::size_t r, const std::size_t c) noexcept
@@ -79,22 +94,84 @@ struct JohnsonVrsParams {
 [[nodiscard]] Real first_order_lag_step(Real x, Real target, Real dt, Real tau) noexcept;
 
 // ----------------------------------------------------------------------------------------------------------------
-// airfoil: continuous cl / cd curves (documentation 5.2): linear / alpha^3 close to zero, sinusoidal stall behavior
+// Empirical full-circle continuation used after the selected XFOIL polar ends.
 // ----------------------------------------------------------------------------------------------------------------
-struct AirfoilCurves { // (NACA0012)
-    Real cl_trans_start = 12 * 3.14159265358979323846 / 180;  // [rad] begin of the transition from linear to sinus
-    Real cl_trans_end = 26 * 3.14159265358979323846 / 180;    // [rad]
-    Real cd_trans_start = 20 * 3.14159265358979323846 / 180;  // [rad]
-    Real cd_trans_end = 35 * 3.14159265358979323846 / 180;    // [rad]
-    Real cl_slope = 5.0;               // [1/rad] at alpha = 0
-    Real cd_slope = 1.5;               // [1/rad^3] factor of alpha^3
-    Real cd_offset = 0.011;            // cd at alpha = 0
-    Real cl_first_max = 40.0;          // [deg] first maximum of the sinus part
-    Real cd_first_min = -1.0;          // [deg] first minimum of the cosine part
-    Real cl_amplitude = 1.10;
-    Real cd_amplitude_or_offset = 0.90;
+struct PostStallModel {
+    Real cl_positive_peak_deg = 40.0;
+    Real cl_negative_peak_deg = 40.0;
+    Real cl_positive_amplitude = 1.10;
+    Real cl_negative_amplitude = 1.10;
+    Real cd_positive_first_min_deg = -1.0;
+    Real cd_negative_first_min_deg = -1.0;
+    Real cd_positive_amplitude_or_offset = 0.90;
+    Real cd_negative_amplitude_or_offset = 0.90;
 };
-void airfoil_coefficients(const AirfoilCurves& a, Real alpha, Real& cl, Real& cd) noexcept;
+
+// Re / Ncrit lookup polar. The table blends into the 360-degree post-stall model.
+struct AirfoilPolarTable {
+    static constexpr std::size_t kReCount = 4;
+    static constexpr std::size_t kNcritCount = 3;
+    static constexpr Real kAlphaMinDeg = -22.0;
+    static constexpr Real kAlphaMaxDeg = 22.0;
+    static constexpr Real kAlphaStepDeg = 0.5;
+    static constexpr std::size_t kAlphaCount = 89;
+    static constexpr std::size_t kPolarCount = kReCount * kNcritCount;
+    static constexpr Real kAlphaMinRad = kAlphaMinDeg * Real{3.14159265358979323846} / Real{180.0};
+    static constexpr Real kAlphaMaxRad = kAlphaMaxDeg * Real{3.14159265358979323846} / Real{180.0};
+    static constexpr Real kInvAlphaStep = Real{1} / (kAlphaStepDeg * Real{3.14159265358979323846} / Real{180.0});
+
+    std::array<Real, kReCount> re_grid{{50000, 100000, 200000, 500000}};
+    std::array<Real, kNcritCount> ncrit_grid{{1.0, 5.0, 9.0}};
+    std::array<Real, kPolarCount> alpha_min_deg{};
+    std::array<Real, kPolarCount> alpha_max_deg{};
+    std::array<Real, kPolarCount * kAlphaCount> cl_table{};
+    std::array<Real, kPolarCount * kAlphaCount> cd_table{};
+
+    [[nodiscard]] static constexpr std::size_t index(std::size_t r, std::size_t n, std::size_t a) noexcept
+    {
+        return (r * kNcritCount + n) * kAlphaCount + a;
+    }
+
+    [[nodiscard]] static constexpr std::size_t polar_index(std::size_t r, std::size_t n) noexcept
+    {
+        return r * kNcritCount + n;
+    }
+};
+
+struct AirfoilSlice {
+    std::array<Real, AirfoilPolarTable::kAlphaCount> cl{};
+    std::array<Real, AirfoilPolarTable::kAlphaCount> cd{};
+};
+
+template <std::size_t N>
+inline void find_grid_bracket(const std::array<Real, N>& grid, Real value, std::size_t& index0, Real& fraction) noexcept
+{
+    if (value <= grid[0]) {
+        index0 = 0;
+        fraction = 0;
+        return;
+    }
+    if (value >= grid[N - 1]) {
+        index0 = N - 2;
+        fraction = 1;
+        return;
+    }
+    for (std::size_t i = 0; i + 1 < N; ++i) {
+        if (value <= grid[i + 1]) {
+            index0 = i;
+            fraction = (value - grid[i]) / (grid[i + 1] - grid[i]);
+            return;
+        }
+    }
+    index0 = N - 2;
+    fraction = 1;
+}
+
+[[nodiscard]] AirfoilSlice make_airfoil_slice(const AirfoilPolarTable& table, Real re, Real ncrit) noexcept;
+void evaluate_airfoil_polar(const PostStallModel& post_stall, const AirfoilSlice& slice, Real alpha, Real& cl, Real& cd) noexcept;
+[[nodiscard]] bool load_airfoil_polar_xml(const std::filesystem::path& file, AirfoilPolarTable& table,
+                                          PostStallModel& post_stall) noexcept;
+[[nodiscard]] bool load_airfoil_polar_xml(const std::filesystem::path& file, AirfoilPolarTable& table) noexcept;
 
 struct NewtonSettings {
     Real residual_tolerance = 0.001;   // [N]
@@ -129,13 +206,15 @@ struct BemtConfig {
     Real low_rpm_pitch = 0 * 3.14159265358979323846 / 180;  // [rad] pitch used at (very) low rotor speed instead of the commanded one
     Real low_rpm_start = 30 * 3.14159265358979323846 / 30;  // [rad/s] below: low_rpm_pitch
     Real low_rpm_end = 80 * 3.14159265358979323846 / 30;    // [rad/s] above: the commanded pitch
-    AirfoilCurves airfoil{};
+    PostStallModel post_stall{};
+    AirfoilPolarTable airfoil_polar{};
+    Real kinematic_viscosity = 1.48e-5;  // [m^2/s] air at about 15 deg C
     JohnsonVrsParams vrs{};
     NewtonSettings newton{};
     TurbulenceConfig turbulence_config{};
 };
 
-[[nodiscard]] BemtConfig make_bemt_config(const params::si::ModelParams& p) noexcept;
+[[nodiscard]] BemtConfig make_bemt_config(const params::si::ModelParams& p);
 
 // ----------------------------------------------------------------------------------------------------------------
 // state
