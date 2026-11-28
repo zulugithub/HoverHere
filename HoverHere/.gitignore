@@ -185,7 +185,11 @@ crashlytics-build.properties
 bemt_rotor_test.csv
 vrs_plot_data.csv
 
-Assets/Materials/ParallaxOcclusionTest
+Assets/Materials/ParallaxOcclusionTest/*
+!Assets/Materials/ParallaxOcclusionTest/ParallaxOcclusionTest3.shader
+!Assets/Materials/ParallaxOcclusionTest/ParallaxOcclusionTest3.shader.meta
+!Assets/Materials/ParallaxOcclusionTest/ParallaxOcclusionTest4.shader
+!Assets/Materials/ParallaxOcclusionTest/ParallaxOcclusionTest4.shader.meta
 
 
 

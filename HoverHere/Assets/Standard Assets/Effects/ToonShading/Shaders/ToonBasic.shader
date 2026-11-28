@@ -1,63 +1,68 @@
-Shader "Toon/Basic" {
-	Properties {
-		_Color ("Main Color", Color) = (.5,.5,.5,1)
-		_MainTex ("Base (RGB)", 2D) = "white" {}
-		_ToonShade ("ToonShader Cubemap(RGB)", CUBE) = "" { }
+Shader "Toon/Basic"
+{
+	Properties
+	{
+		_Color("Main Color", Color) = (.5,.5,.5,1)
+		_MainTex("Base (RGB)", 2D) = "white" {}
+		_ToonShade("ToonShader Cubemap(RGB)", Cube) = "" {}
 	}
 
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Opaque" }
 
-	SubShader {
-		Tags { "RenderType"="Opaque" }
-		Pass {
+		Pass
+		{
 			Name "BASE"
+			Tags { "LightMode" = "SRPDefaultUnlit" }
 			Cull Off
-			
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fog
 
-			#include "UnityCG.cginc"
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
 
-			sampler2D _MainTex;
-			samplerCUBE _ToonShade;
-			float4 _MainTex_ST;
-			float4 _Color;
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-			struct appdata {
-				float4 vertex : POSITION;
-				float2 texcoord : TEXCOORD0;
-				float3 normal : NORMAL;
-			};
-			
-			struct v2f {
-				float4 pos : SV_POSITION;
-				float2 texcoord : TEXCOORD0;
-				float3 cubenormal : TEXCOORD1;
-				UNITY_FOG_COORDS(2)
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
+			TEXTURECUBE(_ToonShade);
+			SAMPLER(sampler_ToonShade);
+
+			CBUFFER_START(UnityPerMaterial)
+				float4 _MainTex_ST;
+				float4 _Color;
+			CBUFFER_END
+
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+				float2 uv : TEXCOORD0;
 			};
 
-			v2f vert (appdata v)
+			struct Varyings
 			{
-				v2f o;
-				o.pos = UnityObjectToClipPos(v.vertex);
-				o.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-				o.cubenormal = mul (UNITY_MATRIX_MV, float4(v.normal,0));
-				UNITY_TRANSFER_FOG(o,o.pos);
-				return o;
+				float4 positionCS : SV_POSITION;
+				float2 uv : TEXCOORD0;
+				float3 normalVS : TEXCOORD1;
+			};
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+				output.normalVS = TransformWorldToViewDir(TransformObjectToWorldNormal(input.normalOS));
+				return output;
 			}
 
-			fixed4 frag (v2f i) : SV_Target
+			half4 Frag(Varyings input) : SV_Target
 			{
-				fixed4 col = _Color * tex2D(_MainTex, i.texcoord);
-				fixed4 cube = texCUBE(_ToonShade, i.cubenormal);
-				fixed4 c = fixed4(2.0f * cube.rgb * col.rgb, col.a);
-				UNITY_APPLY_FOG(i.fogCoord, c);
-				return c;
+				half4 baseColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
+				half3 ramp = SAMPLE_TEXTURECUBE(_ToonShade, sampler_ToonShade, input.normalVS).rgb;
+				return half4(2.0h * ramp * baseColor.rgb, baseColor.a);
 			}
-			ENDCG			
+			ENDHLSL
 		}
-	} 
-
-	Fallback "VertexLit"
+	}
 }

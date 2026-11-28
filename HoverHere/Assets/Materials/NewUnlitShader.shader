@@ -1,58 +1,62 @@
-﻿Shader "Unlit/NewUnlitShader"
+Shader "Unlit/NewUnlitShader"
 {
-    Properties
-    {
-        _MainTex ("Texture", 2D) = "white" {}
-    }
-    SubShader
-    {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+	Properties
+	{
+		_MainTex("Texture", 2D) = "white" {}
+	}
 
-        Pass
-        {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Opaque" }
 
-            #include "UnityCG.cginc"
+		Pass
+		{
+			Name "Unlit"
+			Tags { "LightMode" = "UniversalForward" }
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			#pragma multi_compile_fog
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
-            };
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
-                return o;
-            }
+			CBUFFER_START(UnityPerMaterial)
+				float4 _MainTex_ST;
+			CBUFFER_END
 
-            fixed4 frag (v2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
-            }
-            ENDCG
-        }
-    }
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float2 uv : TEXCOORD0;
+			};
+
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float2 uv : TEXCOORD0;
+				float fogFactor : TEXCOORD1;
+			};
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+				output.fogFactor = ComputeFogFactor(output.positionCS.z);
+				return output;
+			}
+
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
+				color.rgb = MixFog(color.rgb, input.fogFactor);
+				return color;
+			}
+			ENDHLSL
+		}
+	}
 }

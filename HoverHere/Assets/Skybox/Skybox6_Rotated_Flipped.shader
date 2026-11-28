@@ -1,163 +1,172 @@
-﻿// Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
-// https://answers.unity.com/questions/965353/how-to-rotate-a-skybox-on-the-z-or-x-axes.html
-
-Shader "Skybox/6 Sided - Arbitrary Rotation and Flipping Horizontaly" {
-	Properties{
+Shader "Skybox/6 Sided - Arbitrary Rotation and Flipping Horizontaly"
+{
+	Properties
+	{
 		_TintColor("Tint Color", Color) = (.5, .5, .5, .5)
 		[Gamma] _Exposure("Exposure", Range(0, 8)) = 1.0
 		_FlippingHorizontaly("Flipping Horizontaly", Range(0, 1)) = 0
 		_Rotation("Rotation", Range(0, 360)) = 0
 		_Rotationaxis("Rotation axis", Vector) = (0, 1, 0)
 		[NoScaleOffset] _FrontTex("Front [+Z]   (HDR)", 2D) = "grey" {}
-	[NoScaleOffset] _BackTex("Back [-Z]   (HDR)", 2D) = "grey" {}
-	[NoScaleOffset] _LeftTex("Left [+X]   (HDR)", 2D) = "grey" {}
-	[NoScaleOffset] _RightTex("Right [-X]   (HDR)", 2D) = "grey" {}
-	[NoScaleOffset] _UpTex("Up [+Y]   (HDR)", 2D) = "grey" {}
-	[NoScaleOffset] _DownTex("Down [-Y]   (HDR)", 2D) = "grey" {}
+		[NoScaleOffset] _BackTex("Back [-Z]   (HDR)", 2D) = "grey" {}
+		[NoScaleOffset] _LeftTex("Left [+X]   (HDR)", 2D) = "grey" {}
+		[NoScaleOffset] _RightTex("Right [-X]   (HDR)", 2D) = "grey" {}
+		[NoScaleOffset] _UpTex("Up [+Y]   (HDR)", 2D) = "grey" {}
+		[NoScaleOffset] _DownTex("Down [-Y]   (HDR)", 2D) = "grey" {}
 	}
 
-		SubShader{
-		Tags{ "Queue" = "Background" "RenderType" = "Background" "PreviewType" = "Skybox" }
-		Cull Off ZWrite Off
-
-		CGINCLUDE
-#include "UnityCG.cginc"
-
-		half4 _TintColor;
-	half _Exposure;
-
-	float _FlippingHorizontaly; // no bool available?
-	float _Rotation;
-	float3 _Rotationaxis;
-
-	float3 RotateAroundYInDegrees(float3 vertex, float degrees)
+	SubShader
 	{
-		float alpha = degrees * UNITY_PI / 180.0;
-		float sina, cosa;
-		sincos(alpha, sina, cosa);
-		float2x2 m = float2x2(cosa, -sina, sina, cosa);
-		return float3(mul(m, vertex.xz), vertex.y).xzy;
-	}
-	float4x4 rotationMatrix(float3 axis, float angle)
-	{
-		axis = normalize(axis);
-		float s = sin(angle);
-		float c = cos(angle);
-		float oc = 1.0 - c;
+		Tags { "Queue" = "Background" "RenderType" = "Background" "PreviewType" = "Skybox" "RenderPipeline" = "UniversalPipeline" }
+		Cull Off
+		ZWrite Off
 
-		return float4x4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-						oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-						oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-						0.0,                                0.0,                                0.0,                                1.0);
+		HLSLINCLUDE
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
 
-	}
-	float4x4 flippingHorizontalyMatrix()
-	{
-		return float4x4(-1.0, 0.0, 0.0, 0.0,
-						0.0, 1.0, 0.0, 0.0,
-						0.0, 0.0, 1.0, 0.0,
-						0.0, 0.0, 0.0, 1.0);
-	}
+		CBUFFER_START(UnityPerMaterial)
+			half4 _TintColor;
+			half _Exposure;
+			float _FlippingHorizontaly;
+			float _Rotation;
+			float3 _Rotationaxis;
+		CBUFFER_END
 
-	struct appdata_t {
-		float4 vertex : POSITION;
-		float2 texcoord : TEXCOORD0;
-		UNITY_VERTEX_INPUT_INSTANCE_ID
-	};
-	struct v2f {
-		float4 vertex : SV_POSITION;
-		float2 texcoord : TEXCOORD0;
-		UNITY_VERTEX_OUTPUT_STEREO
-	};
-	v2f vert(appdata_t v)
-	{
-		v2f o;
-		UNITY_SETUP_INSTANCE_ID(v);
-		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-		//float3 rotated = RotateAroundYInDegrees(v.vertex, _Rotation);
-		float3 rotated;
-		if(_FlippingHorizontaly == false)
-		{ 
-			rotated = mul(rotationMatrix(normalize(_Rotationaxis.xyz), _Rotation * UNITY_PI / 180.0), v.vertex).xyz;
-		}
-		else
+		struct Attributes
 		{
-			rotated = mul(mul(flippingHorizontalyMatrix(),rotationMatrix(normalize(_Rotationaxis.xyz), _Rotation * UNITY_PI / 180.0)), v.vertex).xyz;
-		}
-		//float3 rotated = mul(flippingHorizontalyMatrix(), v.vertex).xyz;
-		o.vertex = UnityObjectToClipPos(rotated);
-		o.texcoord = v.texcoord;
-		return o;
-	}
-	half4 skybox_frag(v2f i, sampler2D smp, half4 smpDecode)
-	{
-		half4 tex = tex2D(smp, i.texcoord);
-		half3 c = DecodeHDR(tex, smpDecode);
-		c = c * _TintColor.rgb * unity_ColorSpaceDouble.rgb;
-		c *= _Exposure;
-		return half4(c, 1);
-	}
-	ENDCG
+			float4 positionOS : POSITION;
+			float2 uv : TEXCOORD0;
+		};
 
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _FrontTex;
-	half4 _FrontTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_FrontTex, _FrontTex_HDR); }
-		ENDCG
-	}
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _BackTex;
-	half4 _BackTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_BackTex, _BackTex_HDR); }
-		ENDCG
-	}
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _LeftTex;
-	half4 _LeftTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_LeftTex, _LeftTex_HDR); }
-		ENDCG
-	}
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _RightTex;
-	half4 _RightTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_RightTex, _RightTex_HDR); }
-		ENDCG
-	}
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _UpTex;
-	half4 _UpTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_UpTex, _UpTex_HDR); }
-		ENDCG
-	}
-		Pass{
-		CGPROGRAM
-#pragma vertex vert
-#pragma fragment frag
-#pragma target 2.0
-		sampler2D _DownTex;
-	half4 _DownTex_HDR;
-	half4 frag(v2f i) : SV_Target{ return skybox_frag(i,_DownTex, _DownTex_HDR); }
-		ENDCG
-	}
+		struct Varyings
+		{
+			float4 positionCS : SV_POSITION;
+			float2 uv : TEXCOORD0;
+		};
+
+		float3 RotateDirection(float3 direction, float3 axis, float angle)
+		{
+			axis = normalize(axis + 1e-8);
+			float sine;
+			float cosine;
+			sincos(angle, sine, cosine);
+			return direction * cosine + cross(axis, direction) * sine + axis * dot(axis, direction) * (1.0 - cosine);
+		}
+
+		half3 ApplyTintAndExposure(half3 color)
+		{
+			// Match unity_ColorSpaceDouble from the original shader in Gamma color space.
+			return color * _TintColor.rgb * _Exposure * 2.0h;
+		}
+
+		Varyings Vert(Attributes input)
+		{
+			Varyings output;
+			float3 direction = RotateDirection(input.positionOS.xyz, _Rotationaxis, radians(_Rotation));
+			if (_FlippingHorizontaly > 0.5)
+				direction.x = -direction.x;
+
+			output.positionCS = TransformObjectToHClip(direction);
+			output.uv = input.uv;
+			return output;
+		}
+		ENDHLSL
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_FrontTex);
+			SAMPLER(sampler_FrontTex);
+			float4 _FrontTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_FrontTex, sampler_FrontTex, input.uv), _FrontTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_BackTex);
+			SAMPLER(sampler_BackTex);
+			float4 _BackTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_BackTex, sampler_BackTex, input.uv), _BackTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_LeftTex);
+			SAMPLER(sampler_LeftTex);
+			float4 _LeftTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_LeftTex, sampler_LeftTex, input.uv), _LeftTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_RightTex);
+			SAMPLER(sampler_RightTex);
+			float4 _RightTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_RightTex, sampler_RightTex, input.uv), _RightTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_UpTex);
+			SAMPLER(sampler_UpTex);
+			float4 _UpTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_UpTex, sampler_UpTex, input.uv), _UpTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			TEXTURE2D(_DownTex);
+			SAMPLER(sampler_DownTex);
+			float4 _DownTex_HDR;
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half3 color = DecodeHDREnvironment(SAMPLE_TEXTURE2D(_DownTex, sampler_DownTex, input.uv), _DownTex_HDR);
+				return half4(ApplyTintAndExposure(color), 1);
+			}
+			ENDHLSL
+		}
 	}
 }

@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "MyInputActions",
     "maps": [
         {
@@ -12,7 +13,8 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": false,
+                    "priority": 0
                 },
                 {
                     "name": "MyMouseScroll",
@@ -21,7 +23,8 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": true,
+                    "priority": 0
                 }
             ],
             "bindings": [

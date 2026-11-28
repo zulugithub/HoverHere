@@ -1,59 +1,54 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// © 2016 BRANISLV GRUJIC ALL RIGHTS RESERVED
-// Provided AS IS
-// For any official support, please use the contact on the unity asset store
-
 Shader "GPUGraph/Graph"
 {
-    Properties
-    {
-        _MainTex("Texture", 2D) = "white" {}
-    }
+	Properties
+	{
+		_MainTex("Texture", 2D) = "white" {}
+	}
 
-        SubShader
-    {
-        // No culling or depth
-        Cull Off ZWrite Off ZTest Always
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" }
+		Cull Off
+		ZWrite Off
+		ZTest Always
 
-        Pass
-        {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+		Pass
+		{
+			Name "Unlit"
+			Tags { "LightMode" = "SRPDefaultUnlit" }
 
-            #include "UnityCG.cginc"
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
 
-        struct appdata
-        {
-            float4 vertex : POSITION;
-            float2 uv : TEXCOORD0;
-            float4 color : COLOR;
-        };
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-        struct v2f
-        {
-            float2 uv : TEXCOORD0;
-            float4 vertex : SV_POSITION;
-            float4 color : COLOR;
-        };
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float2 uv : TEXCOORD0;
+				float4 color : COLOR;
+			};
 
-        v2f vert(appdata v)
-        {
-            v2f o;
-            o.vertex = UnityObjectToClipPos(v.vertex);
-            o.uv = v.uv;
-            o.color = v.color;
-            return o;
-        }
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float4 color : COLOR;
+			};
 
-        sampler2D _MainTex;
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.color = input.color;
+				return output;
+			}
 
-        fixed4 frag(v2f i) : SV_Target
-        {
-            return i.color;
-        }
-            ENDCG
-        }
-    }
+			half4 Frag(Varyings input) : SV_Target
+			{
+				return input.color;
+			}
+			ENDHLSL
+		}
+	}
 }

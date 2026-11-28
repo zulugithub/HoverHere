@@ -1,70 +1,68 @@
-Shader "Toon/Basic Outline" {
-	Properties {
-		_Color ("Main Color", Color) = (.5,.5,.5,1)
-		_OutlineColor ("Outline Color", Color) = (0,0,0,1)
-		_Outline ("Outline width", Range (.002, 0.03)) = .005
-		_MainTex ("Base (RGB)", 2D) = "white" { }
-		_ToonShade ("ToonShader Cubemap(RGB)", CUBE) = "" { }
+Shader "Toon/Basic Outline"
+{
+	Properties
+	{
+		_Color("Main Color", Color) = (.5,.5,.5,1)
+		_OutlineColor("Outline Color", Color) = (0,0,0,1)
+		_Outline("Outline width", Range(.002, .03)) = .005
+		_MainTex("Base (RGB)", 2D) = "white" {}
+		_ToonShade("ToonShader Cubemap(RGB)", Cube) = "" {}
 	}
-	
-	CGINCLUDE
-	#include "UnityCG.cginc"
-	
-	struct appdata {
-		float4 vertex : POSITION;
-		float3 normal : NORMAL;
-	};
 
-	struct v2f {
-		float4 pos : SV_POSITION;
-		UNITY_FOG_COORDS(0)
-		fixed4 color : COLOR;
-	};
-	
-	uniform float _Outline;
-	uniform float4 _OutlineColor;
-	
-	v2f vert(appdata v) {
-		v2f o;
-		o.pos = UnityObjectToClipPos(v.vertex);
-
-		float3 norm   = normalize(mul ((float3x3)UNITY_MATRIX_IT_MV, v.normal));
-		float2 offset = TransformViewToProjection(norm.xy);
-
-		#ifdef UNITY_Z_0_FAR_FROM_CLIPSPACE //to handle recent standard asset package on older version of unity (before 5.5)
-			o.pos.xy += offset * UNITY_Z_0_FAR_FROM_CLIPSPACE(o.pos.z) * _Outline;
-		#else
-			o.pos.xy += offset * o.pos.z * _Outline;
-		#endif
-		o.color = _OutlineColor;
-		UNITY_TRANSFER_FOG(o,o.pos);
-		return o;
-	}
-	ENDCG
-
-	SubShader {
-		Tags { "RenderType"="Opaque" }
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" "RenderType" = "Opaque" }
 		UsePass "Toon/Basic/BASE"
-		Pass {
+
+		Pass
+		{
 			Name "OUTLINE"
-			Tags { "LightMode" = "Always" }
+			Tags { "LightMode" = "SRPDefaultUnlit" }
 			Cull Front
 			ZWrite On
 			ColorMask RGB
-			Blend SrcAlpha OneMinusSrcAlpha
 
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
 			#pragma multi_compile_fog
-			fixed4 frag(v2f i) : SV_Target
+
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+			CBUFFER_START(UnityPerMaterial)
+				half4 _OutlineColor;
+				half _Outline;
+			CBUFFER_END
+
+			struct Attributes
 			{
-				UNITY_APPLY_FOG(i.fogCoord, i.color);
-				return i.color;
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+			};
+
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float fogFactor : TEXCOORD0;
+			};
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				float3 normalVS = TransformWorldToViewDir(TransformObjectToWorldNormal(input.normalOS));
+				output.positionCS.xy += normalVS.xy * _Outline * output.positionCS.w;
+				output.fogFactor = ComputeFogFactor(output.positionCS.z);
+				return output;
 			}
-			ENDCG
+
+			half4 Frag(Varyings input) : SV_Target
+			{
+				half4 color = _OutlineColor;
+				color.rgb = MixFog(color.rgb, input.fogFactor);
+				return color;
+			}
+			ENDHLSL
 		}
 	}
-	
-	Fallback "Toon/Basic"
 }

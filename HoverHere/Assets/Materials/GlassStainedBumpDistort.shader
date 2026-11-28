@@ -1,136 +1,82 @@
-
-
-// Per pixel bumped refraction.
-// Uses a normal map to distort the image behind, and
-// an additional texture to tint the color.
-
-// Based on Unity's Shader "FX/Glass/Stained BumpDistort"
-
-Shader "Custom/GlassStainedBumpDistort"{
-Properties 
+Shader "Custom/GlassStainedBumpDistort"
 {
-	_BumpAmt  ("Distortion", range (0,128)) = 10
-	_MainTex ("Tint Color (RGB)", 2D) = "white" {}
-	_BumpMap ("Normalmap", 2D) = "bump" {}
-	//_grabTexture("GrabTexture", 2D) = "white" {}
-}
-
-Category 
-{
-
-	// We must be transparent, so other objects are drawn before this one.
-	Tags { "Queue"="Transparent" "RenderType"="Opaque" }
-
-
-	SubShader 
+	Properties
 	{
+		_BumpAmt("Distortion", Range(0, 128)) = 10
+		_MainTex("Tint Color (RGB)", 2D) = "white" {}
+		_BumpMap("Normal Map", 2D) = "bump" {}
+	}
 
-		//// This pass grabs the screen behind the object into a texture.
-		//// We can access the result in the next pass as _GrabTexture
-		GrabPass
-		{
-			Name "BASE"
-			Tags { "LightMode" = "Always" }
-		}
-		
-		// Main pass: Take the texture grabbed above and use the bumpmap to perturb it
-		// on to the screen
-		Pass 
-		{
-			Name "BASE"
-			Tags { "LightMode" = "Always" }
-			
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fog
-			#include "UnityCG.cginc"
-			#pragma multi_compile_fwdbase
-			#pragma multi_compile_instancing 
-			#pragma multi_compile_UNITY_SINGLE_PASS_STEREO
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent" "RenderType" = "Transparent" }
+		ZWrite Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
-			struct appdata_t 
+		Pass
+		{
+			Name "Forward"
+			Tags { "LightMode" = "UniversalForward" }
+
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			#pragma multi_compile_instancing
+
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
+			TEXTURE2D(_BumpMap);
+			SAMPLER(sampler_BumpMap);
+
+			CBUFFER_START(UnityPerMaterial)
+				float4 _MainTex_ST;
+				float4 _BumpMap_ST;
+				half _BumpAmt;
+			CBUFFER_END
+
+			struct Attributes
 			{
-				float4 vertex : POSITION;
-				float2 texcoord: TEXCOORD0;
+				float4 positionOS : POSITION;
+				float2 uv : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct v2f 
+			struct Varyings
 			{
-				float4 vertex : SV_POSITION;
-				float4 uvgrab : TEXCOORD0;
-				float2 uvbump : TEXCOORD1;
-				float2 uvmain : TEXCOORD2;
-				UNITY_FOG_COORDS(3)
-
-				UNITY_VERTEX_INPUT_INSTANCE_ID // necessary only if you want to access instanced properties in fragment Shader.
+				float4 positionCS : SV_POSITION;
+				float2 uvMain : TEXCOORD0;
+				float2 uvBump : TEXCOORD1;
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
-			float _BumpAmt;
-			float4 _BumpMap_ST;
-			float4 _MainTex_ST;
-
-			v2f vert (appdata_t v)
+			Varyings Vert(Attributes input)
 			{
-				v2f o;
-
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(v2f, o);
-				UNITY_TRANSFER_INSTANCE_ID(v, o); // necessary only if you want to access instanced properties in the fragment Shader.
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-
-				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uvgrab = ComputeGrabScreenPos(o.vertex);
-				o.uvbump = TRANSFORM_TEX( v.texcoord, _BumpMap );
-				o.uvmain = TRANSFORM_TEX( v.texcoord, _MainTex );
-				UNITY_TRANSFER_FOG(o,o.vertex);
-				return o;
+				Varyings output;
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.uvMain = TRANSFORM_TEX(input.uv, _MainTex);
+				output.uvBump = TRANSFORM_TEX(input.uv, _BumpMap);
+				return output;
 			}
 
-			sampler2D _GrabTexture;
-			float4 _GrabTexture_TexelSize;
-			sampler2D _BumpMap;
-			sampler2D _MainTex;
-
-			half4 frag (v2f i) : SV_Target
+			half4 Frag(Varyings input) : SV_Target
 			{
-				UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-				#if UNITY_SINGLE_PASS_STEREO
-				//i.uvgrab.xy = TransformStereoScreenSpaceTex(i.uvgrab.xy, i.uvgrab.w);
-				#endif
+				half4 packedNormal = SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, input.uvBump);
+				half2 normalXY = packedNormal.ag * 2.0h - 1.0h;
+				float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
+				screenUV += normalXY * _BumpAmt * _CameraOpaqueTexture_TexelSize.xy;
 
-				// calculate perturbed coordinates
-				half2 bump = UnpackNormal(tex2D( _BumpMap, i.uvbump )).rg; // we could optimize this by just reading the x & y without reconstructing the Z
-				float2 offset = bump * _BumpAmt * _GrabTexture_TexelSize.xy;
-				#ifdef UNITY_Z_0_FAR_FROM_CLIPSPACE //to handle recent standard asset package on older version of unity (before 5.5)
-					i.uvgrab.xy = offset * UNITY_Z_0_FAR_FROM_CLIPSPACE(i.uvgrab.z) + i.uvgrab.xy;
-				#else
-					i.uvgrab.xy = offset * i.uvgrab.z + i.uvgrab.xy;
-				#endif
-
-				half4 col = tex2Dproj(_GrabTexture, UNITY_PROJ_COORD(i.uvgrab));
-				half4 tint = tex2D(_MainTex, i.uvmain);
-				col *= tint;
-				UNITY_APPLY_FOG(i.fogCoord, col);
-				return col;
+				half4 color = half4(SampleSceneColor(screenUV), 1.0h);
+				half4 tint = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uvMain);
+				return color * tint;
 			}
-			ENDCG
+			ENDHLSL
 		}
 	}
-
-	// ------------------------------------------------------------------
-	// Fallback for older cards and Unity non-Pro
-
-	SubShader {
-		Blend DstColor Zero
-		Pass {
-			Name "BASE"
-			SetTexture [_MainTex] {	combine texture }
-		}
-	}
-}
-
 }

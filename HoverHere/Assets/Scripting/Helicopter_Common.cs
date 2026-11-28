@@ -2244,20 +2244,61 @@ namespace Common
         public static void ToFadeMode(this Material material)
         {
             material.SetOverrideTag("RenderType", "Transparent");
-            material.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
-            material.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            material.SetInt("_ZWrite", 0);
-            material.DisableKeyword("_ALPHATEST_ON");
-            material.EnableKeyword("_ALPHABLEND_ON");
-            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+
+            if (material.shader.name == "Universal Render Pipeline/Lit")
+            {
+                material.SetFloat("_Surface", 1f);
+                material.SetFloat("_Blend", 0f);
+                material.SetFloat("_BlendModePreserveSpecular", 0f);
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_SrcBlendAlpha", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlendAlpha", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 0);
+                material.SetFloat("_AlphaClip", 0f);
+                material.SetFloat("_AlphaToMask", 0f);
+                material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                material.DisableKeyword("_ALPHAMODULATE_ON");
+                material.SetShaderPassEnabled("DepthOnly", false);
+            }
+            else
+            {
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 0);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.EnableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            }
+
             material.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
         }
 
 
         public static void ChangeTransparency(this Material material, float transparency)
         {
-            var temp = material.color; temp.a = Mathf.Clamp(transparency, 0, 1); // alpha setting
-            material.color = temp;
+            float alpha = Mathf.Clamp01(transparency);
+            if (material.HasProperty("_Opacity"))
+            {
+                material.SetFloat("_Opacity", alpha);
+                return;
+            }
+
+            string colorProperty = material.HasProperty("_BaseColor") ? "_BaseColor" :
+                material.HasProperty("_Color") ? "_Color" :
+                material.HasProperty("_White") ? "_White" : null;
+            if (colorProperty == null)
+            {
+                Debug.LogWarning($"Cannot change transparency for material '{material.name}' with shader '{material.shader.name}': no supported color property was found.", material);
+                return;
+            }
+
+            UnityEngine.Color color = material.GetColor(colorProperty);
+            color.a = alpha;
+            material.SetColor(colorProperty, color);
         }
     }
 

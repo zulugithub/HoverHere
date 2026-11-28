@@ -1,152 +1,189 @@
 Shader "Custom/RotorDiskWithSpecular"
 {
-    Properties
-    {
-        _Color("Color", Color) = (1,1,1,1)
-        _MainTex("Albedo (RGB)", 2D) = "white" {}
-        _MainTex2("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness("Smoothness", Range(0,1)) = 0.5
-        _Metallic("Metallic", Range(0,1)) = 0.0
-        _CollectiveSpecular("CollectiveSpecular", Range(-0.5,0.5)) = 0.5
-    }
-        SubShader
-        {
-            Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjectors" = "True"}
-            LOD 200
+	Properties
+	{
+		_Color("Color", Color) = (1,1,1,1)
+		_MainTex("Albedo (RGB)", 2D) = "white" {}
+		_MainTex2("Albedo (RGB)", 2D) = "white" {}
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_Metallic("Metallic", Range(0,1)) = 0.0
+		_CollectiveSpecular("CollectiveSpecular", Range(-0.5,0.5)) = 0.5
+	}
 
-            // ZWrite pre-pass
-            Pass {
-                ZWrite On
-                ColorMask 0
+	SubShader
+	{
+		Tags { "RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjectors" = "True" }
+		LOD 200
+		Blend SrcAlpha OneMinusSrcAlpha
+		ZWrite Off
 
-                CGPROGRAM
-                #pragma vertex vert
-                #pragma fragment frag
-                #include "UnityCG.cginc"
+		Pass
+		{
+			Name "DepthPrepass"
+			Tags { "LightMode" = "SRPDefaultUnlit" }
+			ZWrite On
+			ColorMask 0
 
-                float4 vert(float4 vertex : POSITION) : SV_POSITION { return UnityObjectToClipPos(vertex); }
-                fixed4 frag() : SV_Target { return 0; }
-                ENDCG
-            }
+			HLSLPROGRAM
+			#pragma vertex DepthVert
+			#pragma fragment DepthFrag
+			#pragma multi_compile_instancing
 
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
 
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
 
+			Varyings DepthVert(Attributes input)
+			{
+				Varyings output;
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				return output;
+			}
 
-            // ------------------------------------------------------------------
-            // transparent shadows support, taken from unity'S standard.shader
-            // https://forum.unity.com/threads/add-semitransparent-shadow-pass-to-a-custom-shader.470681/
-            // https://unity3d.com/get-unity/download/archive
-            // ------------------------------------------------------------------
-            //  Shadow rendering pass
-            Pass {
-                Name "ShadowCaster"
-                Tags { "LightMode" = "ShadowCaster" }
+			half4 DepthFrag(Varyings input) : SV_Target
+			{
+				return 0;
+			}
+			ENDHLSL
+		}
 
-                ZWrite On ZTest LEqual
+		Pass
+		{
+			Name "ForwardLit"
+			Tags { "LightMode" = "UniversalForward" }
 
-                CGPROGRAM
-                #pragma target 3.0
+			HLSLPROGRAM
+			#pragma target 3.0
+			#pragma vertex Vert
+			#pragma fragment Frag
+			#pragma multi_compile_instancing
+			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT
+			#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+			#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
 
-                    // -------------------------------------
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"
 
+			TEXTURE2D(_MainTex);
+			SAMPLER(sampler_MainTex);
 
-                    #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-                    #pragma shader_feature_local _METALLICGLOSSMAP
-                    #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-                    #pragma shader_feature_local _PARALLAXMAP
-                    #pragma multi_compile_shadowcaster
-                    #pragma multi_compile_instancing
-                    // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
-                    //#pragma multi_compile _ LOD_FADE_CROSSFADE
+			CBUFFER_START(UnityPerMaterial)
+				float4 _MainTex_ST;
+				half4 _Color;
+				half _Glossiness;
+				half _Metallic;
+				half _CollectiveSpecular;
+			CBUFFER_END
 
-                    #pragma vertex vertShadowCaster
-                    #pragma fragment fragShadowCaster
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+				float4 tangentOS : TANGENT;
+				float2 uv : TEXCOORD0;
+				float2 diskUV : TEXCOORD1;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
 
-                    #include "UnityStandardShadow.cginc"
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float3 positionWS : TEXCOORD0;
+				float3 normalWS : TEXCOORD1;
+				float4 tangentWS : TEXCOORD2;
+				float2 uv : TEXCOORD3;
+				float2 diskUV : TEXCOORD4;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
+			};
 
-                    ENDCG
-                }
-                    // ------------------------------------------------------------------
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_TRANSFER_INSTANCE_ID(input, output);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
+				output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+				output.positionCS = TransformWorldToHClip(output.positionWS);
+				output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+				output.tangentWS = float4(TransformObjectToWorldDir(input.tangentOS.xyz), input.tangentOS.w);
+				output.uv = TRANSFORM_TEX(input.uv, _MainTex);
+				output.diskUV = input.diskUV;
+				return output;
+			}
 
+			half3 GetDiskNormalTS(float2 uv)
+			{
+				float2 radial = float2(uv.y - 0.5, -(uv.x - 0.5));
+				float distanceFromCenter = length(uv - 0.5);
+				float radialLength = length(radial);
 
+				if (radialLength < 1e-5)
+					return half3(0, 0, 1);
 
+				radial /= radialLength;
+				if (distanceFromCenter > 0.47)
+				{
+					float edge = saturate((distanceFromCenter - 0.47) / 0.03);
+					float sine;
+					float cosine;
+					sincos(edge, sine, cosine);
+					radial = float2(cosine * radial.x - sine * radial.y, sine * radial.x + cosine * radial.y);
+				}
 
-                    CGPROGRAM
-                    // Physically based Standard lighting model, and enable shadows on all light types
-                    #pragma surface surf Standard fullforwardshadows alpha:fade
+				return normalize(half3(radial * _CollectiveSpecular, 1.0));
+			}
 
-                    // Use shader model 3.0 target, to get nicer looking lighting
-                    #pragma target 3.0
+			half4 Frag(Varyings input) : SV_Target
+			{
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-                    sampler2D _MainTex;
-                    sampler2D _MainTex2;
+				half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _Color;
+				InputData inputData = (InputData)0;
+				inputData.positionWS = input.positionWS;
+				inputData.positionCS = input.positionCS;
+				inputData.normalWS = NormalizeNormalPerPixel(TransformTangentToWorld(
+					GetDiskNormalTS(input.diskUV),
+					half3x3(normalize(input.tangentWS.xyz),
+						normalize(cross(input.normalWS, input.tangentWS.xyz) * input.tangentWS.w),
+						normalize(input.normalWS))));
+				inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
+				inputData.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
+				inputData.fogCoord = ComputeFogFactor(input.positionCS.z);
+				inputData.bakedGI = SampleSH(inputData.normalWS);
+				inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
+				inputData.shadowMask = half4(1, 1, 1, 1);
 
-                    struct Input
-                    {
-                        float2 uv_MainTex : TEXCOORD0;
-                        float2 uv2_MainTex2;
-                    };
+				SurfaceData surfaceData = (SurfaceData)0;
+				surfaceData.albedo = albedo.rgb;
+				surfaceData.metallic = _Metallic;
+				surfaceData.smoothness = _Glossiness;
+				surfaceData.normalTS = half3(0, 0, 1);
+				surfaceData.occlusion = 1;
+				surfaceData.alpha = albedo.a;
 
-                    half _Glossiness;
-                    half _Metallic;
-                    fixed4 _Color;
-                    half _CollectiveSpecular;
-
-                    float rand(float myVector)
-                    {
-                        return frac(sin(_Time[0] * myVector * 12.9898 * 43758.5453));
-                    }
-
-                    float3 rotationMatrix(float3 axis, float angle)
-                    {
-                        float s = sin(angle);
-                        float c = cos(angle);
-                        return float3(c * axis.x - s * axis.y, s * axis.x + c * axis.y, 0);
-                    }
-
-                    // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-                    // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-                    // #pragma instancing_options assumeuniformscaling
-                    UNITY_INSTANCING_BUFFER_START(Props)
-                        // put more per-instance properties here
-                    UNITY_INSTANCING_BUFFER_END(Props)
-
-                    void surf(Input IN, inout SurfaceOutputStandard o)
-                    {
-                        // rotor blades  specular highlights
-                        // half factor = 0.5;  // -0.5...0.5 -->  +-collective angle
-                        // normals are not normal to disc surface but tilted in rotation direction
-                        half3 normalized = normalize(half3((IN.uv2_MainTex2.y - 0.5), -(IN.uv2_MainTex2.x - 0.5), 0));
-                        if (length(normalized) != 0)
-                        {
-                            float _CollectiveSpecular___ = _CollectiveSpecular;
-
-                           float pct = sqrt((IN.uv2_MainTex2.y - 0.5) * (IN.uv2_MainTex2.y - 0.5) + (IN.uv2_MainTex2.x - 0.5) * (IN.uv2_MainTex2.x - 0.5));
-                           float range = 0.47;
-                            if (pct > range)
-                            {
-                                float value = ((pct - range) / (0.5 - range)); // 0...1
-                                //_CollectiveSpecular___ = _CollectiveSpecular * cos(value * 3.1415 * 1);
-                                //_CollectiveSpecular___ = _CollectiveSpecular * (1 - value*0.5 );
-
-                                normalized = rotationMatrix(normalized, value * 1);
-                            }
-                            o.Normal = normalize(half3(normalized.x * _CollectiveSpecular___, normalized.y * _CollectiveSpecular___, 1.0));
-                        }
-
-
-                        // Albedo comes from a texture tinted by color
-                        fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-                        o.Albedo = c.rgb;
-                        // Metallic and smoothness come from slider variables
-                        o.Metallic = _Metallic;
-                        o.Smoothness = _Glossiness;
-                        o.Alpha = c.a;
-
-                    }
-                    ENDCG
-        }
-            FallBack "Diffuse"
+				half4 color = UniversalFragmentPBR(inputData, surfaceData);
+				color.rgb = MixFog(color.rgb, inputData.fogCoord);
+				color.a = albedo.a;
+				return color;
+			}
+			ENDHLSL
+		}
+	}
 }

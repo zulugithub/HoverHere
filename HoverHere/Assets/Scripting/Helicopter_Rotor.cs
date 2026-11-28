@@ -93,6 +93,7 @@ namespace Rotor
         Mesh SSB_Mesh;
         Material SSB_Material;
         Material[] SSB_Materials;
+        private float SSB_BaseOpacity = 1f;
         const int SSB_Samples = 360;
 
         private GameObject blade_object;
@@ -281,7 +282,9 @@ namespace Rotor
                 //{
                     if(temp_rotordisk_complex != null)
                     {
-                        rotordisk_complex_material = rotordisk_complex.GetComponent<MeshRenderer>().materials[0];
+                        var rotordisk_complex_renderer = rotordisk_complex.GetComponent<MeshRenderer>();
+                        rotordisk_complex_material = rotordisk_complex_renderer.materials[0];
+                        rotordisk_complex_renderer.enabled = false;
                         //rotordisk_complex_material.ChangeTransparency((1.0f - helicopter_ODE.par.simulation.graphic_settings.rotor_disk_transparency.val));
                     }
                 //}
@@ -323,8 +326,37 @@ namespace Rotor
                     {                        
                         SSB_Mesh = rotordisk_complex.GetComponent<MeshFilter>().mesh;
                         SSB_Material = rotordisk_complex_material;
-                        SSB_Material.enableInstancing = true;
+                       /*SSB_BaseOpacity = SSB_Material.HasProperty("_Opacity") ? SSB_Material.GetFloat("_Opacity") : 1f;
 
+                        if (rotor_name == "Mainrotor")
+                        {
+                            Shader blurShader = Resources.Load<Shader>("SSBRotorBlur");
+                            if (blurShader == null)
+                            {
+                                Debug.LogError("Could not load the main-rotor blur shader from Resources/SSBRotorBlur.shader.", rotordisk_complex);
+                            }
+                            else
+                            {
+                                Texture mainTexture = SSB_Material.GetTexture("_MainTex");
+                                Color baseColor = SSB_Material.GetColor("_Color");
+                                float useColorMap = SSB_Material.GetFloat("_UseColorMap");
+                                float useOpacityMap = SSB_Material.GetFloat("_UseOpacityMap");
+                                float metallic = SSB_Material.GetFloat("_Metallic");
+                                float glossiness = SSB_Material.GetFloat("_Glossiness");
+
+                                SSB_Material.shader = blurShader;
+                                SSB_Material.SetTexture("_MainTex", mainTexture);
+                                SSB_Material.SetColor("_Color", baseColor);
+                                SSB_Material.SetFloat("_Opacity", SSB_BaseOpacity);
+                                SSB_Material.SetFloat("_UseColorMap", useColorMap);
+                                SSB_Material.SetFloat("_UseOpacityMap", useOpacityMap);
+                                SSB_Material.SetFloat("_Metallic", metallic);
+                                SSB_Material.SetFloat("_Glossiness", glossiness);
+                            }
+                        }
+
+                        SSB_Material.enableInstancing = true;
+*/
                         // create array of materials for SSB (SimpleSpinBlur)
                         SSB_Materials = new Material[SSB_Samples + 1];
                         for (int i = 0; i <= SSB_Samples; i++)
@@ -464,11 +496,11 @@ namespace Rotor
                 }
                 else
                 { 
-                    // new complex rotordisk
-                    if (rotordisk_complex_material != null)
-                    {
-                        rotordisk_complex_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting  }
-                    }
+                    // // new complex rotordisk
+                    // if (rotordisk_complex_material != null)
+                    // {
+                    //     rotordisk_complex_material.ChangeTransparency(rotor_disk_transparency * fade_disk_transparency); // alpha setting  }
+                    // }
                 }
             }
         }
@@ -619,10 +651,7 @@ namespace Rotor
                 {
                     if (rotordisk_complex != null)
                     {
-                        // set first object transparency to 0
-                        Color tempColor_0;
-                        tempColor_0 = new Color(SSB_Material.color.r, SSB_Material.color.g, SSB_Material.color.b, 0);
-                        SSB_Material.color = tempColor_0;
+                        SSB_Material.ChangeTransparency(0f);
 
                         //////////////////////////////////////////////////////////////////////////
                         // at flat camera_angles decrease transparency
@@ -691,26 +720,31 @@ namespace Rotor
                         float alpha_pow = Helper.Step(Mathf.Abs(omega * Helper.RadPerSec_to_Rpm), 400 * blur_rpm_factor, 20, 1200 * blur_rpm_factor, 4)/ par_rotor.b.val; // depends on rpm  --> how sharp the blade blur seams
 
                         // calculate and create maximum 360 blades 
-                        float r = SSB_Material.color.r, g = SSB_Material.color.g, b = SSB_Material.color.b;
                         float random_phi = UnityEngine.Random.Range(-(Mathf.PI * 4.0f) / blur_n_blades, (Mathf.PI * 4.0f) / blur_n_blades); // [rad] little variation of blade angle phi to try to break repeating pattern of n_blades
+                        const float blur_sample_opacity_scale = 0.01f;
+                        const float mainrotor_sample_opacity = 0.015f;
                         for (int i = 0; i < blur_n_blades; i++)
-                        {
+                        {  /*  
 #if UNITY_EDITOR
                             SSB_Materials[i].SetFloat("_Metallic", SSB_Material.GetFloat("_Metallic"));
                             SSB_Materials[i].SetFloat("_Glossiness", SSB_Material.GetFloat("_Glossiness"));
 #endif
                             // calculate transparency's alpha value for each blade
-                            float alpha = (1 - alpha_by_camera_angle) * (10.00000000000f / (float)blur_n_blades) + 
+                            float alpha = ((1 - alpha_by_camera_angle) * (10.00000000000f / (float)blur_n_blades) +
                                 Mathf.Abs((2.00000000f / (float)blur_n_blades) + alpha_offset) *   
-                                (Mathf.Pow(Mathf.Abs(Mathf.Sin(((float)i / (float)blur_n_blades) * par_rotor.b.val * Mathf.PI + rpm_offset)), alpha_pow) * alpha_amplitude + (1f - alpha_amplitude));
+                                (Mathf.Pow(Mathf.Abs(Mathf.Sin(((float)i / (float)blur_n_blades) * par_rotor.b.val * Mathf.PI + rpm_offset)), alpha_pow) * alpha_amplitude + (1f - alpha_amplitude))) *
+                                blur_sample_opacity_scale;
 
-                            SSB_Materials[i].color = new Color(r, g, b, alpha * fade_disk_transparency * blur_transparency);
-
+                            float sampleOpacity = alpha * fade_disk_transparency * blur_transparency * SSB_BaseOpacity;
+                            if (rotor_type == 0)
+                                sampleOpacity = mainrotor_sample_opacity * blur_transparency * SSB_BaseOpacity;
+                            SSB_Materials[i].ChangeTransparency(sampleOpacity);
+ */
                             float phi = ((float)i / (float)blur_n_blades) * (Mathf.PI * 2.0f); // [rad] rotation around hub
                             float cyclic_angle = Theta_col * 1.50000000f; // [rad] collectiv signal
                             cyclic_angle += Mathf.Sin(phi) * flapping_a_s_LH * 1.50000000f; // flapping     angle change occures 90° before flapping, therefore use sin instead of cos
                             cyclic_angle += Mathf.Cos(phi) * flapping_b_s_LH * 1.50000000f; // flapping
-                            
+                           
                             // rotation order
                             // 5.) flapping_a_s_LH around z
                             // 4.) -flapping_b_s_LH around x
